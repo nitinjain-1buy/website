@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { footerData } from '../../data/mock';
+import { footerData, logoUrl } from '../../data/mock';
 import { Linkedin, Twitter } from 'lucide-react';
 
 const Footer = () => {
