@@ -289,7 +289,7 @@ const ContactPage = () => {
                 <div className="flex items-start space-x-3">
                   <MapPin className="h-5 w-5 text-slate-400 flex-shrink-0 mt-0.5" />
                   <div className="text-slate-600">
-                    <p>Bangalore, India</p>
+                    <p>Delhi, India</p>
                     <p className="text-sm text-slate-500">Starting in India, building for the world</p>
                   </div>
                 </div>
