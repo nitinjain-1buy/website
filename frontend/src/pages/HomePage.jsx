@@ -24,8 +24,11 @@ import {
   CheckCircle,
   Zap,
   DollarSign,
-  ChevronRight
+  ChevronRight,
+  Play
 } from 'lucide-react';
+import TestimonialsMarquee from '../components/TestimonialsMarquee';
+import DemoVideoModal, { DemoVideoSection } from '../components/DemoVideoModal';
 
 const iconMap = {
   TrendingDown,
