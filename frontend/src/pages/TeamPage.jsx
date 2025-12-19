@@ -45,7 +45,7 @@ const TeamPage = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-12 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {teamData.founders.map((founder, index) => (
               <Card key={index} className="border-2 border-slate-200 hover:border-emerald-200 transition-all hover:shadow-xl">
                 <CardContent className="p-8">
