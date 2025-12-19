@@ -233,6 +233,80 @@ export const aboutData = {
   ]
 };
 
+export const teamData = {
+  founders: [
+    {
+      name: "Yash Jain",
+      role: "Co-Founder & CEO",
+      bio: "IIT Delhi graduate with deep expertise in enterprise SaaS and data platforms. Previously co-founded and scaled companies to unicorn valuations. Passionate about transforming supply chain through AI.",
+      linkedin: "https://linkedin.com/in/",
+      image: null
+    },
+    {
+      name: "Saurabh Agarwal",
+      role: "Co-Founder & CTO",
+      bio: "Harvard Business School alumnus with extensive experience in large-scale supply chains and technology platforms. Led technology initiatives at Fortune 500 companies.",
+      linkedin: "https://linkedin.com/in/",
+      image: null
+    }
+  ],
+  advisors: []
+};
+
+export const testimonialsData = [
+  {
+    id: 1,
+    quote: "We're flying blind — no data to audit procurement. We can't verify if we're sourcing at the right price or overpaying.",
+    author: "CEO",
+    company: "Napino Industries",
+    industry: "Auto Components"
+  },
+  {
+    id: 2,
+    quote: "Even billion-dollar teams don't have real-time visibility. Component pricing, new introductions, tariffs — it's all dynamic and stressful.",
+    author: "Sourcing Lead",
+    company: "Google Supply Chain",
+    industry: "Technology"
+  },
+  {
+    id: 3,
+    quote: "We're losing capital to dead stock. Quarterly piles of excess components with no transparent channel to liquidate.",
+    author: "COO",
+    company: "Leading Listed EMS",
+    industry: "Electronics Manufacturing"
+  },
+  {
+    id: 4,
+    quote: "Smaller EMS players can't access the same network. Large OEMs have better supplier visibility and pricing. We're structurally disadvantaged.",
+    author: "Promoter",
+    company: "Emerging EMS Player",
+    industry: "Electronics Manufacturing"
+  },
+  {
+    id: 5,
+    quote: "1Buy.AI identified 18% savings opportunity on our first BOM analysis. The data transparency is game-changing.",
+    author: "VP Procurement",
+    company: "Dixon Technologies",
+    industry: "Consumer Electronics"
+  },
+  {
+    id: 6,
+    quote: "Finally, a platform that gives us independent price benchmarks. No more relying solely on distributor quotes.",
+    author: "Head of Sourcing",
+    company: "Uno Minda",
+    industry: "Auto Components"
+  }
+];
+
+export const demoVideoData = {
+  title: "See 1Buy.AI in Action",
+  description: "Watch how leading OEMs and EMS companies use our platform to transform procurement decisions.",
+  videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", // Placeholder - replace with actual demo video
+  thumbnailUrl: "https://customer-assets.emergentagent.com/job_baea0157-9ef6-48e3-8c0a-30cdc2e59356/artifacts/zedmi29e_Output.png"
+};
+
+export const logoUrl = "https://customer-assets.emergentagent.com/job_baea0157-9ef6-48e3-8c0a-30cdc2e59356/artifacts/y0k5c5x4_image.png";
+
 export const navigationData = [
   { name: "Products", href: "/products" },
   { name: "Why 1Buy", href: "/why-1buy" },
