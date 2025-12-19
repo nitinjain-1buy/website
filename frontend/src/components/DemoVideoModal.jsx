@@ -1,17 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogTrigger } from './ui/dialog';
 import { demoVideoData } from '../data/mock';
-import { Play, X } from 'lucide-react';
+import { Play, X, Pause, Volume2, VolumeX, Maximize } from 'lucide-react';
 
 const DemoVideoModal = ({ variant = 'default', className = '' }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const videoRef = useRef(null);
 
   const buttonStyles = {
     default: 'bg-emerald-600 hover:bg-emerald-700 text-white',
     outline: 'border-slate-300 text-slate-700 hover:bg-slate-50',
     dark: 'bg-white text-slate-900 hover:bg-slate-100'
   };
+
+  useEffect(() => {
+    if (isOpen && videoRef.current) {
+      videoRef.current.play();
+    } else if (!isOpen && videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+  }, [isOpen]);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -25,21 +35,18 @@ const DemoVideoModal = ({ variant = 'default', className = '' }) => {
           Watch Demo
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-4xl p-0 bg-black border-slate-800">
-        <div className="relative aspect-video w-full">
-          <button
-            onClick={() => setIsOpen(false)}
-            className="absolute -top-12 right-0 text-white hover:text-slate-300 z-50"
+      <DialogContent className="sm:max-w-5xl p-0 bg-black border-slate-800 overflow-hidden">
+        <div className="relative aspect-video w-full bg-black">
+          <video
+            ref={videoRef}
+            src={demoVideoData.videoUrl}
+            className="w-full h-full"
+            controls
+            autoPlay
+            playsInline
           >
-            <X className="h-8 w-8" />
-          </button>
-          <iframe
-            src={isOpen ? `${demoVideoData.videoUrl}?autoplay=1` : ''}
-            title="1Buy.AI Demo Video"
-            className="w-full h-full rounded-lg"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
+            Your browser does not support the video tag.
+          </video>
         </div>
       </DialogContent>
     </Dialog>
@@ -49,6 +56,16 @@ const DemoVideoModal = ({ variant = 'default', className = '' }) => {
 // Hero section with video thumbnail that opens modal
 export const DemoVideoSection = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    if (isOpen && videoRef.current) {
+      videoRef.current.play();
+    } else if (!isOpen && videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+  }, [isOpen]);
 
   return (
     <section className="py-24 bg-slate-50">
@@ -83,21 +100,18 @@ export const DemoVideoSection = () => {
               </p>
             </div>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-4xl p-0 bg-black border-slate-800">
-            <div className="relative aspect-video w-full">
-              <button
-                onClick={() => setIsOpen(false)}
-                className="absolute -top-12 right-0 text-white hover:text-slate-300 z-50"
+          <DialogContent className="sm:max-w-5xl p-0 bg-black border-slate-800 overflow-hidden">
+            <div className="relative aspect-video w-full bg-black">
+              <video
+                ref={videoRef}
+                src={demoVideoData.videoUrl}
+                className="w-full h-full"
+                controls
+                autoPlay
+                playsInline
               >
-                <X className="h-8 w-8" />
-              </button>
-              <iframe
-                src={isOpen ? `${demoVideoData.videoUrl}?autoplay=1` : ''}
-                title="1Buy.AI Demo Video"
-                className="w-full h-full rounded-lg"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
+                Your browser does not support the video tag.
+              </video>
             </div>
           </DialogContent>
         </Dialog>
