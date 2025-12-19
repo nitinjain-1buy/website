@@ -241,3 +241,5 @@ test_plan:
 agent_communication:
     - agent: "testing"
       message: "Starting comprehensive testing of 1Buy.AI website. Will test homepage sections, navigation, all pages, contact form functionality, and mobile responsiveness. Testing URL: http://localhost:3000"
+    - agent: "testing"
+      message: "TESTING COMPLETE: Successfully tested all new features. ✅ Logo displays correctly in header/footer with purple '1BUY' and yellow '.AI'. ✅ Team page works with founder cards, LinkedIn links, and credentials. ✅ Testimonials marquee animates properly with customer quotes. ✅ Navigation includes Team link and works correctly. ✅ All other pages (Products, Contact, About) function properly. ❌ ISSUE FOUND: Demo Video Popup modal not opening correctly - buttons exist but modal dialog/video player not displaying. This needs main agent attention."
