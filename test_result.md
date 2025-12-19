@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Test the 1Buy.AI enterprise website at http://localhost:3000. Check homepage loads correctly with header navigation, hero section, problem cards, workflow, products overview, customer logos, and footer. Navigate to each page (/products, /why-1buy, /how-it-works, /use-cases, /about, /contact) and verify they load. Test contact form functionality and mobile responsiveness at 375px width. Verify navigation links work correctly between pages."
+user_problem_statement: "Test the updated 1Buy.AI enterprise website at http://localhost:3000. Verify the following new features: 1. Logo (purple '1BUY' and yellow '.AI') in header and footer, 2. Team Page at /team with founder cards and LinkedIn links, 3. Testimonials Marquee on homepage with scrolling animation, 4. Demo Video Popup with 'Watch Demo' button, 5. Navigation with Team link, 6. Other pages still working (/products, /contact, /about)."
 
 frontend:
   - task: "Homepage loads with all sections"
