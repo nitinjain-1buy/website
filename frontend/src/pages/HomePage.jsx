@@ -69,11 +69,7 @@ const HomePage = () => {
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              <Link to="/contact">
-                <Button size="lg" variant="outline" className="border-slate-300 text-slate-700 px-8 h-12">
-                  {heroData.ctaSecondary}
-                </Button>
-              </Link>
+              <DemoVideoModal variant="outline" className="border-slate-300 text-slate-700 px-8 h-12" />
             </div>
           </div>
         </div>
