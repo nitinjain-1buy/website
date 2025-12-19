@@ -314,7 +314,8 @@ export const testimonialsData = [
 export const demoVideoData = {
   title: "See 1Buy.AI in Action",
   description: "Watch how leading OEMs and EMS companies use our platform to transform procurement decisions.",
-  videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", // Placeholder - replace with actual demo video
+  videoUrl: "https://customer-assets.emergentagent.com/job_baea0157-9ef6-48e3-8c0a-30cdc2e59356/artifacts/5j0ierkq_3d45f2d1fb8a0891fc370e6a9483043075044110f5cea6d17d7998d318da202c.AI%2BVideo%2BV-2%2B%281%29.mp4",
+  videoType: "mp4",
   thumbnailUrl: "https://customer-assets.emergentagent.com/job_baea0157-9ef6-48e3-8c0a-30cdc2e59356/artifacts/zedmi29e_Output.png"
 };
 
