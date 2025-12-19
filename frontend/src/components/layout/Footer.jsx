@@ -11,11 +11,8 @@ const Footer = () => {
           {/* Brand */}
           <div className="lg:col-span-1">
             <Link to="/" className="flex items-center mb-4">
-              <img 
-                src={logoWhiteUrl} 
-                alt="1Buy.AI" 
-                className="h-10 w-auto"
-              />
+              <span className="text-2xl font-bold text-white">1Buy</span>
+              <span className="text-2xl font-bold text-emerald-400">.AI</span>
             </Link>
             <p className="text-slate-400 text-sm leading-relaxed mb-6">
               {footerData.tagline}
