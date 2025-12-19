@@ -152,7 +152,7 @@ frontend:
 
   - task: "Demo Video Popup functionality"
     implemented: true
-    working: false
+    working: true
     file: "/app/frontend/src/components/DemoVideoModal.jsx"
     stuck_count: 0
     priority: "high"
@@ -164,6 +164,9 @@ frontend:
         - working: false
           agent: "testing"
           comment: "❌ ISSUE: Watch Demo button found (12 instances) but modal dialog not opening properly. No iframe/video element or close button detected after clicking. Modal implementation may have JavaScript issues or dialog state management problems."
+        - working: true
+          agent: "testing"
+          comment: "✓ FIXED: Demo video modal now working correctly. Modal dialog opens with video element, has controls (play, pause, volume, fullscreen), and video source is properly loaded. Minor issue with modal close button timeout but core functionality works."
 
   - task: "Navigation with Team link"
     implemented: true
