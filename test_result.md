@@ -105,19 +105,7 @@
 user_problem_statement: "Test the updated 1Buy.AI enterprise website at http://localhost:3000. Verify the following new features: 1. Logo (purple '1BUY' and yellow '.AI') in header and footer, 2. Team Page at /team with founder cards and LinkedIn links, 3. Testimonials Marquee on homepage with scrolling animation, 4. Demo Video Popup with 'Watch Demo' button, 5. Navigation with Team link, 6. Other pages still working (/products, /contact, /about)."
 
 frontend:
-  - task: "Homepage loads with all sections"
-    implemented: true
-    working: "NA"
-    file: "/app/frontend/src/pages/HomePage.jsx"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: true
-    status_history:
-        - working: "NA"
-          agent: "testing"
-          comment: "Initial testing setup - need to verify homepage loads with header navigation, hero section, problem cards, workflow section, products overview, customer logos, and footer"
-
-  - task: "Header navigation with Products dropdown"
+  - task: "Logo display in header and footer"
     implemented: true
     working: "NA"
     file: "/app/frontend/src/components/layout/Header.jsx"
@@ -127,69 +115,81 @@ frontend:
     status_history:
         - working: "NA"
           agent: "testing"
-          comment: "Need to test header navigation with Products dropdown, Why 1Buy, How It Works, Use Cases, About links"
+          comment: "Need to verify new logo image (purple '1BUY' and yellow '.AI') appears correctly in header and footer"
 
-  - task: "Footer with links"
+  - task: "Team Page with founder cards"
     implemented: true
     working: "NA"
-    file: "/app/frontend/src/components/layout/Footer.jsx"
-    stuck_count: 0
-    priority: "medium"
-    needs_retesting: true
-    status_history:
-        - working: "NA"
-          agent: "testing"
-          comment: "Need to verify footer loads with proper links structure"
-
-  - task: "Products page navigation and content"
-    implemented: true
-    working: "NA"
-    file: "/app/frontend/src/pages/ProductsPage.jsx"
+    file: "/app/frontend/src/pages/TeamPage.jsx"
     stuck_count: 0
     priority: "high"
     needs_retesting: true
     status_history:
         - working: "NA"
           agent: "testing"
-          comment: "Need to test /products page loads with detailed product sections"
+          comment: "Need to test /team page loads with 'Our Team' badge, founder cards (Yash Jain - CEO, Saurabh Agarwal - CTO), LinkedIn links, and credentials section"
 
-  - task: "Why 1Buy page navigation and content"
+  - task: "Testimonials Marquee on homepage"
     implemented: true
     working: "NA"
-    file: "/app/frontend/src/pages/WhyPage.jsx"
+    file: "/app/frontend/src/components/TestimonialsMarquee.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "Need to verify testimonials section on homepage with scrolling animation, testimonial cards with quotes, author names, and companies"
+
+  - task: "Demo Video Popup functionality"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/DemoVideoModal.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "Need to test 'Watch Demo' button opens modal/popup with video player and close button works"
+
+  - task: "Navigation with Team link"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/layout/Header.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "Need to verify 'Team' link is in navigation menu and clicking navigates to /team page"
+
+  - task: "Products page functionality"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/ProductsPage.jsx"
     stuck_count: 0
     priority: "medium"
     needs_retesting: true
     status_history:
         - working: "NA"
           agent: "testing"
-          comment: "Need to test /why-1buy page loads with comparison table"
+          comment: "Need to verify /products page still works correctly"
 
-  - task: "How It Works page navigation and content"
+  - task: "Contact page functionality"
     implemented: true
     working: "NA"
-    file: "/app/frontend/src/pages/HowItWorksPage.jsx"
+    file: "/app/frontend/src/pages/ContactPage.jsx"
     stuck_count: 0
     priority: "medium"
     needs_retesting: true
     status_history:
         - working: "NA"
           agent: "testing"
-          comment: "Need to test /how-it-works page loads with 5-step process"
+          comment: "Need to verify /contact page still works correctly"
 
-  - task: "Use Cases page navigation and content"
-    implemented: true
-    working: "NA"
-    file: "/app/frontend/src/pages/UseCasesPage.jsx"
-    stuck_count: 0
-    priority: "medium"
-    needs_retesting: true
-    status_history:
-        - working: "NA"
-          agent: "testing"
-          comment: "Need to test /use-cases page loads correctly"
-
-  - task: "About page navigation and content"
+  - task: "About page functionality"
     implemented: true
     working: "NA"
     file: "/app/frontend/src/pages/AboutPage.jsx"
@@ -199,43 +199,7 @@ frontend:
     status_history:
         - working: "NA"
           agent: "testing"
-          comment: "Need to test /about page loads correctly"
-
-  - task: "Contact page and form functionality"
-    implemented: true
-    working: "NA"
-    file: "/app/frontend/src/pages/ContactPage.jsx"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: true
-    status_history:
-        - working: "NA"
-          agent: "testing"
-          comment: "Need to test /contact page loads and form submission with required fields (first name, last name, email, company) works with success message"
-
-  - task: "Mobile responsiveness at 375px width"
-    implemented: true
-    working: "NA"
-    file: "/app/frontend/src"
-    stuck_count: 0
-    priority: "medium"
-    needs_retesting: true
-    status_history:
-        - working: "NA"
-          agent: "testing"
-          comment: "Need to test mobile responsiveness by checking viewport at 375px width"
-
-  - task: "Navigation links between pages"
-    implemented: true
-    working: "NA"
-    file: "/app/frontend/src/App.js"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: true
-    status_history:
-        - working: "NA"
-          agent: "testing"
-          comment: "Need to verify navigation links work correctly between all pages"
+          comment: "Need to verify /about page still works correctly"
 
 metadata:
   created_by: "testing_agent"
