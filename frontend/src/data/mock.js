@@ -236,17 +236,30 @@ export const aboutData = {
 export const teamData = {
   founders: [
     {
-      name: "Yash Jain",
-      role: "Co-Founder & CEO",
-      bio: "IIT Delhi graduate with deep expertise in enterprise SaaS and data platforms. Previously co-founded and scaled companies to unicorn valuations. Passionate about transforming supply chain through AI.",
-      linkedin: "https://linkedin.com/in/",
+      name: "Visham Sikand",
+      role: "Co-Founder (Product Innovation)",
+      bio: "Serial entrepreneur with exits: IHO to Aetna Inc (USA) & Goals101 to M2P. 18+ years experience in building superlative teams, boards, managing investor relations and returns.",
+      expertise: "New Product Innovation, Global Scale up & Exit skills",
+      education: "Harvard Business School",
+      linkedin: "https://www.linkedin.com/in/visham-sikand-a769105/",
       image: null
     },
     {
-      name: "Saurabh Agarwal",
-      role: "Co-Founder & CTO",
-      bio: "Harvard Business School alumnus with extensive experience in large-scale supply chains and technology platforms. Led technology initiatives at Fortune 500 companies.",
-      linkedin: "https://linkedin.com/in/",
+      name: "Nitin Jain",
+      role: "Co-Founder (GTM + Ops)",
+      bio: "Co-Founder to 2 Unicorns. 15 years experience of investment banking & building 2 unicorn startups. Scaled Supply Chain Businesses with company turnover of more than $3Bn and profitable.",
+      expertise: "Scaling Supply Chain Businesses, 0-100 scale expertise",
+      education: "IIT Delhi (Computer Science, Silver Medalist)",
+      linkedin: "https://www.linkedin.com/in/nitin-jain-17b82310/",
+      image: null
+    },
+    {
+      name: "Pradeep Paliwal",
+      role: "Co-Founder (Technology & Data)",
+      bio: "CTO at multiple unicorns: TBO, EBIX Cash, RateGain. 20+ years in building scalable SaaS and Data platforms globally.",
+      expertise: "Building Enterprise Data driven SaaS platforms globally",
+      education: "BITS Pilani, VJTI",
+      linkedin: "https://www.linkedin.com/in/ppaliwal/",
       image: null
     }
   ],
