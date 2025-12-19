@@ -60,12 +60,23 @@ const TeamPage = () => {
                     <h3 className="text-2xl font-bold text-slate-900 mb-1">
                       {founder.name}
                     </h3>
-                    <p className="text-emerald-600 font-medium mb-4">
+                    <p className="text-emerald-600 font-medium mb-2">
                       {founder.role}
                     </p>
-                    <p className="text-slate-600 mb-6 leading-relaxed">
+                    {founder.education && (
+                      <p className="text-slate-500 text-sm mb-4">
+                        {founder.education}
+                      </p>
+                    )}
+                    <p className="text-slate-600 mb-4 leading-relaxed text-sm">
                       {founder.bio}
                     </p>
+                    {founder.expertise && (
+                      <div className="bg-slate-50 rounded-lg px-4 py-2 mb-4">
+                        <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Expertise</p>
+                        <p className="text-slate-700 text-sm font-medium">{founder.expertise}</p>
+                      </div>
+                    )}
 
                     {founder.linkedin && (
                       <a
