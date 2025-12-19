@@ -12,9 +12,9 @@ const Footer = () => {
           <div className="lg:col-span-1">
             <Link to="/" className="flex items-center mb-4">
               <img 
-                src={logoUrl} 
+                src={logoWhiteUrl} 
                 alt="1Buy.AI" 
-                className="h-10 w-auto brightness-110"
+                className="h-10 w-auto"
               />
             </Link>
             <p className="text-slate-400 text-sm leading-relaxed mb-6">
