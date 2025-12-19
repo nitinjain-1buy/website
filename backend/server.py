@@ -1,12 +1,12 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, HTTPException
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
 from pathlib import Path
-from pydantic import BaseModel, Field, ConfigDict
-from typing import List
+from pydantic import BaseModel, Field, ConfigDict, EmailStr
+from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
 
@@ -36,6 +36,32 @@ class StatusCheck(BaseModel):
 
 class StatusCheckCreate(BaseModel):
     client_name: str
+
+# Demo Request Models
+class DemoRequestCreate(BaseModel):
+    firstName: str
+    lastName: str
+    email: EmailStr
+    company: str
+    title: Optional[str] = None
+    companySize: Optional[str] = None
+    interest: Optional[str] = None
+    message: Optional[str] = None
+
+class DemoRequest(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    firstName: str
+    lastName: str
+    email: str
+    company: str
+    title: Optional[str] = None
+    companySize: Optional[str] = None
+    interest: Optional[str] = None
+    message: Optional[str] = None
+    status: str = "new"  # new, contacted, converted, closed
+    createdAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 # Add your routes to the router instead of directly to app
 @api_router.get("/")
