@@ -312,6 +312,7 @@ export const navigationData = [
   { name: "Why 1Buy", href: "/why-1buy" },
   { name: "How It Works", href: "/how-it-works" },
   { name: "Use Cases", href: "/use-cases" },
+  { name: "Team", href: "/team" },
   { name: "About", href: "/about" }
 ];
 
