@@ -10,6 +10,7 @@ import HowItWorksPage from "./pages/HowItWorksPage";
 import UseCasesPage from "./pages/UseCasesPage";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
+import TeamPage from "./pages/TeamPage";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
             <Route path="/why-1buy" element={<WhyPage />} />
             <Route path="/how-it-works" element={<HowItWorksPage />} />
             <Route path="/use-cases" element={<UseCasesPage />} />
+            <Route path="/team" element={<TeamPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
           </Routes>
