@@ -232,14 +232,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Logo display in header and footer"
-    - "Team Page with founder cards"
-    - "Testimonials Marquee on homepage"
     - "Demo Video Popup functionality"
-    - "Navigation with Team link"
-  stuck_tasks: []
-  test_all: true
-  test_priority: "high_first"
+  stuck_tasks:
+    - "Demo Video Popup functionality"
+  test_all: false
+  test_priority: "stuck_first"
 
 agent_communication:
     - agent: "testing"
