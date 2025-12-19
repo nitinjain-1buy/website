@@ -134,6 +134,9 @@ frontend:
         - working: true
           agent: "testing"
           comment: "✓ PASSED: Team page loads correctly with 'Our Team' badge, both founder cards (Yash Jain - Co-Founder & CEO, Saurabh Agarwal - Co-Founder & CTO), LinkedIn links, and credentials section showing IIT Delhi, HBS, Unicorn Builders, Enterprise SaaS, and Supply Chain Ops."
+        - working: true
+          agent: "testing"
+          comment: "✓ UPDATED: Team page now correctly displays all 3 founders as requested: Visham Sikand (Product Innovation, Harvard Business School), Nitin Jain (GTM + Ops, IIT Delhi), and Pradeep Paliwal (Technology & Data, BITS Pilani, VJTI). All have LinkedIn links and proper expertise sections."
 
   - task: "Testimonials Marquee on homepage"
     implemented: true
