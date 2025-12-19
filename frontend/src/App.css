@@ -1,34 +1,231 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+/* 1Buy.AI Enterprise Website Styles */
+
+/* Import Inter font for enterprise look */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* Reset and base styles */
+* {
+  box-sizing: border-box;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+html {
+  scroll-behavior: smooth;
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.App-link {
-    color: #61dafb;
+/* Grid pattern for hero background */
+.bg-grid-slate-100 {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(226 232 240 / 0.8)'%3e%3cpath d='M0 .5H31.5V32'/%3e%3c/svg%3e");
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+/* Smooth transitions for interactive elements */
+a,
+button {
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Card hover effects */
+.card {
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+/* Better focus states */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+}
+
+/* Image loading placeholder */
+img {
+  background-color: #f1f5f9;
+}
+
+/* Scrollbar styling for webkit browsers */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Selection color */
+::selection {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+/* Heading styles */
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: -0.025em;
+}
+
+/* Paragraph line height */
+p {
+  line-height: 1.7;
+}
+
+/* Table styles */
+table {
+  border-collapse: collapse;
+}
+
+/* Animation keyframes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Utility animation classes */
+.animate-fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.5s ease forwards;
+}
+
+/* Responsive image container */
+.responsive-img {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.responsive-img img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Enterprise badge styles */
+.enterprise-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 9999px;
+}
+
+/* Gradient text (used sparingly) */
+.gradient-text {
+  background: linear-gradient(135deg, #059669 0%, #0891b2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Stats counter animation */
+@keyframes countUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stat-item {
+  animation: countUp 0.6s ease forwards;
+}
+
+.stat-item:nth-child(1) { animation-delay: 0.1s; }
+.stat-item:nth-child(2) { animation-delay: 0.2s; }
+.stat-item:nth-child(3) { animation-delay: 0.3s; }
+.stat-item:nth-child(4) { animation-delay: 0.4s; }
+
+/* Workflow connector line */
+.workflow-connector {
+  position: relative;
+}
+
+.workflow-connector::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -1rem;
+  width: 2rem;
+  height: 2px;
+  background: #e2e8f0;
+}
+
+/* Mobile menu animation */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Form styles */
+input::placeholder,
+textarea::placeholder {
+  color: #94a3b8;
+}
+
+/* Loading spinner */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+/* Print styles */
+@media print {
+  header,
+  footer,
+  .no-print {
+    display: none !important;
+  }
+  
+  main {
+    padding-top: 0 !important;
+  }
 }
