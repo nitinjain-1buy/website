@@ -10,9 +10,12 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Brand */}
           <div className="lg:col-span-1">
-            <Link to="/" className="flex items-center space-x-2 mb-4">
-              <span className="text-2xl font-bold text-white">1Buy</span>
-              <span className="text-2xl font-bold text-emerald-500">.AI</span>
+            <Link to="/" className="flex items-center mb-4">
+              <img 
+                src={logoUrl} 
+                alt="1Buy.AI" 
+                className="h-10 w-auto brightness-110"
+              />
             </Link>
             <p className="text-slate-400 text-sm leading-relaxed mb-6">
               {footerData.tagline}
