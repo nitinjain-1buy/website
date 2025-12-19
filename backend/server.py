@@ -92,6 +92,64 @@ async def get_status_checks():
     
     return status_checks
 
+# Demo Request Endpoints
+@api_router.post("/demo-requests", response_model=DemoRequest)
+async def create_demo_request(input: DemoRequestCreate):
+    """Submit a new demo request"""
+    demo_dict = input.model_dump()
+    demo_obj = DemoRequest(**demo_dict)
+    
+    # Convert to dict and serialize datetime to ISO string for MongoDB
+    doc = demo_obj.model_dump()
+    doc['createdAt'] = doc['createdAt'].isoformat()
+    
+    await db.demo_requests.insert_one(doc)
+    logger.info(f"New demo request from {input.firstName} {input.lastName} ({input.email}) - {input.company}")
+    return demo_obj
+
+@api_router.get("/demo-requests", response_model=List[DemoRequest])
+async def get_demo_requests():
+    """Get all demo requests (for admin purposes)"""
+    requests = await db.demo_requests.find({}, {"_id": 0}).to_list(1000)
+    
+    # Convert ISO string timestamps back to datetime objects
+    for req in requests:
+        if isinstance(req.get('createdAt'), str):
+            req['createdAt'] = datetime.fromisoformat(req['createdAt'])
+    
+    # Sort by newest first
+    requests.sort(key=lambda x: x.get('createdAt', datetime.min), reverse=True)
+    return requests
+
+@api_router.get("/demo-requests/{request_id}", response_model=DemoRequest)
+async def get_demo_request(request_id: str):
+    """Get a specific demo request by ID"""
+    request = await db.demo_requests.find_one({"id": request_id}, {"_id": 0})
+    if not request:
+        raise HTTPException(status_code=404, detail="Demo request not found")
+    
+    if isinstance(request.get('createdAt'), str):
+        request['createdAt'] = datetime.fromisoformat(request['createdAt'])
+    
+    return request
+
+@api_router.patch("/demo-requests/{request_id}/status")
+async def update_demo_request_status(request_id: str, status: str):
+    """Update the status of a demo request"""
+    valid_statuses = ["new", "contacted", "converted", "closed"]
+    if status not in valid_statuses:
+        raise HTTPException(status_code=400, detail=f"Invalid status. Must be one of: {valid_statuses}")
+    
+    result = await db.demo_requests.update_one(
+        {"id": request_id},
+        {"$set": {"status": status}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Demo request not found")
+    
+    return {"message": "Status updated successfully", "status": status}
+
 # Include the router in the main app
 app.include_router(api_router)
 
