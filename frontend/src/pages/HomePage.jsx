@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import TestimonialsMarquee from '../components/TestimonialsMarquee';
 import DemoVideoModal, { DemoVideoSection } from '../components/DemoVideoModal';
+import ElectronicComponentsPattern from '../components/ElectronicComponentsPattern';
 
 const iconMap = {
   TrendingDown,
