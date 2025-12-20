@@ -89,6 +89,33 @@ class SupplierRequest(BaseModel):
     status: str = "new"  # new, contacted, approved, rejected
     createdAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+# Testimonial Models
+class TestimonialCreate(BaseModel):
+    quote: str
+    author: str
+    company: str
+    industry: Optional[str] = None
+    isActive: bool = True
+
+class TestimonialUpdate(BaseModel):
+    quote: Optional[str] = None
+    author: Optional[str] = None
+    company: Optional[str] = None
+    industry: Optional[str] = None
+    isActive: Optional[bool] = None
+
+class Testimonial(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    quote: str
+    author: str
+    company: str
+    industry: Optional[str] = None
+    isActive: bool = True
+    order: int = 0
+    createdAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
 # Add your routes to the router instead of directly to app
 @api_router.get("/")
 async def root():
