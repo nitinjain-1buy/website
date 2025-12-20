@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Quote, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Quote, ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -9,7 +9,7 @@ const TestimonialsMarquee = () => {
   const [testimonials, setTestimonials] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-  const [speed, setSpeed] = useState(4000); // 4 seconds default
+  const [speed, setSpeed] = useState(5000); // 5 seconds default
   const [isLoading, setIsLoading] = useState(true);
   const containerRef = useRef(null);
 
@@ -37,6 +37,8 @@ const TestimonialsMarquee = () => {
   }, []);
 
   const totalTestimonials = testimonials.length;
+  // For desktop we show 2 at a time, so calculate total "pages"
+  const totalPages = Math.ceil(totalTestimonials / 2);
 
   // Auto-advance testimonials
   useEffect(() => {
@@ -49,37 +51,44 @@ const TestimonialsMarquee = () => {
     return () => clearInterval(interval);
   }, [isAutoPlaying, speed, totalTestimonials]);
 
-  const goToSlide = (index) => {
-    setCurrentIndex(index);
-    setIsAutoPlaying(false);
-    // Resume auto-play after 10 seconds of inactivity
-    setTimeout(() => setIsAutoPlaying(true), 10000);
-  };
-
   const goToPrevious = () => {
     setCurrentIndex((prev) => (prev - 1 + totalTestimonials) % totalTestimonials);
     setIsAutoPlaying(false);
-    setTimeout(() => setIsAutoPlaying(true), 10000);
+    setTimeout(() => setIsAutoPlaying(true), 15000);
   };
 
   const goToNext = () => {
     setCurrentIndex((prev) => (prev + 1) % totalTestimonials);
     setIsAutoPlaying(false);
-    setTimeout(() => setIsAutoPlaying(true), 10000);
+    setTimeout(() => setIsAutoPlaying(true), 15000);
+  };
+
+  const toggleAutoPlay = () => {
+    setIsAutoPlaying(!isAutoPlaying);
   };
 
   const cycleSpeed = () => {
-    // Cycle through speeds: 4s -> 2s -> 1s -> 4s
-    if (speed === 4000) setSpeed(2000);
-    else if (speed === 2000) setSpeed(1000);
-    else setSpeed(4000);
+    // Cycle through speeds: 5s -> 3s -> 2s -> 5s
+    if (speed === 5000) setSpeed(3000);
+    else if (speed === 3000) setSpeed(2000);
+    else setSpeed(5000);
   };
 
   const getSpeedLabel = () => {
-    if (speed === 4000) return '1x';
-    if (speed === 2000) return '2x';
-    return '4x';
+    if (speed === 5000) return '1x';
+    if (speed === 3000) return '1.5x';
+    return '2x';
   };
+
+  // Get current pair of testimonials for display
+  const getVisibleTestimonials = () => {
+    if (totalTestimonials === 0) return [];
+    const first = testimonials[currentIndex];
+    const second = testimonials[(currentIndex + 1) % totalTestimonials];
+    return [first, second];
+  };
+
+  const visibleTestimonials = getVisibleTestimonials();
 
   if (isLoading) {
     return (
@@ -98,18 +107,33 @@ const TestimonialsMarquee = () => {
   return (
     <section className="py-16 bg-slate-900 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between mb-8">
-          <p className="text-slate-400 font-medium">
-            What customers are saying
-          </p>
+        {/* Header */}
+        <div className="flex items-center justify-between mb-10">
+          <div>
+            <p className="text-slate-400 font-medium text-lg">
+              What customers are saying
+            </p>
+            <p className="text-slate-500 text-sm mt-1">
+              Real feedback from industry leaders
+            </p>
+          </div>
           
-          {/* Speed Control */}
-          <button
-            onClick={cycleSpeed}
-            className="text-xs text-slate-500 hover:text-slate-300 transition-colors px-3 py-1 rounded-full border border-slate-700 hover:border-slate-600"
-          >
-            Speed: {getSpeedLabel()}
-          </button>
+          {/* Controls */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={toggleAutoPlay}
+              className="text-xs text-slate-500 hover:text-slate-300 transition-colors p-2 rounded-full border border-slate-700 hover:border-slate-600"
+              title={isAutoPlaying ? 'Pause' : 'Play'}
+            >
+              {isAutoPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            </button>
+            <button
+              onClick={cycleSpeed}
+              className="text-xs text-slate-500 hover:text-slate-300 transition-colors px-3 py-1.5 rounded-full border border-slate-700 hover:border-slate-600"
+            >
+              Speed: {getSpeedLabel()}
+            </button>
+          </div>
         </div>
 
         {/* Testimonials Container */}
@@ -117,42 +141,41 @@ const TestimonialsMarquee = () => {
           {/* Navigation Arrows */}
           <button
             onClick={goToPrevious}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-white transition-colors -ml-2 md:ml-0"
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-white transition-colors shadow-lg border border-slate-700 -ml-4 lg:-ml-6"
           >
-            <ChevronLeft className="h-5 w-5" />
+            <ChevronLeft className="h-6 w-6" />
           </button>
           
           <button
             onClick={goToNext}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-white transition-colors -mr-2 md:mr-0"
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-white transition-colors shadow-lg border border-slate-700 -mr-4 lg:-mr-6"
           >
-            <ChevronRight className="h-5 w-5" />
+            <ChevronRight className="h-6 w-6" />
           </button>
 
-          {/* Testimonials Slider */}
-          <div className="overflow-hidden mx-8 md:mx-12">
-            <div 
-              className="flex transition-transform duration-500 ease-in-out"
-              style={{ transform: `translateX(-${currentIndex * 100}%)` }}
-            >
-              {testimonials.map((testimonial, index) => (
+          {/* Two Testimonials Side by Side */}
+          <div className="mx-10 lg:mx-14">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {visibleTestimonials.map((testimonial, idx) => (
                 <div
-                  key={testimonial.id}
-                  className="w-full flex-shrink-0 px-4"
+                  key={`${testimonial.id}-${idx}`}
+                  className="transform transition-all duration-500 ease-out"
+                  style={{
+                    opacity: 1,
+                    animation: 'fadeSlideIn 0.5s ease-out'
+                  }}
                 >
-                  <div className="max-w-3xl mx-auto">
-                    <div className="bg-slate-800 rounded-xl p-8 md:p-10 border border-slate-700">
-                      <Quote className="h-10 w-10 text-emerald-500 mb-6" />
-                      <p className="text-slate-200 text-lg md:text-xl leading-relaxed mb-8">
-                        "{testimonial.quote}"
-                      </p>
-                      <div className="border-t border-slate-700 pt-6">
-                        <p className="font-semibold text-white text-lg">{testimonial.author}</p>
-                        <p className="text-emerald-400">{testimonial.company}</p>
-                        {testimonial.industry && (
-                          <p className="text-slate-500 text-sm">{testimonial.industry}</p>
-                        )}
-                      </div>
+                  <div className="bg-slate-800 rounded-xl p-6 lg:p-8 border border-slate-700 h-full flex flex-col hover:border-slate-600 transition-colors">
+                    <Quote className="h-8 w-8 text-emerald-500 mb-4 flex-shrink-0" />
+                    <p className="text-slate-200 text-base lg:text-lg leading-relaxed mb-6 flex-grow">
+                      "{testimonial.quote}"
+                    </p>
+                    <div className="border-t border-slate-700 pt-4 mt-auto">
+                      <p className="font-semibold text-white">{testimonial.author}</p>
+                      <p className="text-emerald-400 text-sm">{testimonial.company}</p>
+                      {testimonial.industry && (
+                        <p className="text-slate-500 text-xs mt-1">{testimonial.industry}</p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -161,29 +184,57 @@ const TestimonialsMarquee = () => {
           </div>
         </div>
 
+        {/* Progress Bar */}
+        <div className="mt-8 max-w-md mx-auto">
+          <div className="flex items-center gap-3">
+            <span className="text-slate-500 text-sm min-w-[3rem]">
+              {currentIndex + 1}/{totalTestimonials}
+            </span>
+            <div className="flex-grow h-1 bg-slate-700 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-emerald-500 rounded-full transition-all duration-300"
+                style={{ width: `${((currentIndex + 1) / totalTestimonials) * 100}%` }}
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Navigation Dots */}
-        <div className="flex items-center justify-center mt-8 gap-2">
+        <div className="flex items-center justify-center mt-6 gap-2 flex-wrap">
           {testimonials.map((_, index) => (
             <button
               key={index}
-              onClick={() => goToSlide(index)}
+              onClick={() => {
+                setCurrentIndex(index);
+                setIsAutoPlaying(false);
+                setTimeout(() => setIsAutoPlaying(true), 15000);
+              }}
               className={`transition-all duration-300 rounded-full ${
                 index === currentIndex
-                  ? 'w-8 h-3 bg-emerald-500'
-                  : 'w-3 h-3 bg-slate-600 hover:bg-slate-500'
+                  ? 'w-6 h-2.5 bg-emerald-500'
+                  : index === (currentIndex + 1) % totalTestimonials
+                  ? 'w-4 h-2.5 bg-emerald-700'
+                  : 'w-2.5 h-2.5 bg-slate-600 hover:bg-slate-500'
               }`}
               aria-label={`Go to testimonial ${index + 1}`}
             />
           ))}
         </div>
-
-        {/* Progress indicator */}
-        <div className="flex justify-center mt-4">
-          <span className="text-slate-500 text-sm">
-            {currentIndex + 1} / {totalTestimonials}
-          </span>
-        </div>
       </div>
+
+      {/* CSS Animation */}
+      <style>{`
+        @keyframes fadeSlideIn {
+          from {
+            opacity: 0;
+            transform: translateX(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+      `}</style>
     </section>
   );
 };
