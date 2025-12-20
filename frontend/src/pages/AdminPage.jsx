@@ -5,7 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Badge } from '../components/ui/badge';
+import { Textarea } from '../components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { Switch } from '../components/ui/switch';
 import {
   Select,
   SelectContent,
@@ -21,6 +23,13 @@ import {
   TableHeader,
   TableRow,
 } from '../components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '../components/ui/dialog';
 import { toast } from 'sonner';
 import {
   Lock,
@@ -33,9 +42,13 @@ import {
   Phone,
   Mail,
   Building2,
-  Filter,
   Package,
-  Globe
+  Globe,
+  Quote,
+  Plus,
+  Pencil,
+  Trash2,
+  GripVertical
 } from 'lucide-react';
 import { logoUrl } from '../data/mock';
 
@@ -228,7 +241,7 @@ const CustomerRequestsTable = ({ requests, isLoading, onStatusUpdate, updatingId
                       <div>
                         <p className="font-medium">{request.company}</p>
                         {request.companySize && (
-                          <p className="text-sm text-slate-400">{request.companySize} employees</p>
+                          <p className="text-sm text-slate-400">{request.companySize}</p>
                         )}
                       </div>
                     </div>
@@ -453,22 +466,278 @@ const SupplierRequestsTable = ({ requests, isLoading, onStatusUpdate, updatingId
   );
 };
 
+// Testimonials Management Component
+const TestimonialsManager = ({ testimonials, isLoading, onRefresh }) => {
+  const [editingTestimonial, setEditingTestimonial] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    quote: '',
+    author: '',
+    company: '',
+    industry: '',
+    isActive: true
+  });
+  const [isSaving, setIsSaving] = useState(false);
+
+  const openCreateDialog = () => {
+    setEditingTestimonial(null);
+    setFormData({
+      quote: '',
+      author: '',
+      company: '',
+      industry: '',
+      isActive: true
+    });
+    setIsDialogOpen(true);
+  };
+
+  const openEditDialog = (testimonial) => {
+    setEditingTestimonial(testimonial);
+    setFormData({
+      quote: testimonial.quote,
+      author: testimonial.author,
+      company: testimonial.company,
+      industry: testimonial.industry || '',
+      isActive: testimonial.isActive
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!formData.quote || !formData.author || !formData.company) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      if (editingTestimonial) {
+        await axios.put(`${API}/testimonials/${editingTestimonial.id}`, formData);
+        toast.success('Testimonial updated successfully');
+      } else {
+        await axios.post(`${API}/testimonials`, formData);
+        toast.success('Testimonial created successfully');
+      }
+      setIsDialogOpen(false);
+      onRefresh();
+    } catch (error) {
+      toast.error('Failed to save testimonial');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this testimonial?')) {
+      return;
+    }
+
+    try {
+      await axios.delete(`${API}/testimonials/${id}`);
+      toast.success('Testimonial deleted successfully');
+      onRefresh();
+    } catch (error) {
+      toast.error('Failed to delete testimonial');
+    }
+  };
+
+  const toggleActive = async (testimonial) => {
+    try {
+      await axios.put(`${API}/testimonials/${testimonial.id}`, {
+        isActive: !testimonial.isActive
+      });
+      toast.success(`Testimonial ${testimonial.isActive ? 'hidden' : 'shown'}`);
+      onRefresh();
+    } catch (error) {
+      toast.error('Failed to update testimonial');
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h3 className="text-lg font-semibold text-slate-900">Manage Testimonials</h3>
+          <p className="text-sm text-slate-500">Add, edit, or remove customer testimonials</p>
+        </div>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={openCreateDialog} className="bg-emerald-600 hover:bg-emerald-700">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Testimonial
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>
+                {editingTestimonial ? 'Edit Testimonial' : 'Add New Testimonial'}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="quote">Quote *</Label>
+                <Textarea
+                  id="quote"
+                  value={formData.quote}
+                  onChange={(e) => setFormData({ ...formData, quote: e.target.value })}
+                  placeholder="Enter the testimonial quote..."
+                  rows={4}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="author">Author / Role *</Label>
+                  <Input
+                    id="author"
+                    value={formData.author}
+                    onChange={(e) => setFormData({ ...formData, author: e.target.value })}
+                    placeholder="e.g., CEO, VP Procurement"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="company">Company *</Label>
+                  <Input
+                    id="company"
+                    value={formData.company}
+                    onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                    placeholder="Company name"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="industry">Industry</Label>
+                <Input
+                  id="industry"
+                  value={formData.industry}
+                  onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
+                  placeholder="e.g., Auto Components, Electronics"
+                />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="isActive"
+                  checked={formData.isActive}
+                  onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
+                />
+                <Label htmlFor="isActive">Show on website</Label>
+              </div>
+              <div className="flex justify-end space-x-2 pt-4">
+                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSave} disabled={isSaving}>
+                  {isSaving ? 'Saving...' : (editingTestimonial ? 'Update' : 'Create')}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {isLoading ? (
+        <div className="text-center py-12">
+          <RefreshCw className="h-8 w-8 animate-spin mx-auto text-slate-400" />
+          <p className="text-slate-500 mt-2">Loading...</p>
+        </div>
+      ) : testimonials.length === 0 ? (
+        <div className="text-center py-12">
+          <Quote className="h-12 w-12 mx-auto text-slate-300" />
+          <p className="text-slate-500 mt-2">No testimonials yet</p>
+          <Button onClick={openCreateDialog} variant="outline" className="mt-4">
+            <Plus className="h-4 w-4 mr-2" />
+            Add your first testimonial
+          </Button>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {testimonials.map((testimonial, index) => (
+            <Card key={testimonial.id} className={`${!testimonial.isActive ? 'opacity-60' : ''}`}>
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-3 flex-1">
+                    <div className="text-slate-400 mt-1">
+                      <GripVertical className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Quote className="h-4 w-4 text-emerald-500" />
+                        <span className="text-sm text-slate-500">#{index + 1}</span>
+                        {!testimonial.isActive && (
+                          <Badge variant="outline" className="text-xs">Hidden</Badge>
+                        )}
+                      </div>
+                      <p className="text-slate-700 mb-3 line-clamp-2">"{testimonial.quote}"</p>
+                      <div className="flex items-center gap-4 text-sm">
+                        <span className="font-medium text-slate-900">{testimonial.author}</span>
+                        <span className="text-slate-400">•</span>
+                        <span className="text-emerald-600">{testimonial.company}</span>
+                        {testimonial.industry && (
+                          <>
+                            <span className="text-slate-400">•</span>
+                            <span className="text-slate-500">{testimonial.industry}</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleActive(testimonial)}
+                      title={testimonial.isActive ? 'Hide' : 'Show'}
+                    >
+                      {testimonial.isActive ? (
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <XCircle className="h-4 w-4 text-slate-400" />
+                      )}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => openEditDialog(testimonial)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDelete(testimonial.id)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 // Dashboard Component
 const AdminDashboard = ({ onLogout }) => {
   const [customerRequests, setCustomerRequests] = useState([]);
   const [supplierRequests, setSupplierRequests] = useState([]);
+  const [testimonials, setTestimonials] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
 
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [customersRes, suppliersRes] = await Promise.all([
+      const [customersRes, suppliersRes, testimonialsRes] = await Promise.all([
         axios.get(`${API}/demo-requests`),
-        axios.get(`${API}/supplier-requests`)
+        axios.get(`${API}/supplier-requests`),
+        axios.get(`${API}/testimonials`)
       ]);
       setCustomerRequests(customersRes.data);
       setSupplierRequests(suppliersRes.data);
+      setTestimonials(testimonialsRes.data);
     } catch (err) {
       toast.error('Failed to fetch data');
     } finally {
@@ -549,7 +818,7 @@ const AdminDashboard = ({ onLogout }) => {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Summary Cards */}
-        <div className="grid grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-3 gap-6 mb-8">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -576,9 +845,22 @@ const AdminDashboard = ({ onLogout }) => {
               </div>
             </CardContent>
           </Card>
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-3xl font-bold text-slate-900">{testimonials.filter(t => t.isActive).length}</p>
+                  <p className="text-slate-500">Active Testimonials</p>
+                </div>
+                <div className="w-14 h-14 rounded-xl bg-purple-100 flex items-center justify-center">
+                  <Quote className="h-7 w-7 text-purple-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Tabs for Customers and Suppliers */}
+        {/* Tabs for Customers, Suppliers, and Testimonials */}
         <Card>
           <CardContent className="p-6">
             <Tabs defaultValue="customers">
@@ -590,6 +872,10 @@ const AdminDashboard = ({ onLogout }) => {
                 <TabsTrigger value="suppliers" className="flex items-center gap-2">
                   <Package className="h-4 w-4" />
                   Suppliers ({supplierRequests.length})
+                </TabsTrigger>
+                <TabsTrigger value="testimonials" className="flex items-center gap-2">
+                  <Quote className="h-4 w-4" />
+                  Testimonials ({testimonials.length})
                 </TabsTrigger>
               </TabsList>
 
@@ -608,6 +894,14 @@ const AdminDashboard = ({ onLogout }) => {
                   isLoading={isLoading}
                   onStatusUpdate={updateStatus}
                   updatingId={updatingId}
+                />
+              </TabsContent>
+
+              <TabsContent value="testimonials">
+                <TestimonialsManager
+                  testimonials={testimonials}
+                  isLoading={isLoading}
+                  onRefresh={fetchData}
                 />
               </TabsContent>
             </Tabs>
