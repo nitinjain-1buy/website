@@ -298,7 +298,6 @@ const ContactPage = () => {
                   <MapPin className="h-5 w-5 text-slate-400 flex-shrink-0 mt-0.5" />
                   <div className="text-slate-600">
                     <p>Delhi, India</p>
-                    <p className="text-sm text-slate-500">Starting in India, building for the world</p>
                   </div>
                 </div>
               </div>
