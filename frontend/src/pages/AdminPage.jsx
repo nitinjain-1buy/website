@@ -1399,12 +1399,20 @@ const AdminDashboard = ({ onLogout }) => {
 // Main Admin Page
 const AdminPage = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(sessionStorage.getItem('adminAuth') === 'true');
+  const navigate = useNavigate();
 
+  // Redirect to login page if not authenticated
   if (!isAuthenticated) {
-    return <AdminLogin onLogin={() => setIsAuthenticated(true)} />;
+    return <Navigate to="/login?redirect=/admin" replace />;
   }
 
-  return <AdminDashboard onLogout={() => setIsAuthenticated(false)} />;
+  const handleLogout = () => {
+    sessionStorage.removeItem('adminAuth');
+    setIsAuthenticated(false);
+    navigate('/login');
+  };
+
+  return <AdminDashboard onLogout={handleLogout} />;
 };
 
 export default AdminPage;
