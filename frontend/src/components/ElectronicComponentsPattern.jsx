@@ -95,100 +95,100 @@ const ElectronicComponentsPattern = ({ className = '' }) => {
       </svg>
 
       {/* Scattered Components Pattern */}
-      <div className="absolute inset-0 text-slate-200/40">
+      <div className="absolute inset-0 text-slate-300/50">
         {/* Row 1 */}
-        <svg className="absolute top-[5%] left-[5%] w-12 h-8 rotate-12 opacity-60">
+        <svg className="absolute top-[5%] left-[5%] w-16 h-12 rotate-12 opacity-70">
           <use href="#capacitor" />
         </svg>
-        <svg className="absolute top-[8%] left-[25%] w-14 h-10 -rotate-6 opacity-50">
+        <svg className="absolute top-[8%] left-[25%] w-20 h-12 -rotate-6 opacity-60">
           <use href="#resistor" />
         </svg>
-        <svg className="absolute top-[3%] left-[45%] w-16 h-12 rotate-45 opacity-40">
+        <svg className="absolute top-[3%] left-[45%] w-20 h-16 rotate-45 opacity-50">
           <use href="#chip" />
         </svg>
-        <svg className="absolute top-[10%] left-[70%] w-12 h-10 -rotate-15 opacity-55">
+        <svg className="absolute top-[10%] left-[70%] w-16 h-12 -rotate-15 opacity-65">
           <use href="#diode" />
         </svg>
-        <svg className="absolute top-[5%] left-[88%] w-12 h-12 rotate-30 opacity-45">
+        <svg className="absolute top-[5%] left-[88%] w-16 h-16 rotate-30 opacity-55">
           <use href="#transistor" />
         </svg>
 
         {/* Row 2 */}
-        <svg className="absolute top-[20%] left-[10%] w-12 h-10 -rotate-20 opacity-50">
+        <svg className="absolute top-[20%] left-[10%] w-16 h-12 -rotate-20 opacity-60">
           <use href="#diode" />
         </svg>
-        <svg className="absolute top-[25%] left-[35%] w-14 h-6 rotate-8 opacity-45">
+        <svg className="absolute top-[25%] left-[35%] w-20 h-10 rotate-8 opacity-55">
           <use href="#inductor" />
         </svg>
-        <svg className="absolute top-[18%] left-[55%] w-12 h-8 -rotate-12 opacity-55">
+        <svg className="absolute top-[18%] left-[55%] w-16 h-12 -rotate-12 opacity-65">
           <use href="#capacitor" />
         </svg>
-        <svg className="absolute top-[22%] left-[80%] w-14 h-10 rotate-25 opacity-40">
+        <svg className="absolute top-[22%] left-[80%] w-18 h-14 rotate-25 opacity-50">
           <use href="#led" />
         </svg>
 
         {/* Row 3 */}
-        <svg className="absolute top-[35%] left-[3%] w-16 h-12 rotate-5 opacity-45">
+        <svg className="absolute top-[35%] left-[3%] w-24 h-18 rotate-5 opacity-55">
           <use href="#chip" />
         </svg>
-        <svg className="absolute top-[40%] left-[20%] w-12 h-12 -rotate-30 opacity-50">
+        <svg className="absolute top-[40%] left-[20%] w-16 h-16 -rotate-30 opacity-60">
           <use href="#transistor" />
         </svg>
-        <svg className="absolute top-[38%] left-[42%] w-12 h-6 rotate-15 opacity-55">
+        <svg className="absolute top-[38%] left-[42%] w-16 h-8 rotate-15 opacity-65">
           <use href="#fuse" />
         </svg>
-        <svg className="absolute top-[32%] left-[65%] w-14 h-10 -rotate-8 opacity-45">
+        <svg className="absolute top-[32%] left-[65%] w-20 h-12 -rotate-8 opacity-55">
           <use href="#resistor" />
         </svg>
-        <svg className="absolute top-[40%] left-[92%] w-12 h-8 rotate-20 opacity-50">
+        <svg className="absolute top-[40%] left-[92%] w-16 h-12 rotate-20 opacity-60">
           <use href="#capacitor" />
         </svg>
 
         {/* Row 4 */}
-        <svg className="absolute top-[52%] left-[8%] w-14 h-10 -rotate-5 opacity-55">
+        <svg className="absolute top-[52%] left-[8%] w-18 h-14 -rotate-5 opacity-65">
           <use href="#led" />
         </svg>
-        <svg className="absolute top-[55%] left-[30%] w-12 h-10 rotate-35 opacity-40">
+        <svg className="absolute top-[55%] left-[30%] w-16 h-12 rotate-35 opacity-50">
           <use href="#diode" />
         </svg>
-        <svg className="absolute top-[50%] left-[52%] w-12 h-12 -rotate-25 opacity-50">
+        <svg className="absolute top-[50%] left-[52%] w-16 h-16 -rotate-25 opacity-60">
           <use href="#transistor" />
         </svg>
-        <svg className="absolute top-[58%] left-[75%] w-14 h-6 rotate-10 opacity-45">
+        <svg className="absolute top-[58%] left-[75%] w-20 h-10 rotate-10 opacity-55">
           <use href="#inductor" />
         </svg>
 
         {/* Row 5 */}
-        <svg className="absolute top-[68%] left-[2%] w-14 h-10 rotate-18 opacity-50">
+        <svg className="absolute top-[68%] left-[2%] w-20 h-12 rotate-18 opacity-60">
           <use href="#resistor" />
         </svg>
-        <svg className="absolute top-[72%] left-[22%] w-12 h-8 -rotate-15 opacity-45">
+        <svg className="absolute top-[72%] left-[22%] w-16 h-12 -rotate-15 opacity-55">
           <use href="#capacitor" />
         </svg>
-        <svg className="absolute top-[65%] left-[40%] w-16 h-12 rotate-3 opacity-55">
+        <svg className="absolute top-[65%] left-[40%] w-24 h-18 rotate-3 opacity-65">
           <use href="#chip" />
         </svg>
-        <svg className="absolute top-[70%] left-[62%] w-12 h-6 -rotate-10 opacity-40">
+        <svg className="absolute top-[70%] left-[62%] w-16 h-8 -rotate-10 opacity-50">
           <use href="#fuse" />
         </svg>
-        <svg className="absolute top-[68%] left-[85%] w-12 h-10 rotate-40 opacity-50">
+        <svg className="absolute top-[68%] left-[85%] w-16 h-12 rotate-40 opacity-60">
           <use href="#diode" />
         </svg>
 
         {/* Row 6 */}
-        <svg className="absolute top-[82%] left-[12%] w-12 h-12 -rotate-22 opacity-45">
+        <svg className="absolute top-[82%] left-[12%] w-16 h-16 -rotate-22 opacity-55">
           <use href="#transistor" />
         </svg>
-        <svg className="absolute top-[85%] left-[35%] w-14 h-10 rotate-12 opacity-55">
+        <svg className="absolute top-[85%] left-[35%] w-18 h-14 rotate-12 opacity-65">
           <use href="#led" />
         </svg>
-        <svg className="absolute top-[80%] left-[58%] w-12 h-8 -rotate-8 opacity-50">
+        <svg className="absolute top-[80%] left-[58%] w-16 h-12 -rotate-8 opacity-60">
           <use href="#capacitor" />
         </svg>
-        <svg className="absolute top-[88%] left-[78%] w-14 h-10 rotate-28 opacity-40">
+        <svg className="absolute top-[88%] left-[78%] w-20 h-12 rotate-28 opacity-50">
           <use href="#resistor" />
         </svg>
-        <svg className="absolute top-[83%] left-[95%] w-14 h-6 -rotate-5 opacity-45">
+        <svg className="absolute top-[83%] left-[95%] w-20 h-10 -rotate-5 opacity-55">
           <use href="#inductor" />
         </svg>
       </div>
