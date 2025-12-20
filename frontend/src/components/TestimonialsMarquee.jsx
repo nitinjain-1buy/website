@@ -1,18 +1,46 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { testimonialsData } from '../data/mock';
+import axios from 'axios';
 import { Quote, ChevronLeft, ChevronRight } from 'lucide-react';
 
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
+
 const TestimonialsMarquee = () => {
+  const [testimonials, setTestimonials] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [speed, setSpeed] = useState(4000); // 4 seconds default
+  const [isLoading, setIsLoading] = useState(true);
   const containerRef = useRef(null);
 
-  const totalTestimonials = testimonialsData.length;
+  // Fetch testimonials from API
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      try {
+        const response = await axios.get(`${API}/testimonials?active_only=true`);
+        if (response.data.length > 0) {
+          setTestimonials(response.data);
+        } else {
+          // Seed testimonials if none exist
+          await axios.post(`${API}/testimonials/seed`);
+          const seededResponse = await axios.get(`${API}/testimonials?active_only=true`);
+          setTestimonials(seededResponse.data);
+        }
+      } catch (error) {
+        console.error('Error fetching testimonials:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTestimonials();
+  }, []);
+
+  const totalTestimonials = testimonials.length;
 
   // Auto-advance testimonials
   useEffect(() => {
-    if (!isAutoPlaying) return;
+    if (!isAutoPlaying || totalTestimonials === 0) return;
     
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % totalTestimonials);
@@ -52,6 +80,20 @@ const TestimonialsMarquee = () => {
     if (speed === 2000) return '2x';
     return '4x';
   };
+
+  if (isLoading) {
+    return (
+      <section className="py-16 bg-slate-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <p className="text-slate-400">Loading testimonials...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (testimonials.length === 0) {
+    return null;
+  }
 
   return (
     <section className="py-16 bg-slate-900 overflow-hidden">
@@ -93,7 +135,7 @@ const TestimonialsMarquee = () => {
               className="flex transition-transform duration-500 ease-in-out"
               style={{ transform: `translateX(-${currentIndex * 100}%)` }}
             >
-              {testimonialsData.map((testimonial, index) => (
+              {testimonials.map((testimonial, index) => (
                 <div
                   key={testimonial.id}
                   className="w-full flex-shrink-0 px-4"
@@ -107,7 +149,9 @@ const TestimonialsMarquee = () => {
                       <div className="border-t border-slate-700 pt-6">
                         <p className="font-semibold text-white text-lg">{testimonial.author}</p>
                         <p className="text-emerald-400">{testimonial.company}</p>
-                        <p className="text-slate-500 text-sm">{testimonial.industry}</p>
+                        {testimonial.industry && (
+                          <p className="text-slate-500 text-sm">{testimonial.industry}</p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -119,7 +163,7 @@ const TestimonialsMarquee = () => {
 
         {/* Navigation Dots */}
         <div className="flex items-center justify-center mt-8 gap-2">
-          {testimonialsData.map((_, index) => (
+          {testimonials.map((_, index) => (
             <button
               key={index}
               onClick={() => goToSlide(index)}
