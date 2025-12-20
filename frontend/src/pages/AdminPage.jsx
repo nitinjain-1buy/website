@@ -48,7 +48,12 @@ import {
   Plus,
   Pencil,
   Trash2,
-  GripVertical
+  GripVertical,
+  BarChart3,
+  Image,
+  Settings,
+  Layers,
+  Save
 } from 'lucide-react';
 import { logoUrl } from '../data/mock';
 
@@ -120,6 +125,713 @@ const AdminLogin = ({ onLogin }) => {
   );
 };
 
+// Site Stats Manager Component
+const SiteStatsManager = ({ stats, isLoading, onRefresh }) => {
+  const [editingStat, setEditingStat] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    key: '',
+    value: '',
+    label: '',
+    description: '',
+    order: 0
+  });
+  const [isSaving, setIsSaving] = useState(false);
+
+  const openCreateDialog = () => {
+    setEditingStat(null);
+    setFormData({ key: '', value: '', label: '', description: '', order: stats.length });
+    setIsDialogOpen(true);
+  };
+
+  const openEditDialog = (stat) => {
+    setEditingStat(stat);
+    setFormData({
+      key: stat.key,
+      value: stat.value,
+      label: stat.label,
+      description: stat.description,
+      order: stat.order
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!formData.value || !formData.label) {
+      toast.error('Please fill in value and label');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      if (editingStat) {
+        await axios.put(`${API}/site-stats/${editingStat.id}`, formData);
+        toast.success('Stat updated successfully');
+      } else {
+        await axios.post(`${API}/site-stats`, formData);
+        toast.success('Stat created successfully');
+      }
+      setIsDialogOpen(false);
+      onRefresh();
+    } catch (error) {
+      toast.error('Failed to save stat');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this stat?')) return;
+    try {
+      await axios.delete(`${API}/site-stats/${id}`);
+      toast.success('Stat deleted successfully');
+      onRefresh();
+    } catch (error) {
+      toast.error('Failed to delete stat');
+    }
+  };
+
+  const seedStats = async () => {
+    try {
+      const result = await axios.post(`${API}/site-stats/seed`);
+      toast.success(result.data.message);
+      onRefresh();
+    } catch (error) {
+      toast.error('Failed to seed stats');
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h3 className="text-lg font-semibold text-slate-900">Site Statistics</h3>
+          <p className="text-sm text-slate-500">Manage the key metrics shown on the homepage</p>
+        </div>
+        <div className="flex gap-2">
+          {stats.length === 0 && (
+            <Button onClick={seedStats} variant="outline">
+              Load Defaults
+            </Button>
+          )}
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={openCreateDialog} className="bg-emerald-600 hover:bg-emerald-700">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Stat
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{editingStat ? 'Edit Stat' : 'Add New Stat'}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 mt-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Value *</Label>
+                    <Input
+                      value={formData.value}
+                      onChange={(e) => setFormData({ ...formData, value: e.target.value })}
+                      placeholder="e.g., 30+, 15-20%, 25M+"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Label *</Label>
+                    <Input
+                      value={formData.label}
+                      onChange={(e) => setFormData({ ...formData, label: e.target.value })}
+                      placeholder="e.g., Enterprise Customers"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Description</Label>
+                  <Input
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    placeholder="e.g., Active OEM & EMS engagements"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Key (identifier)</Label>
+                    <Input
+                      value={formData.key}
+                      onChange={(e) => setFormData({ ...formData, key: e.target.value })}
+                      placeholder="e.g., enterprise_customers"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Order</Label>
+                    <Input
+                      type="number"
+                      value={formData.order}
+                      onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) || 0 })}
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+                  <Button onClick={handleSave} disabled={isSaving}>
+                    {isSaving ? 'Saving...' : 'Save'}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="text-center py-12">
+          <RefreshCw className="h-8 w-8 animate-spin mx-auto text-slate-400" />
+        </div>
+      ) : stats.length === 0 ? (
+        <div className="text-center py-12 bg-slate-50 rounded-lg">
+          <BarChart3 className="h-12 w-12 mx-auto text-slate-300" />
+          <p className="text-slate-500 mt-2">No stats yet</p>
+          <Button onClick={seedStats} variant="outline" className="mt-4">
+            Load Default Stats
+          </Button>
+        </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2">
+          {stats.map((stat) => (
+            <Card key={stat.id} className="relative">
+              <CardContent className="p-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-3xl font-bold text-emerald-600">{stat.value}</p>
+                    <p className="font-medium text-slate-900">{stat.label}</p>
+                    <p className="text-sm text-slate-500">{stat.description}</p>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="sm" onClick={() => openEditDialog(stat)}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleDelete(stat.id)} className="text-red-600">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Hero Section Manager Component
+const HeroSectionManager = ({ heroData, isLoading, onRefresh }) => {
+  const [formData, setFormData] = useState({
+    headline: '',
+    subHeadline: '',
+    ctaPrimary: '',
+    ctaSecondary: '',
+    screenshotUrl: ''
+  });
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (heroData) {
+      setFormData({
+        headline: heroData.headline || '',
+        subHeadline: heroData.subHeadline || '',
+        ctaPrimary: heroData.ctaPrimary || '',
+        ctaSecondary: heroData.ctaSecondary || '',
+        screenshotUrl: heroData.screenshotUrl || ''
+      });
+    }
+  }, [heroData]);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await axios.put(`${API}/hero-section`, formData);
+      toast.success('Hero section updated successfully');
+      onRefresh();
+    } catch (error) {
+      toast.error('Failed to update hero section');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h3 className="text-lg font-semibold text-slate-900">Hero Section</h3>
+          <p className="text-sm text-slate-500">Edit the main headline and call-to-action buttons</p>
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="text-center py-12">
+          <RefreshCw className="h-8 w-8 animate-spin mx-auto text-slate-400" />
+        </div>
+      ) : (
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <Label>Main Headline</Label>
+            <Input
+              value={formData.headline}
+              onChange={(e) => setFormData({ ...formData, headline: e.target.value })}
+              placeholder="Enter main headline"
+              className="text-lg"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Sub-headline</Label>
+            <Textarea
+              value={formData.subHeadline}
+              onChange={(e) => setFormData({ ...formData, subHeadline: e.target.value })}
+              placeholder="Enter sub-headline"
+              rows={3}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Primary CTA Button</Label>
+              <Input
+                value={formData.ctaPrimary}
+                onChange={(e) => setFormData({ ...formData, ctaPrimary: e.target.value })}
+                placeholder="e.g., Request a Demo"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Secondary CTA Button</Label>
+              <Input
+                value={formData.ctaSecondary}
+                onChange={(e) => setFormData({ ...formData, ctaSecondary: e.target.value })}
+                placeholder="e.g., Watch Demo"
+              />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label>Platform Screenshot URL</Label>
+            <Input
+              value={formData.screenshotUrl}
+              onChange={(e) => setFormData({ ...formData, screenshotUrl: e.target.value })}
+              placeholder="https://..."
+            />
+            {formData.screenshotUrl && (
+              <div className="mt-2 border rounded-lg overflow-hidden">
+                <img src={formData.screenshotUrl} alt="Preview" className="w-full h-48 object-cover" />
+              </div>
+            )}
+          </div>
+          <Button onClick={handleSave} disabled={isSaving} className="bg-emerald-600 hover:bg-emerald-700">
+            <Save className="h-4 w-4 mr-2" />
+            {isSaving ? 'Saving...' : 'Save Changes'}
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Customer Logos Manager Component
+const CustomerLogosManager = ({ logos, isLoading, onRefresh }) => {
+  const [editingLogo, setEditingLogo] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [formData, setFormData] = useState({ name: '', logoUrl: '', order: 0 });
+  const [isSaving, setIsSaving] = useState(false);
+
+  const openCreateDialog = () => {
+    setEditingLogo(null);
+    setFormData({ name: '', logoUrl: '', order: logos.length });
+    setIsDialogOpen(true);
+  };
+
+  const openEditDialog = (logo) => {
+    setEditingLogo(logo);
+    setFormData({ name: logo.name, logoUrl: logo.logoUrl || '', order: logo.order });
+    setIsDialogOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!formData.name) {
+      toast.error('Please enter a company name');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      if (editingLogo) {
+        await axios.put(`${API}/customer-logos/${editingLogo.id}`, formData);
+        toast.success('Customer updated successfully');
+      } else {
+        await axios.post(`${API}/customer-logos`, formData);
+        toast.success('Customer added successfully');
+      }
+      setIsDialogOpen(false);
+      onRefresh();
+    } catch (error) {
+      toast.error('Failed to save customer');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this customer?')) return;
+    try {
+      await axios.delete(`${API}/customer-logos/${id}`);
+      toast.success('Customer deleted successfully');
+      onRefresh();
+    } catch (error) {
+      toast.error('Failed to delete customer');
+    }
+  };
+
+  const seedLogos = async () => {
+    try {
+      const result = await axios.post(`${API}/customer-logos/seed`);
+      toast.success(result.data.message);
+      onRefresh();
+    } catch (error) {
+      toast.error('Failed to seed logos');
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h3 className="text-lg font-semibold text-slate-900">Customer Logos</h3>
+          <p className="text-sm text-slate-500">Manage the customer names shown on homepage</p>
+        </div>
+        <div className="flex gap-2">
+          {logos.length === 0 && (
+            <Button onClick={seedLogos} variant="outline">Load Defaults</Button>
+          )}
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={openCreateDialog} className="bg-emerald-600 hover:bg-emerald-700">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Customer
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{editingLogo ? 'Edit Customer' : 'Add Customer'}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 mt-4">
+                <div className="space-y-2">
+                  <Label>Company Name *</Label>
+                  <Input
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="e.g., Google, Dixon, Uno Minda"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Logo URL (optional)</Label>
+                  <Input
+                    value={formData.logoUrl}
+                    onChange={(e) => setFormData({ ...formData, logoUrl: e.target.value })}
+                    placeholder="https://..."
+                  />
+                </div>
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+                  <Button onClick={handleSave} disabled={isSaving}>
+                    {isSaving ? 'Saving...' : 'Save'}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="text-center py-12">
+          <RefreshCw className="h-8 w-8 animate-spin mx-auto text-slate-400" />
+        </div>
+      ) : logos.length === 0 ? (
+        <div className="text-center py-12 bg-slate-50 rounded-lg">
+          <Building2 className="h-12 w-12 mx-auto text-slate-300" />
+          <p className="text-slate-500 mt-2">No customers yet</p>
+          <Button onClick={seedLogos} variant="outline" className="mt-4">
+            Load Default Customers
+          </Button>
+        </div>
+      ) : (
+        <div className="flex flex-wrap gap-3">
+          {logos.map((logo) => (
+            <div key={logo.id} className="flex items-center gap-2 bg-slate-100 px-4 py-2 rounded-full group">
+              <span className="font-medium text-slate-700">{logo.name}</span>
+              <button onClick={() => openEditDialog(logo)} className="opacity-0 group-hover:opacity-100 transition-opacity">
+                <Pencil className="h-3 w-3 text-slate-500" />
+              </button>
+              <button onClick={() => handleDelete(logo.id)} className="opacity-0 group-hover:opacity-100 transition-opacity">
+                <Trash2 className="h-3 w-3 text-red-500" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Products Manager Component
+const ProductsManager = ({ products, isLoading, onRefresh }) => {
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    productId: '',
+    name: '',
+    tagline: '',
+    description: '',
+    features: '',
+    benefits: '',
+    icon: 'Database',
+    order: 0
+  });
+  const [isSaving, setIsSaving] = useState(false);
+
+  const iconOptions = ['Database', 'ShoppingCart', 'RefreshCw', 'Package', 'Zap', 'Layers'];
+
+  const openCreateDialog = () => {
+    setEditingProduct(null);
+    setFormData({
+      productId: '',
+      name: '',
+      tagline: '',
+      description: '',
+      features: '',
+      benefits: '',
+      icon: 'Database',
+      order: products.length
+    });
+    setIsDialogOpen(true);
+  };
+
+  const openEditDialog = (product) => {
+    setEditingProduct(product);
+    setFormData({
+      productId: product.productId,
+      name: product.name,
+      tagline: product.tagline,
+      description: product.description,
+      features: product.features.join('\n'),
+      benefits: product.benefits.join('\n'),
+      icon: product.icon,
+      order: product.order
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!formData.name || !formData.productId) {
+      toast.error('Please fill in required fields');
+      return;
+    }
+
+    const payload = {
+      ...formData,
+      features: formData.features.split('\n').filter(f => f.trim()),
+      benefits: formData.benefits.split('\n').filter(b => b.trim())
+    };
+
+    setIsSaving(true);
+    try {
+      if (editingProduct) {
+        await axios.put(`${API}/products/${editingProduct.id}`, payload);
+        toast.success('Product updated successfully');
+      } else {
+        await axios.post(`${API}/products`, payload);
+        toast.success('Product created successfully');
+      }
+      setIsDialogOpen(false);
+      onRefresh();
+    } catch (error) {
+      toast.error('Failed to save product');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this product?')) return;
+    try {
+      await axios.delete(`${API}/products/${id}`);
+      toast.success('Product deleted successfully');
+      onRefresh();
+    } catch (error) {
+      toast.error('Failed to delete product');
+    }
+  };
+
+  const seedProducts = async () => {
+    try {
+      const result = await axios.post(`${API}/products/seed`);
+      toast.success(result.data.message);
+      onRefresh();
+    } catch (error) {
+      toast.error('Failed to seed products');
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h3 className="text-lg font-semibold text-slate-900">Products</h3>
+          <p className="text-sm text-slate-500">Manage product descriptions and features</p>
+        </div>
+        <div className="flex gap-2">
+          {products.length === 0 && (
+            <Button onClick={seedProducts} variant="outline">Load Defaults</Button>
+          )}
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={openCreateDialog} className="bg-emerald-600 hover:bg-emerald-700">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Product
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>{editingProduct ? 'Edit Product' : 'Add Product'}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 mt-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Product ID *</Label>
+                    <Input
+                      value={formData.productId}
+                      onChange={(e) => setFormData({ ...formData, productId: e.target.value })}
+                      placeholder="e.g., 1data, 1source"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Name *</Label>
+                    <Input
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      placeholder="e.g., 1Data"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Tagline</Label>
+                  <Input
+                    value={formData.tagline}
+                    onChange={(e) => setFormData({ ...formData, tagline: e.target.value })}
+                    placeholder="e.g., Pricing & Risk Intelligence"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Description</Label>
+                  <Textarea
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    placeholder="Product description..."
+                    rows={3}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Features (one per line)</Label>
+                  <Textarea
+                    value={formData.features}
+                    onChange={(e) => setFormData({ ...formData, features: e.target.value })}
+                    placeholder="Feature 1&#10;Feature 2&#10;Feature 3"
+                    rows={4}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Benefits (one per line)</Label>
+                  <Textarea
+                    value={formData.benefits}
+                    onChange={(e) => setFormData({ ...formData, benefits: e.target.value })}
+                    placeholder="Benefit 1&#10;Benefit 2"
+                    rows={3}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Icon</Label>
+                    <Select value={formData.icon} onValueChange={(v) => setFormData({ ...formData, icon: v })}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {iconOptions.map(icon => (
+                          <SelectItem key={icon} value={icon}>{icon}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Order</Label>
+                    <Input
+                      type="number"
+                      value={formData.order}
+                      onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) || 0 })}
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+                  <Button onClick={handleSave} disabled={isSaving}>
+                    {isSaving ? 'Saving...' : 'Save'}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="text-center py-12">
+          <RefreshCw className="h-8 w-8 animate-spin mx-auto text-slate-400" />
+        </div>
+      ) : products.length === 0 ? (
+        <div className="text-center py-12 bg-slate-50 rounded-lg">
+          <Layers className="h-12 w-12 mx-auto text-slate-300" />
+          <p className="text-slate-500 mt-2">No products yet</p>
+          <Button onClick={seedProducts} variant="outline" className="mt-4">
+            Load Default Products
+          </Button>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {products.map((product) => (
+            <Card key={product.id}>
+              <CardContent className="p-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-bold text-lg text-slate-900">{product.name}</h4>
+                      <Badge variant="outline">{product.productId}</Badge>
+                    </div>
+                    <p className="text-emerald-600 font-medium">{product.tagline}</p>
+                    <p className="text-slate-600 text-sm mt-1">{product.description}</p>
+                    <p className="text-slate-400 text-xs mt-2">{product.features.length} features, {product.benefits.length} benefits</p>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="sm" onClick={() => openEditDialog(product)}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleDelete(product.id)} className="text-red-600">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 // Customer Requests Table Component
 const CustomerRequestsTable = ({ requests, isLoading, onStatusUpdate, updatingId }) => {
   const [statusFilter, setStatusFilter] = useState('all');
@@ -143,27 +855,16 @@ const CustomerRequestsTable = ({ requests, isLoading, onStatusUpdate, updatingId
       converted: 'bg-green-100 text-green-700 border-green-200',
       closed: 'bg-slate-100 text-slate-700 border-slate-200',
     };
-    return (
-      <Badge variant="outline" className={styles[status] || styles.new}>
-        {status}
-      </Badge>
-    );
+    return <Badge variant="outline" className={styles[status] || styles.new}>{status}</Badge>;
   };
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   };
 
   return (
     <div>
-      {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
         {[
           { label: 'All', value: statusCounts.all, filter: 'all', icon: Users, color: 'bg-slate-600' },
@@ -172,13 +873,7 @@ const CustomerRequestsTable = ({ requests, isLoading, onStatusUpdate, updatingId
           { label: 'Converted', value: statusCounts.converted, filter: 'converted', icon: CheckCircle, color: 'bg-green-600' },
           { label: 'Closed', value: statusCounts.closed, filter: 'closed', icon: XCircle, color: 'bg-slate-400' },
         ].map((stat) => (
-          <Card
-            key={stat.filter}
-            className={`cursor-pointer transition-all ${
-              statusFilter === stat.filter ? 'ring-2 ring-emerald-500' : 'hover:shadow-md'
-            }`}
-            onClick={() => setStatusFilter(stat.filter)}
-          >
+          <Card key={stat.filter} className={`cursor-pointer transition-all ${statusFilter === stat.filter ? 'ring-2 ring-emerald-500' : 'hover:shadow-md'}`} onClick={() => setStatusFilter(stat.filter)}>
             <CardContent className="p-3">
               <div className="flex items-center justify-between">
                 <div>
@@ -194,17 +889,10 @@ const CustomerRequestsTable = ({ requests, isLoading, onStatusUpdate, updatingId
         ))}
       </div>
 
-      {/* Table */}
       {isLoading ? (
-        <div className="text-center py-12">
-          <RefreshCw className="h-8 w-8 animate-spin mx-auto text-slate-400" />
-          <p className="text-slate-500 mt-2">Loading...</p>
-        </div>
+        <div className="text-center py-12"><RefreshCw className="h-8 w-8 animate-spin mx-auto text-slate-400" /></div>
       ) : filteredRequests.length === 0 ? (
-        <div className="text-center py-12">
-          <Users className="h-12 w-12 mx-auto text-slate-300" />
-          <p className="text-slate-500 mt-2">No customer requests found</p>
-        </div>
+        <div className="text-center py-12"><Users className="h-12 w-12 mx-auto text-slate-300" /><p className="text-slate-500 mt-2">No customer requests found</p></div>
       ) : (
         <div className="overflow-x-auto">
           <Table>
@@ -223,52 +911,17 @@ const CustomerRequestsTable = ({ requests, isLoading, onStatusUpdate, updatingId
                 <TableRow key={request.id}>
                   <TableCell>
                     <div>
-                      <p className="font-medium text-slate-900">
-                        {request.firstName} {request.lastName}
-                      </p>
-                      <p className="text-sm text-slate-500 flex items-center">
-                        <Mail className="h-3 w-3 mr-1" />
-                        {request.email}
-                      </p>
-                      {request.title && (
-                        <p className="text-sm text-slate-400">{request.title}</p>
-                      )}
+                      <p className="font-medium text-slate-900">{request.firstName} {request.lastName}</p>
+                      <p className="text-sm text-slate-500 flex items-center"><Mail className="h-3 w-3 mr-1" />{request.email}</p>
                     </div>
                   </TableCell>
+                  <TableCell><div className="flex items-center"><Building2 className="h-4 w-4 mr-2 text-slate-400" /><span>{request.company}</span></div></TableCell>
+                  <TableCell><p className="capitalize">{request.interest || '-'}</p></TableCell>
+                  <TableCell><p className="text-sm">{formatDate(request.createdAt)}</p></TableCell>
+                  <TableCell>{getStatusBadge(request.status)}</TableCell>
                   <TableCell>
-                    <div className="flex items-center">
-                      <Building2 className="h-4 w-4 mr-2 text-slate-400" />
-                      <div>
-                        <p className="font-medium">{request.company}</p>
-                        {request.companySize && (
-                          <p className="text-sm text-slate-400">{request.companySize}</p>
-                        )}
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <p className="capitalize">{request.interest || '-'}</p>
-                    {request.message && (
-                      <p className="text-sm text-slate-400 max-w-xs truncate" title={request.message}>
-                        {request.message}
-                      </p>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <p className="text-sm">{formatDate(request.createdAt)}</p>
-                  </TableCell>
-                  <TableCell>
-                    {getStatusBadge(request.status)}
-                  </TableCell>
-                  <TableCell>
-                    <Select
-                      value={request.status}
-                      onValueChange={(value) => onStatusUpdate(request.id, value, 'customer')}
-                      disabled={updatingId === request.id}
-                    >
-                      <SelectTrigger className="w-32">
-                        <SelectValue />
-                      </SelectTrigger>
+                    <Select value={request.status} onValueChange={(value) => onStatusUpdate(request.id, value, 'customer')} disabled={updatingId === request.id}>
+                      <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="new">New</SelectItem>
                         <SelectItem value="contacted">Contacted</SelectItem>
@@ -287,13 +940,11 @@ const CustomerRequestsTable = ({ requests, isLoading, onStatusUpdate, updatingId
   );
 };
 
-// Supplier Requests Table Component
+// Supplier Requests Table Component  
 const SupplierRequestsTable = ({ requests, isLoading, onStatusUpdate, updatingId }) => {
   const [statusFilter, setStatusFilter] = useState('all');
 
-  const filteredRequests = statusFilter === 'all'
-    ? requests
-    : requests.filter(req => req.status === statusFilter);
+  const filteredRequests = statusFilter === 'all' ? requests : requests.filter(req => req.status === statusFilter);
 
   const statusCounts = {
     all: requests.length,
@@ -310,27 +961,16 @@ const SupplierRequestsTable = ({ requests, isLoading, onStatusUpdate, updatingId
       approved: 'bg-green-100 text-green-700 border-green-200',
       rejected: 'bg-red-100 text-red-700 border-red-200',
     };
-    return (
-      <Badge variant="outline" className={styles[status] || styles.new}>
-        {status}
-      </Badge>
-    );
+    return <Badge variant="outline" className={styles[status] || styles.new}>{status}</Badge>;
   };
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   };
 
   return (
     <div>
-      {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
         {[
           { label: 'All', value: statusCounts.all, filter: 'all', icon: Package, color: 'bg-slate-600' },
@@ -339,13 +979,7 @@ const SupplierRequestsTable = ({ requests, isLoading, onStatusUpdate, updatingId
           { label: 'Approved', value: statusCounts.approved, filter: 'approved', icon: CheckCircle, color: 'bg-green-600' },
           { label: 'Rejected', value: statusCounts.rejected, filter: 'rejected', icon: XCircle, color: 'bg-red-600' },
         ].map((stat) => (
-          <Card
-            key={stat.filter}
-            className={`cursor-pointer transition-all ${
-              statusFilter === stat.filter ? 'ring-2 ring-emerald-500' : 'hover:shadow-md'
-            }`}
-            onClick={() => setStatusFilter(stat.filter)}
-          >
+          <Card key={stat.filter} className={`cursor-pointer transition-all ${statusFilter === stat.filter ? 'ring-2 ring-emerald-500' : 'hover:shadow-md'}`} onClick={() => setStatusFilter(stat.filter)}>
             <CardContent className="p-3">
               <div className="flex items-center justify-between">
                 <div>
@@ -361,17 +995,10 @@ const SupplierRequestsTable = ({ requests, isLoading, onStatusUpdate, updatingId
         ))}
       </div>
 
-      {/* Table */}
       {isLoading ? (
-        <div className="text-center py-12">
-          <RefreshCw className="h-8 w-8 animate-spin mx-auto text-slate-400" />
-          <p className="text-slate-500 mt-2">Loading...</p>
-        </div>
+        <div className="text-center py-12"><RefreshCw className="h-8 w-8 animate-spin mx-auto text-slate-400" /></div>
       ) : filteredRequests.length === 0 ? (
-        <div className="text-center py-12">
-          <Package className="h-12 w-12 mx-auto text-slate-300" />
-          <p className="text-slate-500 mt-2">No supplier requests found</p>
-        </div>
+        <div className="text-center py-12"><Package className="h-12 w-12 mx-auto text-slate-300" /><p className="text-slate-500 mt-2">No supplier requests found</p></div>
       ) : (
         <div className="overflow-x-auto">
           <Table>
@@ -380,7 +1007,6 @@ const SupplierRequestsTable = ({ requests, isLoading, onStatusUpdate, updatingId
                 <TableHead>Company</TableHead>
                 <TableHead>Contact</TableHead>
                 <TableHead>Products</TableHead>
-                <TableHead>Regions</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Actions</TableHead>
@@ -389,65 +1015,19 @@ const SupplierRequestsTable = ({ requests, isLoading, onStatusUpdate, updatingId
             <TableBody>
               {filteredRequests.map((request) => (
                 <TableRow key={request.id}>
-                  <TableCell>
-                    <div>
-                      <p className="font-medium text-slate-900">{request.companyName}</p>
-                      {request.website && (
-                        <a 
-                          href={request.website} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-sm text-blue-600 hover:underline"
-                        >
-                          {request.website}
-                        </a>
-                      )}
-                    </div>
-                  </TableCell>
+                  <TableCell><p className="font-medium text-slate-900">{request.companyName}</p></TableCell>
                   <TableCell>
                     <div>
                       <p className="font-medium">{request.contactName}</p>
-                      <p className="text-sm text-slate-500 flex items-center">
-                        <Mail className="h-3 w-3 mr-1" />
-                        {request.email}
-                      </p>
-                      {request.phone && (
-                        <p className="text-sm text-slate-400 flex items-center">
-                          <Phone className="h-3 w-3 mr-1" />
-                          {request.phone}
-                        </p>
-                      )}
+                      <p className="text-sm text-slate-500">{request.email}</p>
                     </div>
                   </TableCell>
+                  <TableCell><p className="capitalize">{request.productCategories || '-'}</p></TableCell>
+                  <TableCell><p className="text-sm">{formatDate(request.createdAt)}</p></TableCell>
+                  <TableCell>{getStatusBadge(request.status)}</TableCell>
                   <TableCell>
-                    <p className="capitalize">{request.productCategories || '-'}</p>
-                    {request.inventoryDescription && (
-                      <p className="text-sm text-slate-400 max-w-xs truncate" title={request.inventoryDescription}>
-                        {request.inventoryDescription}
-                      </p>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center">
-                      <Globe className="h-4 w-4 mr-1 text-slate-400" />
-                      <span className="capitalize">{request.regionsServed || '-'}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <p className="text-sm">{formatDate(request.createdAt)}</p>
-                  </TableCell>
-                  <TableCell>
-                    {getStatusBadge(request.status)}
-                  </TableCell>
-                  <TableCell>
-                    <Select
-                      value={request.status}
-                      onValueChange={(value) => onStatusUpdate(request.id, value, 'supplier')}
-                      disabled={updatingId === request.id}
-                    >
-                      <SelectTrigger className="w-32">
-                        <SelectValue />
-                      </SelectTrigger>
+                    <Select value={request.status} onValueChange={(value) => onStatusUpdate(request.id, value, 'supplier')} disabled={updatingId === request.id}>
+                      <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="new">New</SelectItem>
                         <SelectItem value="contacted">Contacted</SelectItem>
@@ -466,40 +1046,22 @@ const SupplierRequestsTable = ({ requests, isLoading, onStatusUpdate, updatingId
   );
 };
 
-// Testimonials Management Component
+// Testimonials Manager Component
 const TestimonialsManager = ({ testimonials, isLoading, onRefresh }) => {
   const [editingTestimonial, setEditingTestimonial] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    quote: '',
-    author: '',
-    company: '',
-    industry: '',
-    isActive: true
-  });
+  const [formData, setFormData] = useState({ quote: '', author: '', company: '', industry: '', isActive: true });
   const [isSaving, setIsSaving] = useState(false);
 
   const openCreateDialog = () => {
     setEditingTestimonial(null);
-    setFormData({
-      quote: '',
-      author: '',
-      company: '',
-      industry: '',
-      isActive: true
-    });
+    setFormData({ quote: '', author: '', company: '', industry: '', isActive: true });
     setIsDialogOpen(true);
   };
 
   const openEditDialog = (testimonial) => {
     setEditingTestimonial(testimonial);
-    setFormData({
-      quote: testimonial.quote,
-      author: testimonial.author,
-      company: testimonial.company,
-      industry: testimonial.industry || '',
-      isActive: testimonial.isActive
-    });
+    setFormData({ quote: testimonial.quote, author: testimonial.author, company: testimonial.company, industry: testimonial.industry || '', isActive: testimonial.isActive });
     setIsDialogOpen(true);
   };
 
@@ -508,7 +1070,6 @@ const TestimonialsManager = ({ testimonials, isLoading, onRefresh }) => {
       toast.error('Please fill in all required fields');
       return;
     }
-
     setIsSaving(true);
     try {
       if (editingTestimonial) {
@@ -528,10 +1089,7 @@ const TestimonialsManager = ({ testimonials, isLoading, onRefresh }) => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this testimonial?')) {
-      return;
-    }
-
+    if (!window.confirm('Are you sure you want to delete this testimonial?')) return;
     try {
       await axios.delete(`${API}/testimonials/${id}`);
       toast.success('Testimonial deleted successfully');
@@ -543,9 +1101,7 @@ const TestimonialsManager = ({ testimonials, isLoading, onRefresh }) => {
 
   const toggleActive = async (testimonial) => {
     try {
-      await axios.put(`${API}/testimonials/${testimonial.id}`, {
-        isActive: !testimonial.isActive
-      });
+      await axios.put(`${API}/testimonials/${testimonial.id}`, { isActive: !testimonial.isActive });
       toast.success(`Testimonial ${testimonial.isActive ? 'hidden' : 'shown'}`);
       onRefresh();
     } catch (error) {
@@ -563,71 +1119,37 @@ const TestimonialsManager = ({ testimonials, isLoading, onRefresh }) => {
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={openCreateDialog} className="bg-emerald-600 hover:bg-emerald-700">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Testimonial
+              <Plus className="h-4 w-4 mr-2" />Add Testimonial
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-lg">
-            <DialogHeader>
-              <DialogTitle>
-                {editingTestimonial ? 'Edit Testimonial' : 'Add New Testimonial'}
-              </DialogTitle>
-            </DialogHeader>
+            <DialogHeader><DialogTitle>{editingTestimonial ? 'Edit Testimonial' : 'Add New Testimonial'}</DialogTitle></DialogHeader>
             <div className="space-y-4 mt-4">
               <div className="space-y-2">
                 <Label htmlFor="quote">Quote *</Label>
-                <Textarea
-                  id="quote"
-                  value={formData.quote}
-                  onChange={(e) => setFormData({ ...formData, quote: e.target.value })}
-                  placeholder="Enter the testimonial quote..."
-                  rows={4}
-                />
+                <Textarea id="quote" value={formData.quote} onChange={(e) => setFormData({ ...formData, quote: e.target.value })} placeholder="Enter the testimonial quote..." rows={4} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="author">Author / Role *</Label>
-                  <Input
-                    id="author"
-                    value={formData.author}
-                    onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-                    placeholder="e.g., CEO, VP Procurement"
-                  />
+                  <Input id="author" value={formData.author} onChange={(e) => setFormData({ ...formData, author: e.target.value })} placeholder="e.g., CEO, VP Procurement" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="company">Company *</Label>
-                  <Input
-                    id="company"
-                    value={formData.company}
-                    onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                    placeholder="Company name"
-                  />
+                  <Input id="company" value={formData.company} onChange={(e) => setFormData({ ...formData, company: e.target.value })} placeholder="Company name" />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="industry">Industry</Label>
-                <Input
-                  id="industry"
-                  value={formData.industry}
-                  onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
-                  placeholder="e.g., Auto Components, Electronics"
-                />
+                <Input id="industry" value={formData.industry} onChange={(e) => setFormData({ ...formData, industry: e.target.value })} placeholder="e.g., Auto Components, Electronics" />
               </div>
               <div className="flex items-center space-x-2">
-                <Switch
-                  id="isActive"
-                  checked={formData.isActive}
-                  onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
-                />
+                <Switch id="isActive" checked={formData.isActive} onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })} />
                 <Label htmlFor="isActive">Show on website</Label>
               </div>
               <div className="flex justify-end space-x-2 pt-4">
-                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={handleSave} disabled={isSaving}>
-                  {isSaving ? 'Saving...' : (editingTestimonial ? 'Update' : 'Create')}
-                </Button>
+                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+                <Button onClick={handleSave} disabled={isSaving}>{isSaving ? 'Saving...' : (editingTestimonial ? 'Update' : 'Create')}</Button>
               </div>
             </div>
           </DialogContent>
@@ -635,19 +1157,9 @@ const TestimonialsManager = ({ testimonials, isLoading, onRefresh }) => {
       </div>
 
       {isLoading ? (
-        <div className="text-center py-12">
-          <RefreshCw className="h-8 w-8 animate-spin mx-auto text-slate-400" />
-          <p className="text-slate-500 mt-2">Loading...</p>
-        </div>
+        <div className="text-center py-12"><RefreshCw className="h-8 w-8 animate-spin mx-auto text-slate-400" /></div>
       ) : testimonials.length === 0 ? (
-        <div className="text-center py-12">
-          <Quote className="h-12 w-12 mx-auto text-slate-300" />
-          <p className="text-slate-500 mt-2">No testimonials yet</p>
-          <Button onClick={openCreateDialog} variant="outline" className="mt-4">
-            <Plus className="h-4 w-4 mr-2" />
-            Add your first testimonial
-          </Button>
-        </div>
+        <div className="text-center py-12"><Quote className="h-12 w-12 mx-auto text-slate-300" /><p className="text-slate-500 mt-2">No testimonials yet</p></div>
       ) : (
         <div className="space-y-4">
           {testimonials.map((testimonial, index) => (
@@ -655,59 +1167,26 @@ const TestimonialsManager = ({ testimonials, isLoading, onRefresh }) => {
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-3 flex-1">
-                    <div className="text-slate-400 mt-1">
-                      <GripVertical className="h-5 w-5" />
-                    </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <Quote className="h-4 w-4 text-emerald-500" />
                         <span className="text-sm text-slate-500">#{index + 1}</span>
-                        {!testimonial.isActive && (
-                          <Badge variant="outline" className="text-xs">Hidden</Badge>
-                        )}
+                        {!testimonial.isActive && <Badge variant="outline" className="text-xs">Hidden</Badge>}
                       </div>
                       <p className="text-slate-700 mb-3 line-clamp-2">"{testimonial.quote}"</p>
                       <div className="flex items-center gap-4 text-sm">
                         <span className="font-medium text-slate-900">{testimonial.author}</span>
                         <span className="text-slate-400">•</span>
                         <span className="text-emerald-600">{testimonial.company}</span>
-                        {testimonial.industry && (
-                          <>
-                            <span className="text-slate-400">•</span>
-                            <span className="text-slate-500">{testimonial.industry}</span>
-                          </>
-                        )}
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => toggleActive(testimonial)}
-                      title={testimonial.isActive ? 'Hide' : 'Show'}
-                    >
-                      {testimonial.isActive ? (
-                        <CheckCircle className="h-4 w-4 text-green-600" />
-                      ) : (
-                        <XCircle className="h-4 w-4 text-slate-400" />
-                      )}
+                    <Button variant="ghost" size="sm" onClick={() => toggleActive(testimonial)}>
+                      {testimonial.isActive ? <CheckCircle className="h-4 w-4 text-green-600" /> : <XCircle className="h-4 w-4 text-slate-400" />}
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => openEditDialog(testimonial)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(testimonial.id)}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => openEditDialog(testimonial)}><Pencil className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleDelete(testimonial.id)} className="text-red-600"><Trash2 className="h-4 w-4" /></Button>
                   </div>
                 </div>
               </CardContent>
@@ -724,20 +1203,32 @@ const AdminDashboard = ({ onLogout }) => {
   const [customerRequests, setCustomerRequests] = useState([]);
   const [supplierRequests, setSupplierRequests] = useState([]);
   const [testimonials, setTestimonials] = useState([]);
+  const [siteStats, setSiteStats] = useState([]);
+  const [heroSection, setHeroSection] = useState(null);
+  const [customerLogos, setCustomerLogos] = useState([]);
+  const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
 
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [customersRes, suppliersRes, testimonialsRes] = await Promise.all([
+      const [customersRes, suppliersRes, testimonialsRes, statsRes, heroRes, logosRes, productsRes] = await Promise.all([
         axios.get(`${API}/demo-requests`),
         axios.get(`${API}/supplier-requests`),
-        axios.get(`${API}/testimonials`)
+        axios.get(`${API}/testimonials`),
+        axios.get(`${API}/site-stats`),
+        axios.get(`${API}/hero-section`),
+        axios.get(`${API}/customer-logos`),
+        axios.get(`${API}/products`)
       ]);
       setCustomerRequests(customersRes.data);
       setSupplierRequests(suppliersRes.data);
       setTestimonials(testimonialsRes.data);
+      setSiteStats(statsRes.data);
+      setHeroSection(heroRes.data);
+      setCustomerLogos(logosRes.data);
+      setProducts(productsRes.data);
     } catch (err) {
       toast.error('Failed to fetch data');
     } finally {
@@ -754,19 +1245,10 @@ const AdminDashboard = ({ onLogout }) => {
     try {
       const endpoint = type === 'customer' ? 'demo-requests' : 'supplier-requests';
       await axios.patch(`${API}/${endpoint}/${requestId}/status?status=${newStatus}`);
-      
       if (type === 'customer') {
-        setCustomerRequests(prev =>
-          prev.map(req =>
-            req.id === requestId ? { ...req, status: newStatus } : req
-          )
-        );
+        setCustomerRequests(prev => prev.map(req => req.id === requestId ? { ...req, status: newStatus } : req));
       } else {
-        setSupplierRequests(prev =>
-          prev.map(req =>
-            req.id === requestId ? { ...req, status: newStatus } : req
-          )
-        );
+        setSupplierRequests(prev => prev.map(req => req.id === requestId ? { ...req, status: newStatus } : req));
       }
       toast.success(`Status updated to ${newStatus}`);
     } catch (err) {
@@ -783,7 +1265,6 @@ const AdminDashboard = ({ onLogout }) => {
 
   return (
     <div className="min-h-screen bg-slate-100">
-      {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
@@ -793,116 +1274,118 @@ const AdminDashboard = ({ onLogout }) => {
               <span className="text-slate-600 font-medium">Admin Dashboard</span>
             </div>
             <div className="flex items-center space-x-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={fetchData}
-                disabled={isLoading}
-              >
-                <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-                Refresh
+              <Button variant="outline" size="sm" onClick={fetchData} disabled={isLoading}>
+                <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />Refresh
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleLogout}
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
+              <Button variant="outline" size="sm" onClick={handleLogout}>
+                <LogOut className="h-4 w-4 mr-2" />Logout
               </Button>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Summary Cards */}
-        <div className="grid grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-3xl font-bold text-slate-900">{customerRequests.length}</p>
-                  <p className="text-slate-500">Customer Requests</p>
+                  <p className="text-2xl font-bold text-slate-900">{customerRequests.length}</p>
+                  <p className="text-slate-500 text-sm">Demo Requests</p>
                 </div>
-                <div className="w-14 h-14 rounded-xl bg-blue-100 flex items-center justify-center">
-                  <Users className="h-7 w-7 text-blue-600" />
-                </div>
+                <Users className="h-8 w-8 text-blue-500" />
               </div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-3xl font-bold text-slate-900">{supplierRequests.length}</p>
-                  <p className="text-slate-500">Supplier Requests</p>
+                  <p className="text-2xl font-bold text-slate-900">{supplierRequests.length}</p>
+                  <p className="text-slate-500 text-sm">Supplier Requests</p>
                 </div>
-                <div className="w-14 h-14 rounded-xl bg-emerald-100 flex items-center justify-center">
-                  <Package className="h-7 w-7 text-emerald-600" />
-                </div>
+                <Package className="h-8 w-8 text-emerald-500" />
               </div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-3xl font-bold text-slate-900">{testimonials.filter(t => t.isActive).length}</p>
-                  <p className="text-slate-500">Active Testimonials</p>
+                  <p className="text-2xl font-bold text-slate-900">{testimonials.filter(t => t.isActive).length}</p>
+                  <p className="text-slate-500 text-sm">Testimonials</p>
                 </div>
-                <div className="w-14 h-14 rounded-xl bg-purple-100 flex items-center justify-center">
-                  <Quote className="h-7 w-7 text-purple-600" />
+                <Quote className="h-8 w-8 text-purple-500" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-2xl font-bold text-slate-900">{customerLogos.length}</p>
+                  <p className="text-slate-500 text-sm">Customers Listed</p>
                 </div>
+                <Building2 className="h-8 w-8 text-amber-500" />
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Tabs for Customers, Suppliers, and Testimonials */}
         <Card>
           <CardContent className="p-6">
-            <Tabs defaultValue="customers">
-              <TabsList className="mb-6">
-                <TabsTrigger value="customers" className="flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  Customers ({customerRequests.length})
+            <Tabs defaultValue="site-settings">
+              <TabsList className="mb-6 flex-wrap">
+                <TabsTrigger value="site-settings" className="flex items-center gap-2">
+                  <Settings className="h-4 w-4" />Site Settings
                 </TabsTrigger>
-                <TabsTrigger value="suppliers" className="flex items-center gap-2">
-                  <Package className="h-4 w-4" />
-                  Suppliers ({supplierRequests.length})
+                <TabsTrigger value="stats" className="flex items-center gap-2">
+                  <BarChart3 className="h-4 w-4" />Stats ({siteStats.length})
+                </TabsTrigger>
+                <TabsTrigger value="customers-list" className="flex items-center gap-2">
+                  <Building2 className="h-4 w-4" />Customers ({customerLogos.length})
+                </TabsTrigger>
+                <TabsTrigger value="products" className="flex items-center gap-2">
+                  <Layers className="h-4 w-4" />Products ({products.length})
                 </TabsTrigger>
                 <TabsTrigger value="testimonials" className="flex items-center gap-2">
-                  <Quote className="h-4 w-4" />
-                  Testimonials ({testimonials.length})
+                  <Quote className="h-4 w-4" />Testimonials ({testimonials.length})
+                </TabsTrigger>
+                <TabsTrigger value="demo-requests" className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />Demo Requests ({customerRequests.length})
+                </TabsTrigger>
+                <TabsTrigger value="suppliers" className="flex items-center gap-2">
+                  <Package className="h-4 w-4" />Suppliers ({supplierRequests.length})
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="customers">
-                <CustomerRequestsTable
-                  requests={customerRequests}
-                  isLoading={isLoading}
-                  onStatusUpdate={updateStatus}
-                  updatingId={updatingId}
-                />
+              <TabsContent value="site-settings">
+                <HeroSectionManager heroData={heroSection} isLoading={isLoading} onRefresh={fetchData} />
               </TabsContent>
 
-              <TabsContent value="suppliers">
-                <SupplierRequestsTable
-                  requests={supplierRequests}
-                  isLoading={isLoading}
-                  onStatusUpdate={updateStatus}
-                  updatingId={updatingId}
-                />
+              <TabsContent value="stats">
+                <SiteStatsManager stats={siteStats} isLoading={isLoading} onRefresh={fetchData} />
+              </TabsContent>
+
+              <TabsContent value="customers-list">
+                <CustomerLogosManager logos={customerLogos} isLoading={isLoading} onRefresh={fetchData} />
+              </TabsContent>
+
+              <TabsContent value="products">
+                <ProductsManager products={products} isLoading={isLoading} onRefresh={fetchData} />
               </TabsContent>
 
               <TabsContent value="testimonials">
-                <TestimonialsManager
-                  testimonials={testimonials}
-                  isLoading={isLoading}
-                  onRefresh={fetchData}
-                />
+                <TestimonialsManager testimonials={testimonials} isLoading={isLoading} onRefresh={fetchData} />
+              </TabsContent>
+
+              <TabsContent value="demo-requests">
+                <CustomerRequestsTable requests={customerRequests} isLoading={isLoading} onStatusUpdate={updateStatus} updatingId={updatingId} />
+              </TabsContent>
+
+              <TabsContent value="suppliers">
+                <SupplierRequestsTable requests={supplierRequests} isLoading={isLoading} onStatusUpdate={updateStatus} updatingId={updatingId} />
               </TabsContent>
             </Tabs>
           </CardContent>
@@ -914,9 +1397,7 @@ const AdminDashboard = ({ onLogout }) => {
 
 // Main Admin Page
 const AdminPage = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(
-    sessionStorage.getItem('adminAuth') === 'true'
-  );
+  const [isAuthenticated, setIsAuthenticated] = useState(sessionStorage.getItem('adminAuth') === 'true');
 
   if (!isAuthenticated) {
     return <AdminLogin onLogin={() => setIsAuthenticated(true)} />;
