@@ -176,6 +176,52 @@ async def update_demo_request_status(request_id: str, status: str):
     
     return {"message": "Status updated successfully", "status": status}
 
+# Supplier Request Endpoints
+@api_router.post("/supplier-requests", response_model=SupplierRequest)
+async def create_supplier_request(input: SupplierRequestCreate):
+    """Submit a new supplier enrollment request"""
+    supplier_dict = input.model_dump()
+    supplier_obj = SupplierRequest(**supplier_dict)
+    
+    # Convert to dict and serialize datetime to ISO string for MongoDB
+    doc = supplier_obj.model_dump()
+    doc['createdAt'] = doc['createdAt'].isoformat()
+    
+    await db.supplier_requests.insert_one(doc)
+    logger.info(f"New supplier request from {input.companyName} ({input.email})")
+    return supplier_obj
+
+@api_router.get("/supplier-requests", response_model=List[SupplierRequest])
+async def get_supplier_requests():
+    """Get all supplier requests (for admin purposes)"""
+    requests = await db.supplier_requests.find({}, {"_id": 0}).to_list(1000)
+    
+    # Convert ISO string timestamps back to datetime objects
+    for req in requests:
+        if isinstance(req.get('createdAt'), str):
+            req['createdAt'] = datetime.fromisoformat(req['createdAt'])
+    
+    # Sort by newest first
+    requests.sort(key=lambda x: x.get('createdAt', datetime.min), reverse=True)
+    return requests
+
+@api_router.patch("/supplier-requests/{request_id}/status")
+async def update_supplier_request_status(request_id: str, status: str):
+    """Update the status of a supplier request"""
+    valid_statuses = ["new", "contacted", "approved", "rejected"]
+    if status not in valid_statuses:
+        raise HTTPException(status_code=400, detail=f"Invalid status. Must be one of: {valid_statuses}")
+    
+    result = await db.supplier_requests.update_one(
+        {"id": request_id},
+        {"$set": {"status": status}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Supplier request not found")
+    
+    return {"message": "Status updated successfully", "status": status}
+
 # Admin Authentication
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin@123")
 
