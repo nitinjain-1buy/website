@@ -54,7 +54,8 @@ import {
   Image,
   Settings,
   Layers,
-  Save
+  Save,
+  Rocket
 } from 'lucide-react';
 import { logoUrl } from '../data/mock';
 
