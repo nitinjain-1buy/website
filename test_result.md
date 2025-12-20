@@ -280,6 +280,66 @@ frontend:
           agent: "testing"
           comment: "✓ PASSED: About page loads correctly with mission, vision, and company information clearly displayed."
 
+  - task: "Admin login and dashboard access"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/AdminPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Need to test login at /admin with password admin@123 and verify dashboard loads."
+
+  - task: "Testimonials management UI - Add testimonial"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/AdminPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Need to test Add Testimonial button and form in admin dashboard Testimonials tab."
+
+  - task: "Testimonials management UI - Edit testimonial"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/AdminPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Need to test edit testimonial functionality in admin dashboard."
+
+  - task: "Testimonials management UI - Delete testimonial"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/AdminPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Need to test delete testimonial functionality in admin dashboard."
+
+  - task: "Homepage reflects testimonial changes"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/TestimonialsMarquee.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Need to verify that adding/editing/deleting testimonials in admin is reflected on homepage carousel."
+
 metadata:
   created_by: "testing_agent"
   version: "1.0"
