@@ -218,7 +218,7 @@ export const useCasesData = [
 
 export const aboutData = {
   mission: "To make global electronics procurement intelligent, cheaper, transparent, and optimized — enabling every buyer to make faster, smarter, and more resilient sourcing and excess selling decisions.",
-  vision: "Building the global operating system for electronics procurement. Starting in India, building for the world.",
+  vision: "Building the global operating system for electronics procurement.",
   founders: [
     {
       role: "Founders",
