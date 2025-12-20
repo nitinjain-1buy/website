@@ -14,6 +14,7 @@ import ContactPage from "./pages/ContactPage";
 import TeamPage from "./pages/TeamPage";
 import AdminPage from "./pages/AdminPage";
 import LoginPage from "./pages/LoginPage";
+import PlatformPage from "./pages/PlatformPage";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
           {/* Auth & Admin routes - no layout */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/admin" element={<AdminPage />} />
+          <Route path="/platform" element={<PlatformPage />} />
           
           {/* Public routes with layout */}
           <Route path="/*" element={
