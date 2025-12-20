@@ -13,6 +13,7 @@ import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import TeamPage from "./pages/TeamPage";
 import AdminPage from "./pages/AdminPage";
+import LoginPage from "./pages/LoginPage";
 
 function App() {
   return (
@@ -20,7 +21,8 @@ function App() {
       <BrowserRouter>
         <ScrollToTop />
         <Routes>
-          {/* Admin route - no layout, hidden from public */}
+          {/* Auth & Admin routes - no layout */}
+          <Route path="/login" element={<LoginPage />} />
           <Route path="/admin" element={<AdminPage />} />
           
           {/* Public routes with layout */}
