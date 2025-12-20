@@ -63,6 +63,32 @@ class DemoRequest(BaseModel):
     status: str = "new"  # new, contacted, converted, closed
     createdAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+# Supplier Request Models
+class SupplierRequestCreate(BaseModel):
+    companyName: str
+    contactName: str
+    email: EmailStr
+    phone: Optional[str] = None
+    website: Optional[str] = None
+    productCategories: Optional[str] = None
+    regionsServed: Optional[str] = None
+    inventoryDescription: Optional[str] = None
+
+class SupplierRequest(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    companyName: str
+    contactName: str
+    email: str
+    phone: Optional[str] = None
+    website: Optional[str] = None
+    productCategories: Optional[str] = None
+    regionsServed: Optional[str] = None
+    inventoryDescription: Optional[str] = None
+    status: str = "new"  # new, contacted, approved, rejected
+    createdAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
 # Add your routes to the router instead of directly to app
 @api_router.get("/")
 async def root():
