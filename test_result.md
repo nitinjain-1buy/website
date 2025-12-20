@@ -347,15 +347,19 @@ metadata:
 
 test_plan:
   current_focus:
-    - "All features verified and working"
+    - "Admin login and dashboard access"
+    - "Testimonials management UI - Add testimonial"
+    - "Testimonials management UI - Edit testimonial"
+    - "Testimonials management UI - Delete testimonial"
+    - "Homepage reflects testimonial changes"
+    - "Testimonials GET API endpoint"
+    - "Testimonials POST API endpoint"
+    - "Testimonials PUT API endpoint"
+    - "Testimonials DELETE API endpoint"
   stuck_tasks: []
-  test_all: false
-  test_priority: "complete"
+  test_all: true
+  test_priority: "high_first"
 
 agent_communication:
-    - agent: "testing"
-      message: "Starting comprehensive testing of 1Buy.AI website. Will test homepage sections, navigation, all pages, contact form functionality, and mobile responsiveness. Testing URL: http://localhost:3000"
-    - agent: "testing"
-      message: "TESTING COMPLETE: Successfully tested all new features. ✅ Logo displays correctly in header/footer with purple '1BUY' and yellow '.AI'. ✅ Team page works with founder cards, LinkedIn links, and credentials. ✅ Testimonials marquee animates properly with customer quotes. ✅ Navigation includes Team link and works correctly. ✅ All other pages (Products, Contact, About) function properly. ❌ ISSUE FOUND: Demo Video Popup modal not opening correctly - buttons exist but modal dialog/video player not displaying. This needs main agent attention."
-    - agent: "testing"
-      message: "FINAL VERIFICATION COMPLETE: ✅ ALL FEATURES NOW WORKING CORRECTLY. Homepage logo displays properly (purple '1BUY' and yellow '.AI'). Team page shows all 3 founders correctly: Visham Sikand (Harvard Business School), Nitin Jain (IIT Delhi), Pradeep Paliwal (BITS Pilani, VJTI) with LinkedIn links. Demo video modal opens with video player and controls (play, pause, volume, fullscreen). Navigation Team link works. Testimonials marquee scrolls with animation showing companies like Napino Industries, Google Supply Chain, Dixon Technologies, Uno Minda. All requested features verified and functional."
+    - agent: "main"
+      message: "User explicitly requested end-to-end testing of testimonial management system. Please test: 1) Login at /admin with password 'admin@123', 2) Navigate to Testimonials tab, 3) Add a new test testimonial, 4) Verify it appears in admin list, 5) Navigate to homepage and verify new testimonial shows in carousel, 6) Return to admin and edit the testimonial, 7) Delete the testimonial and verify removal from both admin and homepage. Backend API is working - tested GET endpoint via curl and it returns 7 testimonials."
