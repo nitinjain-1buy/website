@@ -1275,7 +1275,15 @@ const AdminDashboard = ({ onLogout }) => {
               <span className="text-slate-400">|</span>
               <span className="text-slate-600 font-medium">Admin Dashboard</span>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
+              <Button 
+                size="sm" 
+                onClick={() => window.location.href = '/platform'}
+                className="bg-emerald-600 hover:bg-emerald-700"
+              >
+                <Rocket className="h-4 w-4 mr-2" />
+                Go to Platform
+              </Button>
               <Button variant="outline" size="sm" onClick={fetchData} disabled={isLoading}>
                 <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />Refresh
               </Button>
