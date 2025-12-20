@@ -34,6 +34,7 @@ import {
   Building2,
   Filter
 } from 'lucide-react';
+import { logoUrl } from '../data/mock';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
