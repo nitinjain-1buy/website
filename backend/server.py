@@ -378,6 +378,432 @@ async def seed_testimonials():
     
     return {"message": f"Seeded {len(default_testimonials)} testimonials", "seeded": True}
 
+# =============================================
+# SITE CONTENT MANAGEMENT MODELS & ENDPOINTS
+# =============================================
+
+# Site Stats Model
+class SiteStatCreate(BaseModel):
+    key: str  # e.g., "cost_savings", "mpn_coverage", "data_sources", "enterprise_customers"
+    value: str  # e.g., "15-20%", "25M+", "400+", "30+"
+    label: str  # e.g., "Cost Savings Identified"
+    description: str  # e.g., "Average savings identified across customer BOMs"
+    order: int = 0
+
+class SiteStatUpdate(BaseModel):
+    value: Optional[str] = None
+    label: Optional[str] = None
+    description: Optional[str] = None
+    order: Optional[int] = None
+
+class SiteStat(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    key: str
+    value: str
+    label: str
+    description: str
+    order: int = 0
+
+# Hero Section Model
+class HeroSectionUpdate(BaseModel):
+    headline: Optional[str] = None
+    subHeadline: Optional[str] = None
+    ctaPrimary: Optional[str] = None
+    ctaSecondary: Optional[str] = None
+    screenshotUrl: Optional[str] = None
+
+class HeroSection(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = "hero_section"
+    headline: str
+    subHeadline: str
+    ctaPrimary: str
+    ctaSecondary: str
+    screenshotUrl: str
+
+# Customer Logo Model
+class CustomerLogoCreate(BaseModel):
+    name: str
+    logoUrl: Optional[str] = None
+    order: int = 0
+
+class CustomerLogoUpdate(BaseModel):
+    name: Optional[str] = None
+    logoUrl: Optional[str] = None
+    order: Optional[int] = None
+
+class CustomerLogo(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    logoUrl: Optional[str] = None
+    order: int = 0
+
+# Product Model
+class ProductFeature(BaseModel):
+    text: str
+
+class ProductCreate(BaseModel):
+    productId: str  # e.g., "1data", "1source", "1xcess"
+    name: str
+    tagline: str
+    description: str
+    features: List[str] = []
+    benefits: List[str] = []
+    icon: str = "Database"
+    order: int = 0
+
+class ProductUpdate(BaseModel):
+    name: Optional[str] = None
+    tagline: Optional[str] = None
+    description: Optional[str] = None
+    features: Optional[List[str]] = None
+    benefits: Optional[List[str]] = None
+    icon: Optional[str] = None
+    order: Optional[int] = None
+
+class Product(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    productId: str
+    name: str
+    tagline: str
+    description: str
+    features: List[str] = []
+    benefits: List[str] = []
+    icon: str = "Database"
+    order: int = 0
+
+# =============================================
+# SITE STATS ENDPOINTS
+# =============================================
+
+@api_router.get("/site-stats", response_model=List[SiteStat])
+async def get_site_stats():
+    """Get all site statistics"""
+    stats = await db.site_stats.find({}, {"_id": 0}).to_list(100)
+    if not stats:
+        # Return default stats if none exist
+        return []
+    stats.sort(key=lambda x: x.get('order', 0))
+    return stats
+
+@api_router.post("/site-stats", response_model=SiteStat)
+async def create_site_stat(input: SiteStatCreate):
+    """Create a new site statistic"""
+    stat = SiteStat(**input.model_dump())
+    doc = stat.model_dump()
+    await db.site_stats.insert_one(doc)
+    return stat
+
+@api_router.put("/site-stats/{stat_id}", response_model=SiteStat)
+async def update_site_stat(stat_id: str, input: SiteStatUpdate):
+    """Update a site statistic"""
+    update_data = {k: v for k, v in input.model_dump().items() if v is not None}
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    
+    result = await db.site_stats.update_one(
+        {"id": stat_id},
+        {"$set": update_data}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Stat not found")
+    
+    updated = await db.site_stats.find_one({"id": stat_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/site-stats/{stat_id}")
+async def delete_site_stat(stat_id: str):
+    """Delete a site statistic"""
+    result = await db.site_stats.delete_one({"id": stat_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Stat not found")
+    return {"message": "Stat deleted successfully"}
+
+@api_router.post("/site-stats/seed")
+async def seed_site_stats():
+    """Seed default site statistics"""
+    count = await db.site_stats.count_documents({})
+    if count > 0:
+        return {"message": f"Stats already exist ({count} found)", "seeded": False}
+    
+    default_stats = [
+        {"key": "cost_savings", "value": "15-20%", "label": "Cost Savings Identified", "description": "Average savings identified across customer BOMs", "order": 0},
+        {"key": "mpn_coverage", "value": "25M+", "label": "MPN Coverage", "description": "Comprehensive part number database", "order": 1},
+        {"key": "data_sources", "value": "400+", "label": "Data Sources", "description": "Proprietary data pipes for intelligence", "order": 2},
+        {"key": "enterprise_customers", "value": "30+", "label": "Enterprise Customers", "description": "Active OEM & EMS engagements", "order": 3},
+    ]
+    
+    for stat_data in default_stats:
+        stat = SiteStat(**stat_data)
+        await db.site_stats.insert_one(stat.model_dump())
+    
+    return {"message": f"Seeded {len(default_stats)} stats", "seeded": True}
+
+# =============================================
+# HERO SECTION ENDPOINTS
+# =============================================
+
+@api_router.get("/hero-section", response_model=HeroSection)
+async def get_hero_section():
+    """Get hero section content"""
+    hero = await db.hero_section.find_one({"id": "hero_section"}, {"_id": 0})
+    if not hero:
+        # Return default hero section
+        return HeroSection(
+            headline="Decision-grade intelligence for electronics procurement",
+            subHeadline="From pricing and risk to execution and liquidation — the operating system for electronics procurement.",
+            ctaPrimary="Request a Demo",
+            ctaSecondary="Talk to Our Team",
+            screenshotUrl="https://customer-assets.emergentagent.com/job_baea0157-9ef6-48e3-8c0a-30cdc2e59356/artifacts/zedmi29e_Output.png"
+        )
+    return hero
+
+@api_router.put("/hero-section", response_model=HeroSection)
+async def update_hero_section(input: HeroSectionUpdate):
+    """Update hero section content"""
+    update_data = {k: v for k, v in input.model_dump().items() if v is not None}
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    
+    # Check if hero section exists
+    existing = await db.hero_section.find_one({"id": "hero_section"})
+    if not existing:
+        # Create default and then update
+        default_hero = HeroSection(
+            headline="Decision-grade intelligence for electronics procurement",
+            subHeadline="From pricing and risk to execution and liquidation — the operating system for electronics procurement.",
+            ctaPrimary="Request a Demo",
+            ctaSecondary="Talk to Our Team",
+            screenshotUrl="https://customer-assets.emergentagent.com/job_baea0157-9ef6-48e3-8c0a-30cdc2e59356/artifacts/zedmi29e_Output.png"
+        )
+        doc = default_hero.model_dump()
+        doc.update(update_data)
+        await db.hero_section.insert_one(doc)
+    else:
+        await db.hero_section.update_one(
+            {"id": "hero_section"},
+            {"$set": update_data}
+        )
+    
+    updated = await db.hero_section.find_one({"id": "hero_section"}, {"_id": 0})
+    return updated
+
+# =============================================
+# CUSTOMER LOGOS ENDPOINTS
+# =============================================
+
+@api_router.get("/customer-logos", response_model=List[CustomerLogo])
+async def get_customer_logos():
+    """Get all customer logos"""
+    logos = await db.customer_logos.find({}, {"_id": 0}).to_list(100)
+    if not logos:
+        return []
+    logos.sort(key=lambda x: x.get('order', 0))
+    return logos
+
+@api_router.post("/customer-logos", response_model=CustomerLogo)
+async def create_customer_logo(input: CustomerLogoCreate):
+    """Create a new customer logo"""
+    logo = CustomerLogo(**input.model_dump())
+    await db.customer_logos.insert_one(logo.model_dump())
+    return logo
+
+@api_router.put("/customer-logos/{logo_id}", response_model=CustomerLogo)
+async def update_customer_logo(logo_id: str, input: CustomerLogoUpdate):
+    """Update a customer logo"""
+    update_data = {k: v for k, v in input.model_dump().items() if v is not None}
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    
+    result = await db.customer_logos.update_one(
+        {"id": logo_id},
+        {"$set": update_data}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Logo not found")
+    
+    updated = await db.customer_logos.find_one({"id": logo_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/customer-logos/{logo_id}")
+async def delete_customer_logo(logo_id: str):
+    """Delete a customer logo"""
+    result = await db.customer_logos.delete_one({"id": logo_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Logo not found")
+    return {"message": "Logo deleted successfully"}
+
+@api_router.post("/customer-logos/seed")
+async def seed_customer_logos():
+    """Seed default customer logos"""
+    count = await db.customer_logos.count_documents({})
+    if count > 0:
+        return {"message": f"Logos already exist ({count} found)", "seeded": False}
+    
+    default_logos = [
+        "Google", "Uno Minda", "Dixon", "Napino", "SGS Syrma",
+        "NCR Atleos", "Lucas TVS", "Lumax", "Bajaj"
+    ]
+    
+    for idx, name in enumerate(default_logos):
+        logo = CustomerLogo(name=name, order=idx)
+        await db.customer_logos.insert_one(logo.model_dump())
+    
+    return {"message": f"Seeded {len(default_logos)} logos", "seeded": True}
+
+# =============================================
+# PRODUCTS ENDPOINTS
+# =============================================
+
+@api_router.get("/products", response_model=List[Product])
+async def get_products():
+    """Get all products"""
+    products = await db.products.find({}, {"_id": 0}).to_list(100)
+    if not products:
+        return []
+    products.sort(key=lambda x: x.get('order', 0))
+    return products
+
+@api_router.post("/products", response_model=Product)
+async def create_product(input: ProductCreate):
+    """Create a new product"""
+    product = Product(**input.model_dump())
+    await db.products.insert_one(product.model_dump())
+    return product
+
+@api_router.put("/products/{product_id}", response_model=Product)
+async def update_product(product_id: str, input: ProductUpdate):
+    """Update a product"""
+    update_data = {k: v for k, v in input.model_dump().items() if v is not None}
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    
+    result = await db.products.update_one(
+        {"id": product_id},
+        {"$set": update_data}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Product not found")
+    
+    updated = await db.products.find_one({"id": product_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/products/{product_id}")
+async def delete_product(product_id: str):
+    """Delete a product"""
+    result = await db.products.delete_one({"id": product_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Product not found")
+    return {"message": "Product deleted successfully"}
+
+@api_router.post("/products/seed")
+async def seed_products():
+    """Seed default products"""
+    count = await db.products.count_documents({})
+    if count > 0:
+        return {"message": f"Products already exist ({count} found)", "seeded": False}
+    
+    default_products = [
+        {
+            "productId": "1data",
+            "name": "1Data",
+            "tagline": "Pricing & Risk Intelligence",
+            "description": "Bloomberg for Components. Independent global price benchmarks, alternate discovery, and risk intelligence for defensible procurement decisions.",
+            "features": [
+                "Independent global price benchmarks",
+                "Alternate part discovery (form/fit/function)",
+                "Lifecycle, EOL, and supplier risk alerts",
+                "BOM-level cost and sourcing simulations",
+                "AI-driven price predictions",
+                "Actionable savings opportunities"
+            ],
+            "benefits": [
+                "Benchmark every quote against market data",
+                "Identify 10-20% savings opportunities",
+                "De-risk your supply chain proactively",
+                "Make defensible, auditable decisions"
+            ],
+            "icon": "Database",
+            "order": 0
+        },
+        {
+            "productId": "1source",
+            "name": "1Source",
+            "tagline": "High-Impact Sourcing Execution",
+            "description": "Amazon for Procurement. Execute sourcing where it matters most with vetted global suppliers and transparent landed-cost comparison.",
+            "features": [
+                "Vetted global suppliers (CN/IN/TW/KR/EU/US)",
+                "Transparent landed-cost comparison",
+                "Faster RFQ workflows",
+                "Aggregated demand intelligence",
+                "Seamless ERP integration",
+                "You stay in control"
+            ],
+            "benefits": [
+                "Execute only on high-impact components",
+                "Reduce sourcing cycle time by 40%",
+                "Access global supplier network",
+                "Cleaner decisions, better outcomes"
+            ],
+            "icon": "ShoppingCart",
+            "order": 1
+        },
+        {
+            "productId": "1xcess",
+            "name": "1Xcess",
+            "tagline": "Excess Inventory Monetization",
+            "description": "eBay for Components. Structured liquidation of excess and EOL inventory through competitive bidding with approved buyers.",
+            "features": [
+                "Approved buyers with global reach",
+                "Competitive bidding & transparency",
+                "Reverse auctions for best pricing",
+                "Multi-attribute bidding",
+                "Escrow + QA for trust",
+                "Faster recovery, fewer write-offs"
+            ],
+            "benefits": [
+                "Turn excess into cash",
+                "Reduce working capital lock-up",
+                "Transparent liquidation process",
+                "Recover value from EOL stock"
+            ],
+            "icon": "RefreshCw",
+            "order": 2
+        }
+    ]
+    
+    for product_data in default_products:
+        product = Product(**product_data)
+        await db.products.insert_one(product.model_dump())
+    
+    return {"message": f"Seeded {len(default_products)} products", "seeded": True}
+
+# =============================================
+# SEED ALL SITE CONTENT
+# =============================================
+
+@api_router.post("/site-content/seed-all")
+async def seed_all_site_content():
+    """Seed all site content if not exists"""
+    results = {}
+    
+    # Seed stats
+    stats_result = await seed_site_stats()
+    results["stats"] = stats_result
+    
+    # Seed logos
+    logos_result = await seed_customer_logos()
+    results["logos"] = logos_result
+    
+    # Seed products
+    products_result = await seed_products()
+    results["products"] = products_result
+    
+    return results
+
 # Admin Authentication
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin@123")
 
