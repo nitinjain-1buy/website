@@ -32,7 +32,7 @@ const DemoVideoModal = ({ variant = 'default', className = '' }) => {
           className={`${buttonStyles[variant]} ${className}`}
         >
           <Play className="mr-2 h-5 w-5" />
-          Watch Demo
+          Watch Teaser
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-5xl p-0 bg-black border-slate-800 overflow-hidden">
