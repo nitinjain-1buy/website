@@ -293,11 +293,11 @@ const ContactPage = () => {
               </Card>
 
               <div className="space-y-4">
-                <h3 className="font-semibold text-slate-900">Office</h3>
+                <h3 className="font-semibold text-slate-900">Global Operations</h3>
                 <div className="flex items-start space-x-3">
                   <MapPin className="h-5 w-5 text-slate-400 flex-shrink-0 mt-0.5" />
                   <div className="text-slate-600">
-                    <p>Delhi, India</p>
+                    <p>Serving customers across Asia, Europe & Americas</p>
                   </div>
                 </div>
               </div>
