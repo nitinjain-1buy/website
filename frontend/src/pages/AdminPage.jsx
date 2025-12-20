@@ -193,8 +193,7 @@ const AdminDashboard = ({ onLogout }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
-              <span className="text-xl font-bold text-slate-900">1Buy</span>
-              <span className="text-xl font-bold text-emerald-600">.AI</span>
+              <img src={logoUrl} alt="1Buy.AI" className="h-8 w-auto" />
               <span className="text-slate-400">|</span>
               <span className="text-slate-600 font-medium">Admin Dashboard</span>
             </div>
