@@ -271,7 +271,7 @@ const ElectronicComponentsPattern = ({ className = '' }) => {
         <svg className="absolute top-[87%] left-[28%] w-14 h-10" style={{ transform: 'rotate(-15deg)' }}><use href="#ic-chip" /></svg>
         <svg className="absolute top-[92%] left-[42%] w-8 h-8" style={{ transform: 'rotate(18deg)' }}><use href="#pot" /></svg>
         <svg className="absolute top-[88%] left-[56%] w-8 h-5" style={{ transform: 'rotate(-25deg)' }}><use href="#resistor-smd" /></svg>
-        <svg className="absolute top-[94%] left-[68%] w-5 h="8" style={{ transform: 'rotate(10deg)' }}><use href="#crystal" /></svg>
+        <svg className="absolute top-[94%] left-[68%] w-5 h-8" style={{ transform: 'rotate(10deg)' }}><use href="#crystal" /></svg>
         <svg className="absolute top-[89%] left-[80%] w-6 h-9" style={{ transform: 'rotate(-8deg)' }}><use href="#led" /></svg>
         <svg className="absolute top-[93%] left-[92%] w-8 h-5" style={{ transform: 'rotate(22deg)' }}><use href="#diode" /></svg>
       </div>
