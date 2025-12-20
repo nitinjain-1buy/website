@@ -1,14 +1,12 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import {
-  heroData,
   problemsData,
-  productsData,
-  workflowSteps,
-  proofPointsData
+  workflowSteps
 } from '../data/mock';
 import {
   TrendingDown,
@@ -31,6 +29,9 @@ import TestimonialsMarquee from '../components/TestimonialsMarquee';
 import DemoVideoModal, { DemoVideoSection } from '../components/DemoVideoModal';
 import ElectronicComponentsPattern from '../components/ElectronicComponentsPattern';
 
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
+
 const iconMap = {
   TrendingDown,
   Layers,
@@ -46,7 +47,101 @@ const iconMap = {
   DollarSign
 };
 
+// Default values for fallback
+const defaultHeroData = {
+  headline: "Decision-grade intelligence for electronics procurement",
+  subHeadline: "From pricing and risk to execution and liquidation — the operating system for electronics procurement.",
+  ctaPrimary: "Request a Demo",
+  ctaSecondary: "Talk to Our Team",
+  screenshotUrl: "https://customer-assets.emergentagent.com/job_baea0157-9ef6-48e3-8c0a-30cdc2e59356/artifacts/zedmi29e_Output.png"
+};
+
+const defaultStats = [
+  { value: "15-20%", label: "Cost Savings Identified", description: "Average savings identified across customer BOMs" },
+  { value: "25M+", label: "MPN Coverage", description: "Comprehensive part number database" },
+  { value: "400+", label: "Data Sources", description: "Proprietary data pipes for intelligence" },
+  { value: "30+", label: "Enterprise Customers", description: "Active OEM & EMS engagements" }
+];
+
+const defaultCustomers = [
+  "Google", "Uno Minda", "Dixon", "Napino", "SGS Syrma", "NCR Atleos", "Lucas TVS", "Lumax", "Bajaj"
+];
+
+const defaultProducts = [
+  {
+    productId: "1data",
+    name: "1Data",
+    tagline: "Pricing & Risk Intelligence",
+    description: "Bloomberg for Components. Independent global price benchmarks, alternate discovery, and risk intelligence for defensible procurement decisions.",
+    features: ["Independent global price benchmarks", "Alternate part discovery", "Lifecycle and risk alerts", "AI-driven price predictions"],
+    icon: "Database"
+  },
+  {
+    productId: "1source",
+    name: "1Source",
+    tagline: "High-Impact Sourcing Execution",
+    description: "Amazon for Procurement. Execute sourcing where it matters most with vetted global suppliers and transparent landed-cost comparison.",
+    features: ["Vetted global suppliers", "Transparent landed-cost comparison", "Faster RFQ workflows", "Seamless ERP integration"],
+    icon: "ShoppingCart"
+  },
+  {
+    productId: "1xcess",
+    name: "1Xcess",
+    tagline: "Excess Inventory Monetization",
+    description: "eBay for Components. Structured liquidation of excess and EOL inventory through competitive bidding with approved buyers.",
+    features: ["Approved buyers with global reach", "Competitive bidding & transparency", "Reverse auctions for best pricing", "Escrow + QA for trust"],
+    icon: "RefreshCw"
+  }
+];
+
 const HomePage = () => {
+  const [heroData, setHeroData] = useState(defaultHeroData);
+  const [stats, setStats] = useState(defaultStats);
+  const [customers, setCustomers] = useState(defaultCustomers);
+  const [products, setProducts] = useState(defaultProducts);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSiteContent = async () => {
+      try {
+        // Fetch all content in parallel
+        const [heroRes, statsRes, customersRes, productsRes] = await Promise.all([
+          axios.get(`${API}/hero-section`).catch(() => ({ data: null })),
+          axios.get(`${API}/site-stats`).catch(() => ({ data: [] })),
+          axios.get(`${API}/customer-logos`).catch(() => ({ data: [] })),
+          axios.get(`${API}/products`).catch(() => ({ data: [] }))
+        ]);
+
+        // Update hero data if available
+        if (heroRes.data && heroRes.data.headline) {
+          setHeroData(heroRes.data);
+        }
+
+        // Update stats if available
+        if (statsRes.data && statsRes.data.length > 0) {
+          setStats(statsRes.data);
+        }
+
+        // Update customers if available
+        if (customersRes.data && customersRes.data.length > 0) {
+          setCustomers(customersRes.data.map(c => c.name));
+        }
+
+        // Update products if available
+        if (productsRes.data && productsRes.data.length > 0) {
+          setProducts(productsRes.data);
+        }
+      } catch (error) {
+        console.error('Error fetching site content:', error);
+        // Keep default values on error
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSiteContent();
+  }, []);
+
   return (
     <div className="bg-white">
       {/* Hero Section */}
@@ -81,7 +176,7 @@ const HomePage = () => {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
           <div className="relative rounded-xl overflow-hidden shadow-2xl border border-slate-200">
             <img
-              src="https://customer-assets.emergentagent.com/job_baea0157-9ef6-48e3-8c0a-30cdc2e59356/artifacts/zedmi29e_Output.png"
+              src={heroData.screenshotUrl}
               alt="1Buy.AI Platform Dashboard"
               className="w-full"
             />
@@ -93,8 +188,8 @@ const HomePage = () => {
       <section className="bg-slate-900 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {proofPointsData.stats.map((stat, index) => (
-              <div key={index} className="text-center">
+            {stats.map((stat, index) => (
+              <div key={stat.key || index} className="text-center">
                 <div className="text-3xl lg:text-4xl font-bold text-emerald-400 mb-2">
                   {stat.value}
                 </div>
@@ -209,18 +304,18 @@ const HomePage = () => {
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
-            {productsData.map((product, index) => {
-              const IconComponent = iconMap[product.icon];
+            {products.map((product, index) => {
+              const IconComponent = iconMap[product.icon] || Database;
               const colors = [
                 { bg: 'bg-blue-50', icon: 'text-blue-600', border: 'border-blue-100' },
                 { bg: 'bg-emerald-50', icon: 'text-emerald-600', border: 'border-emerald-100' },
                 { bg: 'bg-amber-50', icon: 'text-amber-600', border: 'border-amber-100' }
               ];
               return (
-                <Card key={product.id} className={`border-2 ${colors[index].border} hover:shadow-xl transition-all`}>
+                <Card key={product.productId || product.id} className={`border-2 ${colors[index % 3].border} hover:shadow-xl transition-all`}>
                   <CardContent className="p-8">
-                    <div className={`w-14 h-14 rounded-xl ${colors[index].bg} flex items-center justify-center mb-6`}>
-                      <IconComponent className={`h-7 w-7 ${colors[index].icon}`} />
+                    <div className={`w-14 h-14 rounded-xl ${colors[index % 3].bg} flex items-center justify-center mb-6`}>
+                      <IconComponent className={`h-7 w-7 ${colors[index % 3].icon}`} />
                     </div>
                     <h3 className="text-2xl font-bold text-slate-900 mb-2">
                       {product.name}
@@ -232,14 +327,14 @@ const HomePage = () => {
                       {product.description}
                     </p>
                     <ul className="space-y-3 mb-6">
-                      {product.features.slice(0, 4).map((feature, idx) => (
+                      {(product.features || []).slice(0, 4).map((feature, idx) => (
                         <li key={idx} className="flex items-start">
                           <CheckCircle className="h-5 w-5 text-emerald-600 mr-2 flex-shrink-0 mt-0.5" />
                           <span className="text-slate-700 text-sm">{feature}</span>
                         </li>
                       ))}
                     </ul>
-                    <Link to={`/products#${product.id}`}>
+                    <Link to={`/products#${product.productId}`}>
                       <Button variant="outline" className="w-full border-slate-300">
                         Learn More
                         <ArrowRight className="ml-2 h-4 w-4" />
@@ -260,7 +355,7 @@ const HomePage = () => {
             Trusted by leading OEMs and EMS companies worldwide
           </p>
           <div className="flex flex-wrap justify-center items-center gap-8 lg:gap-16">
-            {proofPointsData.customers.slice(0, 6).map((customer, index) => (
+            {customers.slice(0, 9).map((customer, index) => (
               <div key={index} className="text-slate-400 font-semibold text-lg hover:text-slate-600 transition-colors">
                 {customer}
               </div>
