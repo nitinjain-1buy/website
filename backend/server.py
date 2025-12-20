@@ -249,6 +249,135 @@ async def update_supplier_request_status(request_id: str, status: str):
     
     return {"message": "Status updated successfully", "status": status}
 
+# Testimonial Endpoints
+@api_router.get("/testimonials", response_model=List[Testimonial])
+async def get_testimonials(active_only: bool = False):
+    """Get all testimonials"""
+    query = {"isActive": True} if active_only else {}
+    testimonials = await db.testimonials.find(query, {"_id": 0}).to_list(1000)
+    
+    # Convert ISO string timestamps back to datetime objects
+    for t in testimonials:
+        if isinstance(t.get('createdAt'), str):
+            t['createdAt'] = datetime.fromisoformat(t['createdAt'])
+    
+    # Sort by order, then by createdAt
+    testimonials.sort(key=lambda x: (x.get('order', 0), x.get('createdAt', datetime.min)))
+    return testimonials
+
+@api_router.post("/testimonials", response_model=Testimonial)
+async def create_testimonial(input: TestimonialCreate):
+    """Create a new testimonial"""
+    # Get the highest order number
+    highest = await db.testimonials.find_one(sort=[("order", -1)])
+    next_order = (highest.get("order", 0) + 1) if highest else 1
+    
+    testimonial_dict = input.model_dump()
+    testimonial_obj = Testimonial(**testimonial_dict, order=next_order)
+    
+    doc = testimonial_obj.model_dump()
+    doc['createdAt'] = doc['createdAt'].isoformat()
+    
+    await db.testimonials.insert_one(doc)
+    logger.info(f"New testimonial created from {input.author} at {input.company}")
+    return testimonial_obj
+
+@api_router.put("/testimonials/{testimonial_id}", response_model=Testimonial)
+async def update_testimonial(testimonial_id: str, input: TestimonialUpdate):
+    """Update a testimonial"""
+    update_data = {k: v for k, v in input.model_dump().items() if v is not None}
+    
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    
+    result = await db.testimonials.update_one(
+        {"id": testimonial_id},
+        {"$set": update_data}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Testimonial not found")
+    
+    updated = await db.testimonials.find_one({"id": testimonial_id}, {"_id": 0})
+    if isinstance(updated.get('createdAt'), str):
+        updated['createdAt'] = datetime.fromisoformat(updated['createdAt'])
+    
+    return updated
+
+@api_router.delete("/testimonials/{testimonial_id}")
+async def delete_testimonial(testimonial_id: str):
+    """Delete a testimonial"""
+    result = await db.testimonials.delete_one({"id": testimonial_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Testimonial not found")
+    
+    return {"message": "Testimonial deleted successfully"}
+
+@api_router.post("/testimonials/reorder")
+async def reorder_testimonials(testimonial_ids: List[str]):
+    """Reorder testimonials by providing ordered list of IDs"""
+    for index, tid in enumerate(testimonial_ids):
+        await db.testimonials.update_one(
+            {"id": tid},
+            {"$set": {"order": index}}
+        )
+    return {"message": "Testimonials reordered successfully"}
+
+@api_router.post("/testimonials/seed")
+async def seed_testimonials():
+    """Seed initial testimonials if none exist"""
+    count = await db.testimonials.count_documents({})
+    if count > 0:
+        return {"message": f"Testimonials already exist ({count} found)", "seeded": False}
+    
+    default_testimonials = [
+        {
+            "quote": "We're flying blind — no data to audit procurement. We can't verify if we're sourcing at the right price or overpaying.",
+            "author": "CEO",
+            "company": "Napino Industries",
+            "industry": "Auto Components"
+        },
+        {
+            "quote": "Even billion-dollar teams don't have real-time visibility. Component pricing, new introductions, tariffs — it's all dynamic and stressful.",
+            "author": "Sourcing Lead",
+            "company": "Google Supply Chain",
+            "industry": "Technology"
+        },
+        {
+            "quote": "We're losing capital to dead stock. Quarterly piles of excess components with no transparent channel to liquidate.",
+            "author": "COO",
+            "company": "Leading Listed EMS",
+            "industry": "Electronics Manufacturing"
+        },
+        {
+            "quote": "Smaller EMS players can't access the same network. Large OEMs have better supplier visibility and pricing. We're structurally disadvantaged.",
+            "author": "Promoter",
+            "company": "Emerging EMS Player",
+            "industry": "Electronics Manufacturing"
+        },
+        {
+            "quote": "1Buy.AI identified 18% savings opportunity on our first BOM analysis. The data transparency is game-changing.",
+            "author": "VP Procurement",
+            "company": "Dixon Technologies",
+            "industry": "Consumer Electronics"
+        },
+        {
+            "quote": "Finally, a platform that gives us independent price benchmarks. No more relying solely on distributor quotes.",
+            "author": "Head of Sourcing",
+            "company": "Uno Minda",
+            "industry": "Auto Components"
+        }
+    ]
+    
+    for index, t in enumerate(default_testimonials):
+        testimonial = Testimonial(**t, order=index)
+        doc = testimonial.model_dump()
+        doc['createdAt'] = doc['createdAt'].isoformat()
+        await db.testimonials.insert_one(doc)
+    
+    return {"message": f"Seeded {len(default_testimonials)} testimonials", "seeded": True}
+
 # Admin Authentication
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin@123")
 
