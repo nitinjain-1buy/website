@@ -150,6 +150,20 @@ async def update_demo_request_status(request_id: str, status: str):
     
     return {"message": "Status updated successfully", "status": status}
 
+# Admin Authentication
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin@123")
+
+class AdminLoginRequest(BaseModel):
+    password: str
+
+@api_router.post("/admin/login")
+async def admin_login(request: AdminLoginRequest):
+    """Verify admin password"""
+    if request.password == ADMIN_PASSWORD:
+        return {"success": True, "message": "Login successful"}
+    else:
+        raise HTTPException(status_code=401, detail="Invalid password")
+
 # Include the router in the main app
 app.include_router(api_router)
 
