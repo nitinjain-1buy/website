@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Badge } from '../components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import {
   Select,
   SelectContent,
@@ -32,7 +33,9 @@ import {
   Phone,
   Mail,
   Building2,
-  Filter
+  Filter,
+  Package,
+  Globe
 } from 'lucide-react';
 import { logoUrl } from '../data/mock';
 
@@ -71,7 +74,7 @@ const AdminLogin = ({ onLogin }) => {
             <Lock className="h-8 w-8 text-white" />
           </div>
           <CardTitle className="text-2xl">Admin Dashboard</CardTitle>
-          <p className="text-slate-500 text-sm">Enter password to access demo requests</p>
+          <p className="text-slate-500 text-sm">Enter password to access</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -104,50 +107,9 @@ const AdminLogin = ({ onLogin }) => {
   );
 };
 
-// Dashboard Component
-const AdminDashboard = ({ onLogout }) => {
-  const [requests, setRequests] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+// Customer Requests Table Component
+const CustomerRequestsTable = ({ requests, isLoading, onStatusUpdate, updatingId }) => {
   const [statusFilter, setStatusFilter] = useState('all');
-  const [updatingId, setUpdatingId] = useState(null);
-
-  const fetchRequests = async () => {
-    setIsLoading(true);
-    try {
-      const response = await axios.get(`${API}/demo-requests`);
-      setRequests(response.data);
-    } catch (err) {
-      toast.error('Failed to fetch demo requests');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchRequests();
-  }, []);
-
-  const updateStatus = async (requestId, newStatus) => {
-    setUpdatingId(requestId);
-    try {
-      await axios.patch(`${API}/demo-requests/${requestId}/status?status=${newStatus}`);
-      setRequests(prev =>
-        prev.map(req =>
-          req.id === requestId ? { ...req, status: newStatus } : req
-        )
-      );
-      toast.success(`Status updated to ${newStatus}`);
-    } catch (err) {
-      toast.error('Failed to update status');
-    } finally {
-      setUpdatingId(null);
-    }
-  };
-
-  const handleLogout = () => {
-    sessionStorage.removeItem('adminAuth');
-    onLogout();
-  };
 
   const filteredRequests = statusFilter === 'all'
     ? requests
@@ -187,6 +149,370 @@ const AdminDashboard = ({ onLogout }) => {
   };
 
   return (
+    <div>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+        {[
+          { label: 'All', value: statusCounts.all, filter: 'all', icon: Users, color: 'bg-slate-600' },
+          { label: 'New', value: statusCounts.new, filter: 'new', icon: Clock, color: 'bg-blue-600' },
+          { label: 'Contacted', value: statusCounts.contacted, filter: 'contacted', icon: Phone, color: 'bg-yellow-600' },
+          { label: 'Converted', value: statusCounts.converted, filter: 'converted', icon: CheckCircle, color: 'bg-green-600' },
+          { label: 'Closed', value: statusCounts.closed, filter: 'closed', icon: XCircle, color: 'bg-slate-400' },
+        ].map((stat) => (
+          <Card
+            key={stat.filter}
+            className={`cursor-pointer transition-all ${
+              statusFilter === stat.filter ? 'ring-2 ring-emerald-500' : 'hover:shadow-md'
+            }`}
+            onClick={() => setStatusFilter(stat.filter)}
+          >
+            <CardContent className="p-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xl font-bold text-slate-900">{stat.value}</p>
+                  <p className="text-xs text-slate-500">{stat.label}</p>
+                </div>
+                <div className={`w-8 h-8 rounded-lg ${stat.color} flex items-center justify-center`}>
+                  <stat.icon className="h-4 w-4 text-white" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Table */}
+      {isLoading ? (
+        <div className="text-center py-12">
+          <RefreshCw className="h-8 w-8 animate-spin mx-auto text-slate-400" />
+          <p className="text-slate-500 mt-2">Loading...</p>
+        </div>
+      ) : filteredRequests.length === 0 ? (
+        <div className="text-center py-12">
+          <Users className="h-12 w-12 mx-auto text-slate-300" />
+          <p className="text-slate-500 mt-2">No customer requests found</p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Contact</TableHead>
+                <TableHead>Company</TableHead>
+                <TableHead>Interest</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredRequests.map((request) => (
+                <TableRow key={request.id}>
+                  <TableCell>
+                    <div>
+                      <p className="font-medium text-slate-900">
+                        {request.firstName} {request.lastName}
+                      </p>
+                      <p className="text-sm text-slate-500 flex items-center">
+                        <Mail className="h-3 w-3 mr-1" />
+                        {request.email}
+                      </p>
+                      {request.title && (
+                        <p className="text-sm text-slate-400">{request.title}</p>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center">
+                      <Building2 className="h-4 w-4 mr-2 text-slate-400" />
+                      <div>
+                        <p className="font-medium">{request.company}</p>
+                        {request.companySize && (
+                          <p className="text-sm text-slate-400">{request.companySize} employees</p>
+                        )}
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <p className="capitalize">{request.interest || '-'}</p>
+                    {request.message && (
+                      <p className="text-sm text-slate-400 max-w-xs truncate" title={request.message}>
+                        {request.message}
+                      </p>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <p className="text-sm">{formatDate(request.createdAt)}</p>
+                  </TableCell>
+                  <TableCell>
+                    {getStatusBadge(request.status)}
+                  </TableCell>
+                  <TableCell>
+                    <Select
+                      value={request.status}
+                      onValueChange={(value) => onStatusUpdate(request.id, value, 'customer')}
+                      disabled={updatingId === request.id}
+                    >
+                      <SelectTrigger className="w-32">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="new">New</SelectItem>
+                        <SelectItem value="contacted">Contacted</SelectItem>
+                        <SelectItem value="converted">Converted</SelectItem>
+                        <SelectItem value="closed">Closed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Supplier Requests Table Component
+const SupplierRequestsTable = ({ requests, isLoading, onStatusUpdate, updatingId }) => {
+  const [statusFilter, setStatusFilter] = useState('all');
+
+  const filteredRequests = statusFilter === 'all'
+    ? requests
+    : requests.filter(req => req.status === statusFilter);
+
+  const statusCounts = {
+    all: requests.length,
+    new: requests.filter(r => r.status === 'new').length,
+    contacted: requests.filter(r => r.status === 'contacted').length,
+    approved: requests.filter(r => r.status === 'approved').length,
+    rejected: requests.filter(r => r.status === 'rejected').length,
+  };
+
+  const getStatusBadge = (status) => {
+    const styles = {
+      new: 'bg-blue-100 text-blue-700 border-blue-200',
+      contacted: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+      approved: 'bg-green-100 text-green-700 border-green-200',
+      rejected: 'bg-red-100 text-red-700 border-red-200',
+    };
+    return (
+      <Badge variant="outline" className={styles[status] || styles.new}>
+        {status}
+      </Badge>
+    );
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  return (
+    <div>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+        {[
+          { label: 'All', value: statusCounts.all, filter: 'all', icon: Package, color: 'bg-slate-600' },
+          { label: 'New', value: statusCounts.new, filter: 'new', icon: Clock, color: 'bg-blue-600' },
+          { label: 'Contacted', value: statusCounts.contacted, filter: 'contacted', icon: Phone, color: 'bg-yellow-600' },
+          { label: 'Approved', value: statusCounts.approved, filter: 'approved', icon: CheckCircle, color: 'bg-green-600' },
+          { label: 'Rejected', value: statusCounts.rejected, filter: 'rejected', icon: XCircle, color: 'bg-red-600' },
+        ].map((stat) => (
+          <Card
+            key={stat.filter}
+            className={`cursor-pointer transition-all ${
+              statusFilter === stat.filter ? 'ring-2 ring-emerald-500' : 'hover:shadow-md'
+            }`}
+            onClick={() => setStatusFilter(stat.filter)}
+          >
+            <CardContent className="p-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xl font-bold text-slate-900">{stat.value}</p>
+                  <p className="text-xs text-slate-500">{stat.label}</p>
+                </div>
+                <div className={`w-8 h-8 rounded-lg ${stat.color} flex items-center justify-center`}>
+                  <stat.icon className="h-4 w-4 text-white" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Table */}
+      {isLoading ? (
+        <div className="text-center py-12">
+          <RefreshCw className="h-8 w-8 animate-spin mx-auto text-slate-400" />
+          <p className="text-slate-500 mt-2">Loading...</p>
+        </div>
+      ) : filteredRequests.length === 0 ? (
+        <div className="text-center py-12">
+          <Package className="h-12 w-12 mx-auto text-slate-300" />
+          <p className="text-slate-500 mt-2">No supplier requests found</p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Company</TableHead>
+                <TableHead>Contact</TableHead>
+                <TableHead>Products</TableHead>
+                <TableHead>Regions</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredRequests.map((request) => (
+                <TableRow key={request.id}>
+                  <TableCell>
+                    <div>
+                      <p className="font-medium text-slate-900">{request.companyName}</p>
+                      {request.website && (
+                        <a 
+                          href={request.website} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-sm text-blue-600 hover:underline"
+                        >
+                          {request.website}
+                        </a>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div>
+                      <p className="font-medium">{request.contactName}</p>
+                      <p className="text-sm text-slate-500 flex items-center">
+                        <Mail className="h-3 w-3 mr-1" />
+                        {request.email}
+                      </p>
+                      {request.phone && (
+                        <p className="text-sm text-slate-400 flex items-center">
+                          <Phone className="h-3 w-3 mr-1" />
+                          {request.phone}
+                        </p>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <p className="capitalize">{request.productCategories || '-'}</p>
+                    {request.inventoryDescription && (
+                      <p className="text-sm text-slate-400 max-w-xs truncate" title={request.inventoryDescription}>
+                        {request.inventoryDescription}
+                      </p>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center">
+                      <Globe className="h-4 w-4 mr-1 text-slate-400" />
+                      <span className="capitalize">{request.regionsServed || '-'}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <p className="text-sm">{formatDate(request.createdAt)}</p>
+                  </TableCell>
+                  <TableCell>
+                    {getStatusBadge(request.status)}
+                  </TableCell>
+                  <TableCell>
+                    <Select
+                      value={request.status}
+                      onValueChange={(value) => onStatusUpdate(request.id, value, 'supplier')}
+                      disabled={updatingId === request.id}
+                    >
+                      <SelectTrigger className="w-32">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="new">New</SelectItem>
+                        <SelectItem value="contacted">Contacted</SelectItem>
+                        <SelectItem value="approved">Approved</SelectItem>
+                        <SelectItem value="rejected">Rejected</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Dashboard Component
+const AdminDashboard = ({ onLogout }) => {
+  const [customerRequests, setCustomerRequests] = useState([]);
+  const [supplierRequests, setSupplierRequests] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [updatingId, setUpdatingId] = useState(null);
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      const [customersRes, suppliersRes] = await Promise.all([
+        axios.get(`${API}/demo-requests`),
+        axios.get(`${API}/supplier-requests`)
+      ]);
+      setCustomerRequests(customersRes.data);
+      setSupplierRequests(suppliersRes.data);
+    } catch (err) {
+      toast.error('Failed to fetch data');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const updateStatus = async (requestId, newStatus, type) => {
+    setUpdatingId(requestId);
+    try {
+      const endpoint = type === 'customer' ? 'demo-requests' : 'supplier-requests';
+      await axios.patch(`${API}/${endpoint}/${requestId}/status?status=${newStatus}`);
+      
+      if (type === 'customer') {
+        setCustomerRequests(prev =>
+          prev.map(req =>
+            req.id === requestId ? { ...req, status: newStatus } : req
+          )
+        );
+      } else {
+        setSupplierRequests(prev =>
+          prev.map(req =>
+            req.id === requestId ? { ...req, status: newStatus } : req
+          )
+        );
+      }
+      toast.success(`Status updated to ${newStatus}`);
+    } catch (err) {
+      toast.error('Failed to update status');
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('adminAuth');
+    onLogout();
+  };
+
+  return (
     <div className="min-h-screen bg-slate-100">
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
@@ -201,7 +527,7 @@ const AdminDashboard = ({ onLogout }) => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={fetchRequests}
+                onClick={fetchData}
                 disabled={isLoading}
               >
                 <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
@@ -222,144 +548,69 @@ const AdminDashboard = ({ onLogout }) => {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-          {[
-            { label: 'All Requests', value: statusCounts.all, filter: 'all', icon: Users, color: 'bg-slate-600' },
-            { label: 'New', value: statusCounts.new, filter: 'new', icon: Clock, color: 'bg-blue-600' },
-            { label: 'Contacted', value: statusCounts.contacted, filter: 'contacted', icon: Phone, color: 'bg-yellow-600' },
-            { label: 'Converted', value: statusCounts.converted, filter: 'converted', icon: CheckCircle, color: 'bg-green-600' },
-            { label: 'Closed', value: statusCounts.closed, filter: 'closed', icon: XCircle, color: 'bg-slate-400' },
-          ].map((stat) => (
-            <Card
-              key={stat.filter}
-              className={`cursor-pointer transition-all ${
-                statusFilter === stat.filter ? 'ring-2 ring-emerald-500' : 'hover:shadow-md'
-              }`}
-              onClick={() => setStatusFilter(stat.filter)}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
-                    <p className="text-sm text-slate-500">{stat.label}</p>
-                  </div>
-                  <div className={`w-10 h-10 rounded-lg ${stat.color} flex items-center justify-center`}>
-                    <stat.icon className="h-5 w-5 text-white" />
-                  </div>
+        {/* Summary Cards */}
+        <div className="grid grid-cols-2 gap-6 mb-8">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-3xl font-bold text-slate-900">{customerRequests.length}</p>
+                  <p className="text-slate-500">Customer Requests</p>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+                <div className="w-14 h-14 rounded-xl bg-blue-100 flex items-center justify-center">
+                  <Users className="h-7 w-7 text-blue-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-3xl font-bold text-slate-900">{supplierRequests.length}</p>
+                  <p className="text-slate-500">Supplier Requests</p>
+                </div>
+                <div className="w-14 h-14 rounded-xl bg-emerald-100 flex items-center justify-center">
+                  <Package className="h-7 w-7 text-emerald-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Requests Table */}
+        {/* Tabs for Customers and Suppliers */}
         <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center">
-                <Filter className="h-5 w-5 mr-2" />
-                Demo Requests
-                {statusFilter !== 'all' && (
-                  <Badge variant="outline" className="ml-2">
-                    {statusFilter}
-                  </Badge>
-                )}
-              </CardTitle>
-              <p className="text-sm text-slate-500">
-                Showing {filteredRequests.length} of {requests.length} requests
-              </p>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="text-center py-12">
-                <RefreshCw className="h-8 w-8 animate-spin mx-auto text-slate-400" />
-                <p className="text-slate-500 mt-2">Loading requests...</p>
-              </div>
-            ) : filteredRequests.length === 0 ? (
-              <div className="text-center py-12">
-                <Users className="h-12 w-12 mx-auto text-slate-300" />
-                <p className="text-slate-500 mt-2">No demo requests found</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Contact</TableHead>
-                      <TableHead>Company</TableHead>
-                      <TableHead>Interest</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredRequests.map((request) => (
-                      <TableRow key={request.id}>
-                        <TableCell>
-                          <div>
-                            <p className="font-medium text-slate-900">
-                              {request.firstName} {request.lastName}
-                            </p>
-                            <p className="text-sm text-slate-500 flex items-center">
-                              <Mail className="h-3 w-3 mr-1" />
-                              {request.email}
-                            </p>
-                            {request.title && (
-                              <p className="text-sm text-slate-400">{request.title}</p>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center">
-                            <Building2 className="h-4 w-4 mr-2 text-slate-400" />
-                            <div>
-                              <p className="font-medium">{request.company}</p>
-                              {request.companySize && (
-                                <p className="text-sm text-slate-400">{request.companySize} employees</p>
-                              )}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <p className="capitalize">{request.interest || '-'}</p>
-                          {request.message && (
-                            <p className="text-sm text-slate-400 max-w-xs truncate" title={request.message}>
-                              {request.message}
-                            </p>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <p className="text-sm">{formatDate(request.createdAt)}</p>
-                        </TableCell>
-                        <TableCell>
-                          {getStatusBadge(request.status)}
-                        </TableCell>
-                        <TableCell>
-                          <Select
-                            value={request.status}
-                            onValueChange={(value) => updateStatus(request.id, value)}
-                            disabled={updatingId === request.id}
-                          >
-                            <SelectTrigger className="w-32">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="new">New</SelectItem>
-                              <SelectItem value="contacted">Contacted</SelectItem>
-                              <SelectItem value="converted">Converted</SelectItem>
-                              <SelectItem value="closed">Closed</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
+          <CardContent className="p-6">
+            <Tabs defaultValue="customers">
+              <TabsList className="mb-6">
+                <TabsTrigger value="customers" className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Customers ({customerRequests.length})
+                </TabsTrigger>
+                <TabsTrigger value="suppliers" className="flex items-center gap-2">
+                  <Package className="h-4 w-4" />
+                  Suppliers ({supplierRequests.length})
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="customers">
+                <CustomerRequestsTable
+                  requests={customerRequests}
+                  isLoading={isLoading}
+                  onStatusUpdate={updateStatus}
+                  updatingId={updatingId}
+                />
+              </TabsContent>
+
+              <TabsContent value="suppliers">
+                <SupplierRequestsTable
+                  requests={supplierRequests}
+                  isLoading={isLoading}
+                  onStatusUpdate={updateStatus}
+                  updatingId={updatingId}
+                />
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
       </main>
