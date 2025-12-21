@@ -244,8 +244,8 @@ const MapLocationEditor = ({ locations, isLoading, onRefresh }) => {
         <svg 
           ref={svgRef}
           className="absolute inset-0 w-full h-full"
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
+          viewBox="0 0 100 50"
+          preserveAspectRatio="xMidYMid slice"
         >
           <defs>
             <filter id="markerGlow">
