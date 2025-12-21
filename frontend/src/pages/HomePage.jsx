@@ -362,22 +362,6 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Customer Logos */}
-      <section className="py-16 bg-slate-50 border-y border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-slate-500 font-medium mb-8">
-            Trusted by leading OEMs and EMS companies worldwide
-          </p>
-          <div className="flex flex-wrap justify-center items-center gap-8 lg:gap-16">
-            {customers.slice(0, 9).map((customer, index) => (
-              <div key={index} className="text-slate-400 font-semibold text-lg hover:text-slate-600 transition-colors">
-                {customer}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Mental Model Section */}
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
