@@ -82,7 +82,7 @@ const GlobalNetworkMap = () => {
     { from: 'china', to: 'europe', color: '#8b5cf6' },
     { from: 'vietnam', to: 'usa', color: '#f59e0b' },
     { from: 'thailand', to: 'europe', color: '#f59e0b' },
-    { from: 'india', to: 'usa', color: '#10b981' },
+    { from: 'india', to: 'usa', color: '#10b981', curveBelow: true },
     { from: 'india', to: 'europe', color: '#10b981' },
     { from: 'china', to: 'usa', color: '#8b5cf6' },
   ];
@@ -97,7 +97,7 @@ const GlobalNetworkMap = () => {
   const getLocation = (id) => locations.find(loc => loc.id === id);
 
   // Generate curved SVG path between two points (using percentages)
-  const generateCurvedPath = (from, to) => {
+  const generateCurvedPath = (from, to, curveBelow = false) => {
     const fromLoc = getLocation(from);
     const toLoc = getLocation(to);
     if (!fromLoc || !toLoc) return '';
@@ -106,7 +106,11 @@ const GlobalNetworkMap = () => {
     const fromY = fromLoc.y * 0.5;
     const toY = toLoc.y * 0.5;
     const midX = (fromLoc.x + toLoc.x) / 2;
-    const midY = Math.min(fromY, toY) - 8; // Curve upward
+    
+    // Curve below for India-USA path, otherwise curve upward
+    const midY = curveBelow 
+      ? Math.max(fromY, toY) + 12  // Curve downward (below both points)
+      : Math.min(fromY, toY) - 8;   // Curve upward (above both points)
     
     return `M ${fromLoc.x} ${fromY} Q ${midX} ${midY} ${toLoc.x} ${toY}`;
   };
