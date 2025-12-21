@@ -8,15 +8,15 @@ const GlobalNetworkMap = () => {
 
   // Locations positioned to match the actual world map image (percentages for responsiveness)
   const locations = [
-    { id: 'usa', name: 'USA', x: 18, y: 38, region: 'usa' },
-    { id: 'europe', name: 'Europe', x: 47, y: 30, region: 'europe' },
-    { id: 'india', name: 'India', x: 65, y: 52, region: 'india' },
-    { id: 'china', name: 'China', x: 75, y: 38, region: 'fareast' },
-    { id: 'korea', name: 'Korea', x: 82, y: 35, region: 'fareast' },
-    { id: 'japan', name: 'Japan', x: 87, y: 38, region: 'fareast' },
-    { id: 'taiwan', name: 'Taiwan', x: 82, y: 48, region: 'fareast' },
-    { id: 'vietnam', name: 'Vietnam', x: 76, y: 55, region: 'sea' },
-    { id: 'thailand', name: 'Thailand', x: 72, y: 55, region: 'sea' },
+    { id: 'usa', name: 'USA', x: 18, y: 42, region: 'usa' },
+    { id: 'europe', name: 'Europe', x: 48, y: 32, region: 'europe' },
+    { id: 'india', name: 'India', x: 66, y: 48, region: 'india' },
+    { id: 'china', name: 'China', x: 76, y: 36, region: 'fareast' },
+    { id: 'korea', name: 'Korea', x: 82, y: 34, region: 'fareast' },
+    { id: 'japan', name: 'Japan', x: 87, y: 36, region: 'fareast' },
+    { id: 'taiwan', name: 'Taiwan', x: 82, y: 44, region: 'fareast' },
+    { id: 'vietnam', name: 'Vietnam', x: 77, y: 50, region: 'sea' },
+    { id: 'thailand', name: 'Thailand', x: 73, y: 50, region: 'sea' },
   ];
 
   // Flow paths showing global sourcing connections
