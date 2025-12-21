@@ -100,24 +100,131 @@ const GlobalNetworkMap = () => {
               </circle>
             </defs>
 
-            {/* Simplified World Map Background */}
-            <g opacity="0.15" fill="none" stroke="#64748b" strokeWidth="0.5">
+            {/* World Map Background - More Visible */}
+            <g>
+              {/* Ocean/Background */}
+              <rect x="0" y="0" width="900" height="400" fill="#0f172a" />
+              
               {/* North America */}
-              <path d="M80,120 Q120,100 180,110 Q220,115 250,140 Q260,180 240,220 Q200,250 160,240 Q120,230 100,200 Q80,170 80,120" />
+              <path 
+                d="M50,80 L100,60 L150,55 L200,60 L240,80 L260,100 L270,130 L280,160 L270,190 L250,210 L230,230 L200,240 L170,235 L140,220 L120,200 L100,180 L80,150 L60,120 L50,100 Z" 
+                fill="#1e3a5f" 
+                stroke="#3b82f6" 
+                strokeWidth="1"
+                opacity="0.6"
+              />
+              {/* USA Detail */}
+              <path 
+                d="M80,140 L150,130 L200,140 L240,160 L250,180 L240,200 L200,210 L150,200 L100,180 L80,160 Z" 
+                fill="#1e4976" 
+                stroke="#3b82f6" 
+                strokeWidth="0.5"
+                opacity="0.5"
+              />
+              
               {/* South America */}
-              <path d="M200,260 Q230,270 240,320 Q235,370 210,390 Q180,380 175,340 Q170,300 200,260" />
+              <path 
+                d="M180,250 L220,245 L250,260 L260,300 L255,340 L240,370 L210,385 L180,375 L165,340 L170,300 L175,270 Z" 
+                fill="#1e3a5f" 
+                stroke="#3b82f6" 
+                strokeWidth="1"
+                opacity="0.6"
+              />
+              
               {/* Europe */}
-              <path d="M420,100 Q460,90 500,100 Q520,120 510,150 Q480,170 440,160 Q420,140 420,100" />
+              <path 
+                d="M400,70 L440,60 L480,65 L510,80 L525,100 L520,130 L505,150 L480,160 L450,155 L420,145 L400,125 L395,100 Z" 
+                fill="#1e3a5f" 
+                stroke="#3b82f6" 
+                strokeWidth="1"
+                opacity="0.6"
+              />
+              {/* UK */}
+              <path 
+                d="M390,90 L400,85 L405,95 L400,105 L390,100 Z" 
+                fill="#1e4976" 
+                stroke="#3b82f6" 
+                strokeWidth="0.5"
+                opacity="0.5"
+              />
+              
               {/* Africa */}
-              <path d="M440,180 Q480,175 510,200 Q520,260 490,320 Q450,340 420,300 Q410,240 440,180" />
-              {/* Asia */}
-              <path d="M520,100 Q600,80 700,100 Q760,120 780,170 Q770,220 720,250 Q650,260 580,240 Q530,200 520,150 Q515,120 520,100" />
+              <path 
+                d="M430,170 L480,165 L520,180 L540,220 L535,270 L520,310 L490,340 L450,345 L420,320 L410,280 L415,230 L425,190 Z" 
+                fill="#1e3a5f" 
+                stroke="#3b82f6" 
+                strokeWidth="1"
+                opacity="0.6"
+              />
+              
+              {/* Russia/Northern Asia */}
+              <path 
+                d="M500,50 L560,40 L640,45 L720,55 L780,70 L800,90 L790,110 L760,120 L700,115 L640,110 L580,100 L530,90 L510,70 Z" 
+                fill="#1e3a5f" 
+                stroke="#3b82f6" 
+                strokeWidth="1"
+                opacity="0.6"
+              />
+              
+              {/* China/East Asia */}
+              <path 
+                d="M620,110 L680,105 L730,120 L760,150 L755,180 L730,200 L690,210 L650,200 L620,180 L610,150 L615,125 Z" 
+                fill="#1e4976" 
+                stroke="#10b981" 
+                strokeWidth="1.5"
+                opacity="0.7"
+              />
+              
               {/* India */}
-              <path d="M560,190 Q590,185 600,220 Q595,260 570,270 Q545,255 550,220 Q555,200 560,190" />
+              <path 
+                d="M550,180 L590,175 L610,195 L605,230 L590,260 L565,270 L545,255 L540,220 L545,195 Z" 
+                fill="#134e4a" 
+                stroke="#10b981" 
+                strokeWidth="2"
+                opacity="0.8"
+              />
+              
               {/* Southeast Asia */}
-              <path d="M620,230 Q660,225 700,240 Q720,270 700,290 Q660,295 630,280 Q615,260 620,230" />
+              <path 
+                d="M620,220 L660,215 L700,230 L720,260 L710,290 L680,300 L640,290 L620,260 L615,240 Z" 
+                fill="#1e4976" 
+                stroke="#10b981" 
+                strokeWidth="1"
+                opacity="0.6"
+              />
+              
+              {/* Japan */}
+              <path 
+                d="M760,140 L775,135 L785,150 L780,170 L765,175 L755,160 Z" 
+                fill="#1e4976" 
+                stroke="#10b981" 
+                strokeWidth="1.5"
+                opacity="0.7"
+              />
+              
+              {/* Taiwan */}
+              <ellipse cx="720" cy="200" rx="8" ry="12" fill="#1e4976" stroke="#10b981" strokeWidth="1" opacity="0.7" />
+              
               {/* Australia */}
-              <path d="M700,320 Q750,310 780,340 Q785,380 750,395 Q710,390 700,360 Q695,340 700,320" />
+              <path 
+                d="M700,310 L760,300 L800,320 L810,360 L790,390 L740,395 L700,375 L690,340 Z" 
+                fill="#1e3a5f" 
+                stroke="#3b82f6" 
+                strokeWidth="1"
+                opacity="0.6"
+              />
+              
+              {/* Grid lines for tech feel */}
+              <g stroke="#334155" strokeWidth="0.3" opacity="0.4">
+                <line x1="0" y1="100" x2="900" y2="100" strokeDasharray="5,10" />
+                <line x1="0" y1="200" x2="900" y2="200" strokeDasharray="5,10" />
+                <line x1="0" y1="300" x2="900" y2="300" strokeDasharray="5,10" />
+                <line x1="150" y1="0" x2="150" y2="400" strokeDasharray="5,10" />
+                <line x1="300" y1="0" x2="300" y2="400" strokeDasharray="5,10" />
+                <line x1="450" y1="0" x2="450" y2="400" strokeDasharray="5,10" />
+                <line x1="600" y1="0" x2="600" y2="400" strokeDasharray="5,10" />
+                <line x1="750" y1="0" x2="750" y2="400" strokeDasharray="5,10" />
+              </g>
             </g>
 
             {/* Connection Paths */}
