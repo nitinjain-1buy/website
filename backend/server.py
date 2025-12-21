@@ -899,6 +899,95 @@ async def seed_map_locations():
     
     return {"message": f"Seeded {len(default_locations)} locations", "seeded": True}
 
+# =============================================
+# REGION CARDS MODELS & ENDPOINTS
+# =============================================
+
+class RegionCardCreate(BaseModel):
+    name: str
+    countries: str
+    icon: str = "🌍"
+    type: str
+    order: int = 0
+
+class RegionCardUpdate(BaseModel):
+    name: Optional[str] = None
+    countries: Optional[str] = None
+    icon: Optional[str] = None
+    type: Optional[str] = None
+    order: Optional[int] = None
+
+class RegionCard(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    countries: str
+    icon: str = "🌍"
+    type: str
+    order: int = 0
+
+@api_router.get("/region-cards", response_model=List[RegionCard])
+async def get_region_cards():
+    """Get all region cards"""
+    cards = await db.region_cards.find({}, {"_id": 0}).to_list(100)
+    if not cards:
+        return []
+    cards.sort(key=lambda x: x.get('order', 0))
+    return cards
+
+@api_router.post("/region-cards", response_model=RegionCard)
+async def create_region_card(input: RegionCardCreate):
+    """Create a new region card"""
+    card = RegionCard(**input.model_dump())
+    await db.region_cards.insert_one(card.model_dump())
+    return card
+
+@api_router.put("/region-cards/{card_id}", response_model=RegionCard)
+async def update_region_card(card_id: str, input: RegionCardUpdate):
+    """Update a region card"""
+    update_data = {k: v for k, v in input.model_dump().items() if v is not None}
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    
+    result = await db.region_cards.update_one(
+        {"id": card_id},
+        {"$set": update_data}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Region card not found")
+    
+    updated = await db.region_cards.find_one({"id": card_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/region-cards/{card_id}")
+async def delete_region_card(card_id: str):
+    """Delete a region card"""
+    result = await db.region_cards.delete_one({"id": card_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Region card not found")
+    return {"message": "Region card deleted successfully"}
+
+@api_router.post("/region-cards/seed")
+async def seed_region_cards():
+    """Seed default region cards"""
+    count = await db.region_cards.count_documents({})
+    if count > 0:
+        return {"message": f"Region cards already exist ({count} found)", "seeded": False}
+    
+    default_cards = [
+        {"name": "Far East", "countries": "China, Taiwan, Japan, Korea", "icon": "🏭", "type": "Manufacturing", "order": 0},
+        {"name": "South East Asia", "countries": "Vietnam, Thailand", "icon": "🔧", "type": "Assembly", "order": 1},
+        {"name": "India", "countries": "Growing Hub", "icon": "🚀", "type": "Design & Mfg", "order": 2},
+        {"name": "Europe", "countries": "Germany, UK, France", "icon": "🎯", "type": "High-End", "order": 3},
+        {"name": "Americas", "countries": "USA, Mexico", "icon": "🌎", "type": "Consumption", "order": 4},
+    ]
+    
+    for card_data in default_cards:
+        card = RegionCard(**card_data)
+        await db.region_cards.insert_one(card.model_dump())
+    
+    return {"message": f"Seeded {len(default_cards)} region cards", "seeded": True}
+
 # Admin Authentication
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin@123")
 
