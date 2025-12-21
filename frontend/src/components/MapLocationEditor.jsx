@@ -282,7 +282,7 @@ const MapLocationEditor = ({ locations, isLoading, onRefresh }) => {
                 {(isSelected || isHovered) && (
                   <circle
                     cx={pos.x}
-                    cy={pos.y / 2}
+                    cy={pos.y}
                     r={isSelected ? 3 : 2.5}
                     fill="none"
                     stroke={markerColor}
@@ -297,7 +297,7 @@ const MapLocationEditor = ({ locations, isLoading, onRefresh }) => {
                 {/* Main marker */}
                 <circle
                   cx={pos.x}
-                  cy={pos.y / 2}
+                  cy={pos.y}
                   r={isSelected ? 2 : 1.5}
                   fill={markerColor}
                   stroke={isSelected ? '#fff' : 'rgba(255,255,255,0.7)'}
@@ -312,7 +312,7 @@ const MapLocationEditor = ({ locations, isLoading, onRefresh }) => {
                 {/* Label */}
                 <text
                   x={pos.x}
-                  y={pos.y / 2 - 3}
+                  y={pos.y - 3}
                   textAnchor="middle"
                   fill="#fff"
                   fontSize={isSelected ? 2.2 : 1.8}
