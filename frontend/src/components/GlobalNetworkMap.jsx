@@ -1,23 +1,59 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+
+const API = process.env.REACT_APP_BACKEND_URL;
 
 const GlobalNetworkMap = () => {
   const [activeFlow, setActiveFlow] = useState(0);
+  const [locations, setLocations] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // World map image URL
   const worldMapImage = "https://customer-assets.emergentagent.com/job_procure-sphere/artifacts/4a54wyou_Screenshot%20from%202025-12-21%2018-55-27.png";
 
-  // Locations positioned to match the actual world map image (percentages for responsiveness)
-  const locations = [
-    { id: 'usa', name: 'USA', x: 18, y: 42, region: 'usa' },
-    { id: 'europe', name: 'Europe', x: 48, y: 32, region: 'europe' },
-    { id: 'india', name: 'India', x: 66, y: 48, region: 'india' },
-    { id: 'china', name: 'China', x: 76, y: 36, region: 'fareast' },
-    { id: 'korea', name: 'Korea', x: 82, y: 34, region: 'fareast' },
-    { id: 'japan', name: 'Japan', x: 87, y: 36, region: 'fareast' },
-    { id: 'taiwan', name: 'Taiwan', x: 82, y: 44, region: 'fareast' },
-    { id: 'vietnam', name: 'Vietnam', x: 77, y: 50, region: 'sea' },
-    { id: 'thailand', name: 'Thailand', x: 73, y: 50, region: 'sea' },
-  ];
+  // Fetch locations from API
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        const response = await axios.get(`${API}/api/map-locations`);
+        if (response.data && response.data.length > 0) {
+          // Transform API data to include id based on name (lowercase)
+          const transformedLocations = response.data.map(loc => ({
+            ...loc,
+            id: loc.name.toLowerCase().replace(/\s+/g, ''),
+          }));
+          setLocations(transformedLocations);
+        } else {
+          // If no locations in DB, seed them first
+          await axios.post(`${API}/api/map-locations/seed`);
+          const seededResponse = await axios.get(`${API}/api/map-locations`);
+          const transformedLocations = seededResponse.data.map(loc => ({
+            ...loc,
+            id: loc.name.toLowerCase().replace(/\s+/g, ''),
+          }));
+          setLocations(transformedLocations);
+        }
+      } catch (error) {
+        console.error('Error fetching map locations:', error);
+        // Fallback to default locations if API fails
+        setLocations([
+          { id: 'usa', name: 'USA', x: 18, y: 42, type: 'Data Source' },
+          { id: 'europe', name: 'Europe', x: 48, y: 32, type: 'Data Source' },
+          { id: 'india', name: 'India', x: 66, y: 48, type: 'Data Source' },
+          { id: 'china', name: 'China', x: 76, y: 36, type: 'Sourcing Hub' },
+          { id: 'korea', name: 'Korea', x: 82, y: 34, type: 'Sourcing Hub' },
+          { id: 'japan', name: 'Japan', x: 87, y: 36, type: 'Sourcing Hub' },
+          { id: 'taiwan', name: 'Taiwan', x: 82, y: 44, type: 'Sourcing Hub' },
+          { id: 'vietnam', name: 'Vietnam', x: 77, y: 50, type: 'Data Source' },
+          { id: 'thailand', name: 'Thailand', x: 73, y: 50, type: 'Data Source' },
+        ]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchLocations();
+  }, []);
 
   // Flow paths showing global sourcing connections
   const flows = [
