@@ -106,11 +106,11 @@ const GlobalNetworkMap = () => {
         {/* Map Container */}
         <div className="relative bg-slate-800/30 rounded-2xl p-4 border border-slate-700 overflow-hidden">
           {/* World Map Background Image */}
-          <div className="relative w-full" style={{ paddingBottom: '50%' }}>
+          <div className="relative w-full" style={{ aspectRatio: '2/1' }}>
             <img 
               src={worldMapImage} 
               alt="World Map"
-              className="absolute inset-0 w-full h-full object-contain opacity-30"
+              className="absolute inset-0 w-full h-full object-cover opacity-30"
               style={{ filter: 'brightness(0.8) contrast(1.2)' }}
             />
             
