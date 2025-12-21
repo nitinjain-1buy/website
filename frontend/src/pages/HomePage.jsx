@@ -174,12 +174,12 @@ const HomePage = () => {
 
           {/* Trusted By - Customer Logos - Full Width Centered */}
           <div className="mt-12 pt-8 border-t border-slate-200 text-center">
-            <p className="text-slate-800 text-base font-semibold mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
               Trusted by leading OEMs and EMS companies worldwide
-            </p>
-            <div className="flex flex-wrap justify-center items-center gap-x-8 gap-y-3">
+            </h2>
+            <div className="flex flex-wrap justify-center items-center gap-x-10 gap-y-4 mt-6">
               {customers.slice(0, 8).map((customer, index) => (
-                <span key={index} className="text-slate-400 font-semibold text-base hover:text-slate-600 transition-colors">
+                <span key={index} className="text-xl text-slate-400 font-semibold hover:text-slate-600 transition-colors">
                   {customer}
                 </span>
               ))}
