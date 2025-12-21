@@ -165,7 +165,7 @@ const GlobalNetworkMap = () => {
 
               {/* Connection Flow Lines */}
               {flows.map((flow, index) => {
-                const path = generateCurvedPath(flow.from, flow.to);
+                const path = generateCurvedPath(flow.from, flow.to, flow.curveBelow);
                 const isActive = index === activeFlow;
                 return (
                   <g key={`${flow.from}-${flow.to}`}>
