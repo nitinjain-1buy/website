@@ -170,19 +170,19 @@ const HomePage = () => {
               </Link>
               <DemoVideoModal variant="outline" className="border-slate-300 text-slate-700 px-8 h-12" />
             </div>
+          </div>
 
-            {/* Trusted By - Customer Logos */}
-            <div className="mt-12 pt-8 border-t border-slate-200 text-center">
-              <p className="text-slate-800 text-base font-semibold mb-4">
-                Trusted by leading OEMs and EMS companies worldwide
-              </p>
-              <div className="flex flex-wrap justify-center items-center gap-x-8 gap-y-3">
-                {customers.slice(0, 8).map((customer, index) => (
-                  <span key={index} className="text-slate-400 font-semibold text-base hover:text-slate-600 transition-colors">
-                    {customer}
-                  </span>
-                ))}
-              </div>
+          {/* Trusted By - Customer Logos - Full Width Centered */}
+          <div className="mt-12 pt-8 border-t border-slate-200 text-center">
+            <p className="text-slate-800 text-base font-semibold mb-4">
+              Trusted by leading OEMs and EMS companies worldwide
+            </p>
+            <div className="flex flex-wrap justify-center items-center gap-x-8 gap-y-3">
+              {customers.slice(0, 8).map((customer, index) => (
+                <span key={index} className="text-slate-400 font-semibold text-base hover:text-slate-600 transition-colors">
+                  {customer}
+                </span>
+              ))}
             </div>
           </div>
         </div>
