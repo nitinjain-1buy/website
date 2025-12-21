@@ -1639,6 +1639,9 @@ const AdminDashboard = ({ onLogout }) => {
                 <TabsTrigger value="products" className="flex items-center gap-2">
                   <Layers className="h-4 w-4" />Products ({products.length})
                 </TabsTrigger>
+                <TabsTrigger value="map-locations" className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />Map ({mapLocations.length})
+                </TabsTrigger>
                 <TabsTrigger value="testimonials" className="flex items-center gap-2">
                   <Quote className="h-4 w-4" />Testimonials ({testimonials.length})
                 </TabsTrigger>
