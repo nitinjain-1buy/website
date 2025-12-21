@@ -84,10 +84,13 @@ const GlobalNetworkMap = () => {
     const toLoc = getLocation(to);
     if (!fromLoc || !toLoc) return '';
     
+    // Scale Y coordinates by 0.5 for the 2:1 aspect ratio viewBox
+    const fromY = fromLoc.y * 0.5;
+    const toY = toLoc.y * 0.5;
     const midX = (fromLoc.x + toLoc.x) / 2;
-    const midY = Math.min(fromLoc.y, toLoc.y) - 15; // Curve upward
+    const midY = Math.min(fromY, toY) - 8; // Curve upward
     
-    return `M ${fromLoc.x} ${fromLoc.y} Q ${midX} ${midY} ${toLoc.x} ${toLoc.y}`;
+    return `M ${fromLoc.x} ${fromY} Q ${midX} ${midY} ${toLoc.x} ${toY}`;
   };
 
   return (
