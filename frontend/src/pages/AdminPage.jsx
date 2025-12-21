@@ -1669,6 +1669,10 @@ const AdminDashboard = ({ onLogout }) => {
                 <ProductsManager products={products} isLoading={isLoading} onRefresh={fetchData} />
               </TabsContent>
 
+              <TabsContent value="map-locations">
+                <MapLocationsManager locations={mapLocations} isLoading={isLoading} onRefresh={fetchData} />
+              </TabsContent>
+
               <TabsContent value="testimonials">
                 <TestimonialsManager testimonials={testimonials} isLoading={isLoading} onRefresh={fetchData} />
               </TabsContent>
