@@ -3,17 +3,17 @@ import React, { useEffect, useState } from 'react';
 const GlobalNetworkMap = () => {
   const [activeFlow, setActiveFlow] = useState(0);
 
-  // Locations with coordinates (approximate positions on the SVG viewBox)
+  // Locations with coordinates positioned on the actual world map
   const locations = [
-    { id: 'china', name: 'China', x: 680, y: 180, region: 'fareast' },
-    { id: 'taiwan', name: 'Taiwan', x: 710, y: 210, region: 'fareast' },
-    { id: 'japan', name: 'Japan', x: 760, y: 170, region: 'fareast' },
-    { id: 'korea', name: 'Korea', x: 720, y: 165, region: 'fareast' },
-    { id: 'vietnam', name: 'Vietnam', x: 665, y: 230, region: 'sea' },
-    { id: 'thailand', name: 'Thailand', x: 640, y: 225, region: 'sea' },
-    { id: 'india', name: 'India', x: 580, y: 210, region: 'india' },
-    { id: 'europe', name: 'Europe', x: 450, y: 140, region: 'europe' },
-    { id: 'usa', name: 'USA', x: 180, y: 170, region: 'usa' },
+    { id: 'china', name: 'China', x: 770, y: 200, region: 'fareast' },
+    { id: 'taiwan', name: 'Taiwan', x: 810, y: 240, region: 'fareast' },
+    { id: 'japan', name: 'Japan', x: 850, y: 190, region: 'fareast' },
+    { id: 'korea', name: 'Korea', x: 820, y: 185, region: 'fareast' },
+    { id: 'vietnam', name: 'Vietnam', x: 755, y: 270, region: 'sea' },
+    { id: 'thailand', name: 'Thailand', x: 720, y: 265, region: 'sea' },
+    { id: 'india', name: 'India', x: 650, y: 250, region: 'india' },
+    { id: 'europe', name: 'Europe', x: 480, y: 150, region: 'europe' },
+    { id: 'usa', name: 'USA', x: 200, y: 180, region: 'usa' },
   ];
 
   // Flow paths showing global sourcing connections
@@ -30,7 +30,6 @@ const GlobalNetworkMap = () => {
     { from: 'china', to: 'usa', color: '#8b5cf6' },
   ];
 
-  // Cycle through highlighting different flows
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveFlow((prev) => (prev + 1) % flows.length);
@@ -40,15 +39,12 @@ const GlobalNetworkMap = () => {
 
   const getLocation = (id) => locations.find(loc => loc.id === id);
 
-  // Generate curved path between two points
   const generateCurvedPath = (from, to) => {
     const fromLoc = getLocation(from);
     const toLoc = getLocation(to);
     if (!fromLoc || !toLoc) return '';
-
     const midX = (fromLoc.x + toLoc.x) / 2;
-    const midY = (fromLoc.y + toLoc.y) / 2 - 50; // Curve upward
-
+    const midY = (fromLoc.y + toLoc.y) / 2 - 60;
     return `M ${fromLoc.x} ${fromLoc.y} Q ${midX} ${midY} ${toLoc.x} ${toLoc.y}`;
   };
 
@@ -66,21 +62,9 @@ const GlobalNetworkMap = () => {
         </div>
 
         {/* Map Container */}
-        <div className="relative">
-          <svg
-            viewBox="0 0 900 400"
-            className="w-full h-auto"
-            style={{ maxHeight: '500px' }}
-          >
+        <div className="relative bg-slate-800/50 rounded-2xl p-4 border border-slate-700">
+          <svg viewBox="0 0 1000 450" className="w-full h-auto">
             <defs>
-              {/* Gradient for paths */}
-              <linearGradient id="flowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#10b981" stopOpacity="0.2" />
-                <stop offset="50%" stopColor="#10b981" stopOpacity="0.8" />
-                <stop offset="100%" stopColor="#10b981" stopOpacity="0.2" />
-              </linearGradient>
-
-              {/* Glow filter */}
               <filter id="glow">
                 <feGaussianBlur stdDeviation="3" result="coloredBlur" />
                 <feMerge>
@@ -88,143 +72,48 @@ const GlobalNetworkMap = () => {
                   <feMergeNode in="SourceGraphic" />
                 </feMerge>
               </filter>
-
-              {/* Animated dot */}
-              <circle id="dot" r="4" fill="#10b981">
-                <animate
-                  attributeName="opacity"
-                  values="1;0.3;1"
-                  dur="1.5s"
-                  repeatCount="indefinite"
-                />
-              </circle>
             </defs>
 
-            {/* World Map Background - More Visible */}
-            <g>
-              {/* Ocean/Background */}
-              <rect x="0" y="0" width="900" height="400" fill="#0f172a" />
-              
+            {/* Proper World Map SVG Paths */}
+            <g fill="#1e3a5f" stroke="#3b82f6" strokeWidth="0.5" opacity="0.7">
               {/* North America */}
-              <path 
-                d="M50,80 L100,60 L150,55 L200,60 L240,80 L260,100 L270,130 L280,160 L270,190 L250,210 L230,230 L200,240 L170,235 L140,220 L120,200 L100,180 L80,150 L60,120 L50,100 Z" 
-                fill="#1e3a5f" 
-                stroke="#3b82f6" 
-                strokeWidth="1"
-                opacity="0.6"
-              />
-              {/* USA Detail */}
-              <path 
-                d="M80,140 L150,130 L200,140 L240,160 L250,180 L240,200 L200,210 L150,200 L100,180 L80,160 Z" 
-                fill="#1e4976" 
-                stroke="#3b82f6" 
-                strokeWidth="0.5"
-                opacity="0.5"
-              />
-              
+              <path d="M165,75 L175,73 L185,75 L200,73 L215,75 L225,80 L232,75 L240,73 L248,75 L255,80 L258,85 L260,95 L255,105 L248,115 L245,125 L250,135 L255,145 L252,155 L245,165 L238,175 L235,185 L240,195 L248,200 L255,195 L260,188 L268,185 L275,190 L278,200 L275,210 L268,218 L260,225 L250,230 L240,228 L230,225 L220,230 L210,235 L200,238 L190,235 L180,230 L170,225 L162,218 L158,210 L155,200 L152,190 L148,180 L142,172 L135,165 L128,160 L120,158 L112,160 L105,165 L100,172 L95,165 L92,155 L90,145 L88,135 L90,125 L95,115 L102,105 L110,98 L120,92 L130,88 L140,85 L150,82 L160,78 Z" />
+              {/* Greenland */}
+              <path d="M320,50 L340,48 L360,52 L375,60 L385,72 L388,85 L385,100 L378,112 L368,120 L355,125 L340,122 L328,115 L318,105 L312,92 L310,78 L315,62 Z" />
               {/* South America */}
-              <path 
-                d="M180,250 L220,245 L250,260 L260,300 L255,340 L240,370 L210,385 L180,375 L165,340 L170,300 L175,270 Z" 
-                fill="#1e3a5f" 
-                stroke="#3b82f6" 
-                strokeWidth="1"
-                opacity="0.6"
-              />
-              
+              <path d="M240,280 L250,275 L262,278 L275,285 L285,295 L292,308 L295,322 L292,338 L285,355 L275,370 L262,382 L248,390 L235,395 L222,392 L210,385 L200,375 L195,362 L192,348 L195,332 L200,318 L208,305 L218,292 L230,282 Z" />
               {/* Europe */}
-              <path 
-                d="M400,70 L440,60 L480,65 L510,80 L525,100 L520,130 L505,150 L480,160 L450,155 L420,145 L400,125 L395,100 Z" 
-                fill="#1e3a5f" 
-                stroke="#3b82f6" 
-                strokeWidth="1"
-                opacity="0.6"
-              />
+              <path d="M440,95 L455,92 L472,95 L488,100 L502,108 L515,118 L525,130 L530,145 L528,160 L520,172 L508,182 L495,188 L480,190 L465,188 L450,182 L438,172 L430,160 L428,145 L432,130 L440,118 L448,108 Z" />
               {/* UK */}
-              <path 
-                d="M390,90 L400,85 L405,95 L400,105 L390,100 Z" 
-                fill="#1e4976" 
-                stroke="#3b82f6" 
-                strokeWidth="0.5"
-                opacity="0.5"
-              />
-              
+              <path d="M425,115 L432,112 L438,115 L442,122 L440,130 L435,135 L428,132 L422,125 L423,118 Z" />
               {/* Africa */}
-              <path 
-                d="M430,170 L480,165 L520,180 L540,220 L535,270 L520,310 L490,340 L450,345 L420,320 L410,280 L415,230 L425,190 Z" 
-                fill="#1e3a5f" 
-                stroke="#3b82f6" 
-                strokeWidth="1"
-                opacity="0.6"
-              />
-              
+              <path d="M460,200 L480,195 L502,200 L522,210 L538,225 L548,245 L552,268 L548,292 L540,315 L528,335 L512,352 L492,365 L470,372 L448,368 L428,358 L415,342 L408,322 L405,300 L410,278 L420,258 L435,240 L452,222 Z" />
               {/* Russia/Northern Asia */}
-              <path 
-                d="M500,50 L560,40 L640,45 L720,55 L780,70 L800,90 L790,110 L760,120 L700,115 L640,110 L580,100 L530,90 L510,70 Z" 
-                fill="#1e3a5f" 
-                stroke="#3b82f6" 
-                strokeWidth="1"
-                opacity="0.6"
-              />
-              
-              {/* China/East Asia */}
-              <path 
-                d="M620,110 L680,105 L730,120 L760,150 L755,180 L730,200 L690,210 L650,200 L620,180 L610,150 L615,125 Z" 
-                fill="#1e4976" 
-                stroke="#10b981" 
-                strokeWidth="1.5"
-                opacity="0.7"
-              />
-              
+              <path d="M520,60 L560,55 L605,58 L655,62 L705,68 L755,75 L800,85 L840,95 L870,108 L890,122 L895,138 L888,152 L875,162 L858,168 L838,170 L815,168 L790,165 L762,160 L732,155 L700,152 L668,150 L635,148 L602,148 L570,150 L540,155 L515,162 L498,155 L490,142 L492,125 L500,110 L512,98 L525,85 L535,72 Z" />
+              {/* Middle East */}
+              <path d="M545,180 L565,178 L585,182 L602,190 L615,202 L622,218 L620,235 L612,250 L598,260 L582,265 L565,262 L550,255 L538,242 L532,228 L535,212 L542,195 Z" />
               {/* India */}
-              <path 
-                d="M550,180 L590,175 L610,195 L605,230 L590,260 L565,270 L545,255 L540,220 L545,195 Z" 
-                fill="#134e4a" 
-                stroke="#10b981" 
-                strokeWidth="2"
-                opacity="0.8"
-              />
-              
+              <path d="M620,210 L642,205 L662,212 L678,225 L688,242 L692,262 L688,282 L678,300 L665,315 L648,325 L628,328 L610,322 L595,310 L585,295 L582,275 L588,255 L600,238 L615,222 Z" fill="#134e4a" stroke="#10b981" strokeWidth="1.5" opacity="0.9" />
               {/* Southeast Asia */}
-              <path 
-                d="M620,220 L660,215 L700,230 L720,260 L710,290 L680,300 L640,290 L620,260 L615,240 Z" 
-                fill="#1e4976" 
-                stroke="#10b981" 
-                strokeWidth="1"
-                opacity="0.6"
-              />
-              
+              <path d="M700,245 L720,240 L742,245 L762,255 L778,270 L788,288 L792,308 L788,328 L778,345 L762,358 L742,365 L720,362 L700,352 L685,338 L678,320 L680,300 L688,282 L700,265 Z" />
+              {/* China */}
+              <path d="M720,155 L755,148 L790,152 L822,162 L850,178 L868,198 L875,222 L870,245 L858,265 L840,280 L818,290 L792,292 L765,288 L740,278 L720,262 L705,242 L698,220 L700,198 L710,178 Z" fill="#1e4976" stroke="#10b981" strokeWidth="1" opacity="0.8" />
               {/* Japan */}
-              <path 
-                d="M760,140 L775,135 L785,150 L780,170 L765,175 L755,160 Z" 
-                fill="#1e4976" 
-                stroke="#10b981" 
-                strokeWidth="1.5"
-                opacity="0.7"
-              />
-              
-              {/* Taiwan */}
-              <ellipse cx="720" cy="200" rx="8" ry="12" fill="#1e4976" stroke="#10b981" strokeWidth="1" opacity="0.7" />
-              
+              <path d="M855,165 L868,162 L880,168 L888,180 L890,195 L885,210 L875,222 L862,228 L850,225 L842,215 L840,200 L845,185 L852,172 Z" fill="#1e4976" stroke="#10b981" strokeWidth="1" opacity="0.8" />
+              {/* Indonesia/Philippines */}
+              <path d="M760,320 L785,315 L812,322 L838,335 L858,352 L868,372 L865,392 L852,408 L832,418 L808,420 L782,415 L758,405 L740,390 L732,372 L735,352 L748,335 Z" />
               {/* Australia */}
-              <path 
-                d="M700,310 L760,300 L800,320 L810,360 L790,390 L740,395 L700,375 L690,340 Z" 
-                fill="#1e3a5f" 
-                stroke="#3b82f6" 
-                strokeWidth="1"
-                opacity="0.6"
-              />
-              
-              {/* Grid lines for tech feel */}
-              <g stroke="#334155" strokeWidth="0.3" opacity="0.4">
-                <line x1="0" y1="100" x2="900" y2="100" strokeDasharray="5,10" />
-                <line x1="0" y1="200" x2="900" y2="200" strokeDasharray="5,10" />
-                <line x1="0" y1="300" x2="900" y2="300" strokeDasharray="5,10" />
-                <line x1="150" y1="0" x2="150" y2="400" strokeDasharray="5,10" />
-                <line x1="300" y1="0" x2="300" y2="400" strokeDasharray="5,10" />
-                <line x1="450" y1="0" x2="450" y2="400" strokeDasharray="5,10" />
-                <line x1="600" y1="0" x2="600" y2="400" strokeDasharray="5,10" />
-                <line x1="750" y1="0" x2="750" y2="400" strokeDasharray="5,10" />
-              </g>
+              <path d="M780,380 L820,375 L862,382 L900,398 L928,420 L942,448 L940,478 L925,505 L900,525 L868,538 L832,542 L795,535 L762,520 L738,498 L725,472 L728,445 L745,420 L770,400 Z" />
+            </g>
+
+            {/* Grid overlay for tech feel */}
+            <g stroke="#334155" strokeWidth="0.3" opacity="0.3">
+              {[0, 1, 2, 3, 4, 5, 6].map(i => (
+                <line key={`h${i}`} x1="0" y1={i * 75} x2="1000" y2={i * 75} strokeDasharray="5,10" />
+              ))}
+              {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => (
+                <line key={`v${i}`} x1={i * 100} y1="0" x2={i * 100} y2="450" strokeDasharray="5,10" />
+              ))}
             </g>
 
             {/* Connection Paths */}
@@ -233,29 +122,17 @@ const GlobalNetworkMap = () => {
               const isActive = index === activeFlow;
               return (
                 <g key={`${flow.from}-${flow.to}`}>
-                  {/* Base path */}
                   <path
                     d={path}
                     fill="none"
                     stroke={flow.color}
-                    strokeWidth={isActive ? "2" : "1"}
-                    strokeOpacity={isActive ? "0.6" : "0.2"}
-                    strokeDasharray="4,4"
+                    strokeWidth={isActive ? "2.5" : "1"}
+                    strokeOpacity={isActive ? "0.8" : "0.3"}
+                    strokeDasharray="6,4"
                   />
-                  {/* Animated flowing dot */}
                   {isActive && (
-                    <circle r="5" fill={flow.color} filter="url(#glow)">
-                      <animateMotion
-                        dur="2s"
-                        repeatCount="indefinite"
-                        path={path}
-                      />
-                      <animate
-                        attributeName="r"
-                        values="3;5;3"
-                        dur="1s"
-                        repeatCount="indefinite"
-                      />
+                    <circle r="6" fill={flow.color} filter="url(#glow)">
+                      <animateMotion dur="2s" repeatCount="indefinite" path={path} />
                     </circle>
                   )}
                 </g>
@@ -264,78 +141,35 @@ const GlobalNetworkMap = () => {
 
             {/* Location Markers */}
             {locations.map((loc) => (
-              <g key={loc.id} className="cursor-pointer">
-                {/* Pulse animation */}
-                <circle
-                  cx={loc.x}
-                  cy={loc.y}
-                  r="12"
-                  fill={loc.region === 'india' ? '#10b981' : '#3b82f6'}
-                  opacity="0.3"
-                >
-                  <animate
-                    attributeName="r"
-                    values="8;15;8"
-                    dur="2s"
-                    repeatCount="indefinite"
-                  />
-                  <animate
-                    attributeName="opacity"
-                    values="0.4;0.1;0.4"
-                    dur="2s"
-                    repeatCount="indefinite"
-                  />
+              <g key={loc.id}>
+                <circle cx={loc.x} cy={loc.y} r="15" fill={loc.region === 'india' ? '#10b981' : '#3b82f6'} opacity="0.2">
+                  <animate attributeName="r" values="12;20;12" dur="2s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="0.3;0.1;0.3" dur="2s" repeatCount="indefinite" />
                 </circle>
-                {/* Main dot */}
-                <circle
-                  cx={loc.x}
-                  cy={loc.y}
-                  r="6"
-                  fill={loc.region === 'india' ? '#10b981' : '#3b82f6'}
-                  stroke="#fff"
-                  strokeWidth="2"
-                  filter="url(#glow)"
-                />
-                {/* Label */}
-                <text
-                  x={loc.x}
-                  y={loc.y - 15}
-                  textAnchor="middle"
-                  fill="#e2e8f0"
-                  fontSize="10"
-                  fontWeight="500"
-                >
-                  {loc.name}
-                </text>
+                <circle cx={loc.x} cy={loc.y} r="8" fill={loc.region === 'india' ? '#10b981' : '#3b82f6'} stroke="#fff" strokeWidth="2" filter="url(#glow)" />
+                <text x={loc.x} y={loc.y - 18} textAnchor="middle" fill="#e2e8f0" fontSize="11" fontWeight="600">{loc.name}</text>
               </g>
             ))}
 
             {/* Legend */}
-            <g transform="translate(30, 340)">
-              <rect x="0" y="0" width="200" height="50" rx="5" fill="#1e293b" opacity="0.8" />
-              <circle cx="20" cy="18" r="5" fill="#3b82f6" />
-              <text x="35" y="22" fill="#94a3b8" fontSize="10">Data Sources</text>
-              <circle cx="110" cy="18" r="5" fill="#10b981" />
-              <text x="125" y="22" fill="#94a3b8" fontSize="10">Sourcing Hubs</text>
-              <text x="15" y="42" fill="#64748b" fontSize="9">Live data flows updating in real-time</text>
+            <g transform="translate(30, 380)">
+              <rect x="0" y="0" width="220" height="55" rx="8" fill="#1e293b" opacity="0.9" />
+              <circle cx="25" cy="20" r="6" fill="#3b82f6" />
+              <text x="42" y="24" fill="#94a3b8" fontSize="11">Data Sources</text>
+              <circle cx="130" cy="20" r="6" fill="#10b981" />
+              <text x="147" y="24" fill="#94a3b8" fontSize="11">Sourcing Hubs</text>
+              <text x="15" y="45" fill="#64748b" fontSize="10">Live data flows updating in real-time</text>
+            </g>
+
+            {/* Stats */}
+            <g transform="translate(780, 380)">
+              <rect x="0" y="0" width="180" height="55" rx="8" fill="#1e293b" opacity="0.9" />
+              <text x="25" y="25" fill="#10b981" fontSize="20" fontWeight="bold">400+</text>
+              <text x="25" y="42" fill="#64748b" fontSize="10">Data Sources</text>
+              <text x="110" y="25" fill="#3b82f6" fontSize="20" fontWeight="bold">9</text>
+              <text x="110" y="42" fill="#64748b" fontSize="10">Regions</text>
             </g>
           </svg>
-
-          {/* Stats Overlay */}
-          <div className="absolute bottom-4 right-4 hidden md:block">
-            <div className="bg-slate-800/80 backdrop-blur-sm rounded-lg p-4 border border-slate-700">
-              <div className="grid grid-cols-2 gap-4 text-center">
-                <div>
-                  <p className="text-2xl font-bold text-emerald-400">400+</p>
-                  <p className="text-xs text-slate-400">Data Sources</p>
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-blue-400">9</p>
-                  <p className="text-xs text-slate-400">Regions</p>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Region Cards */}
@@ -346,7 +180,7 @@ const GlobalNetworkMap = () => {
             { name: 'India', countries: 'Growing Hub', icon: '🚀', type: 'Design & Mfg' },
             { name: 'Europe', countries: 'Germany, UK, France', icon: '🎯', type: 'High-End' },
             { name: 'Americas', countries: 'USA, Mexico', icon: '🌎', type: 'Consumption' },
-          ].map((region, index) => (
+          ].map((region) => (
             <div
               key={region.name}
               className="bg-slate-800/50 rounded-lg p-4 border border-slate-700 hover:border-emerald-500/50 transition-colors"
