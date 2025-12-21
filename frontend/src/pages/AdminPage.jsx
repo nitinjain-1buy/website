@@ -1486,20 +1486,22 @@ const AdminDashboard = ({ onLogout }) => {
   const [heroSection, setHeroSection] = useState(null);
   const [customerLogos, setCustomerLogos] = useState([]);
   const [products, setProducts] = useState([]);
+  const [mapLocations, setMapLocations] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
 
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [customersRes, suppliersRes, testimonialsRes, statsRes, heroRes, logosRes, productsRes] = await Promise.all([
+      const [customersRes, suppliersRes, testimonialsRes, statsRes, heroRes, logosRes, productsRes, mapLocationsRes] = await Promise.all([
         axios.get(`${API}/demo-requests`),
         axios.get(`${API}/supplier-requests`),
         axios.get(`${API}/testimonials`),
         axios.get(`${API}/site-stats`),
         axios.get(`${API}/hero-section`),
         axios.get(`${API}/customer-logos`),
-        axios.get(`${API}/products`)
+        axios.get(`${API}/products`),
+        axios.get(`${API}/map-locations`)
       ]);
       setCustomerRequests(customersRes.data);
       setSupplierRequests(suppliersRes.data);
@@ -1508,6 +1510,7 @@ const AdminDashboard = ({ onLogout }) => {
       setHeroSection(heroRes.data);
       setCustomerLogos(logosRes.data);
       setProducts(productsRes.data);
+      setMapLocations(mapLocationsRes.data);
     } catch (err) {
       toast.error('Failed to fetch data');
     } finally {
