@@ -1681,6 +1681,10 @@ const AdminDashboard = ({ onLogout }) => {
                 <MapLocationEditor locations={mapLocations} isLoading={isLoading} onRefresh={fetchData} />
               </TabsContent>
 
+              <TabsContent value="region-cards">
+                <RegionCardsManager regionCards={regionCards} isLoading={isLoading} onRefresh={fetchData} />
+              </TabsContent>
+
               <TabsContent value="testimonials">
                 <TestimonialsManager testimonials={testimonials} isLoading={isLoading} onRefresh={fetchData} />
               </TabsContent>
