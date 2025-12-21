@@ -172,39 +172,41 @@ const GlobalNetworkMap = () => {
                 // Determine color based on type: Sourcing Hub = green, Data Source = blue
                 const markerColor = loc.type === 'Sourcing Hub' ? '#10b981' : '#3b82f6';
                 const isSourcingHub = loc.type === 'Sourcing Hub';
+                // Scale Y by 0.5 for the 2:1 aspect ratio viewBox
+                const scaledY = loc.y * 0.5;
                 
                 return (
                 <g key={loc.id}>
                   {/* Pulse animation ring */}
                   <circle 
                     cx={loc.x} 
-                    cy={loc.y} 
-                    r="2" 
+                    cy={scaledY} 
+                    r="1.2" 
                     fill="none"
                     stroke={markerColor} 
-                    strokeWidth="0.3"
+                    strokeWidth="0.2"
                     opacity="0.6"
                   >
-                    <animate attributeName="r" values="1.5;3;1.5" dur="2s" repeatCount="indefinite" />
+                    <animate attributeName="r" values="0.8;1.8;0.8" dur="2s" repeatCount="indefinite" />
                     <animate attributeName="opacity" values="0.6;0.1;0.6" dur="2s" repeatCount="indefinite" />
                   </circle>
                   {/* Main marker dot */}
                   <circle 
                     cx={loc.x} 
-                    cy={loc.y} 
-                    r={isSourcingHub ? "1.2" : "1"} 
+                    cy={scaledY} 
+                    r={isSourcingHub ? "0.8" : "0.6"} 
                     fill={markerColor} 
                     stroke="#fff" 
-                    strokeWidth="0.3"
+                    strokeWidth="0.15"
                     filter="url(#strongGlow)"
                   />
                   {/* Label */}
                   <text 
                     x={loc.x} 
-                    y={loc.y - 2.5} 
+                    y={scaledY - 1.5} 
                     textAnchor="middle" 
                     fill="#fff" 
-                    fontSize="1.8" 
+                    fontSize="1.4" 
                     fontWeight="600"
                     style={{ textShadow: '0 0 3px rgba(0,0,0,0.8)' }}
                   >
