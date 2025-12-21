@@ -6,25 +6,25 @@ const API = process.env.REACT_APP_BACKEND_URL;
 const GlobalNetworkMap = () => {
   const [activeFlow, setActiveFlow] = useState(0);
   const [locations, setLocations] = useState([]);
+  const [regionCards, setRegionCards] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // World map image URL
   const worldMapImage = "https://customer-assets.emergentagent.com/job_procure-sphere/artifacts/4a54wyou_Screenshot%20from%202025-12-21%2018-55-27.png";
 
-  // Fetch locations from API
+  // Fetch locations and region cards from API
   useEffect(() => {
-    const fetchLocations = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get(`${API}/api/map-locations`);
-        if (response.data && response.data.length > 0) {
-          // Transform API data to include id based on name (lowercase)
-          const transformedLocations = response.data.map(loc => ({
+        // Fetch map locations
+        const locResponse = await axios.get(`${API}/api/map-locations`);
+        if (locResponse.data && locResponse.data.length > 0) {
+          const transformedLocations = locResponse.data.map(loc => ({
             ...loc,
             id: loc.name.toLowerCase().replace(/\s+/g, ''),
           }));
           setLocations(transformedLocations);
         } else {
-          // If no locations in DB, seed them first
           await axios.post(`${API}/api/map-locations/seed`);
           const seededResponse = await axios.get(`${API}/api/map-locations`);
           const transformedLocations = seededResponse.data.map(loc => ({
@@ -33,9 +33,19 @@ const GlobalNetworkMap = () => {
           }));
           setLocations(transformedLocations);
         }
+
+        // Fetch region cards
+        const cardResponse = await axios.get(`${API}/api/region-cards`);
+        if (cardResponse.data && cardResponse.data.length > 0) {
+          setRegionCards(cardResponse.data);
+        } else {
+          await axios.post(`${API}/api/region-cards/seed`);
+          const seededCards = await axios.get(`${API}/api/region-cards`);
+          setRegionCards(seededCards.data);
+        }
       } catch (error) {
-        console.error('Error fetching map locations:', error);
-        // Fallback to default locations if API fails
+        console.error('Error fetching data:', error);
+        // Fallback to default locations
         setLocations([
           { id: 'usa', name: 'USA', x: 18, y: 42, type: 'Data Source' },
           { id: 'europe', name: 'Europe', x: 48, y: 32, type: 'Data Source' },
@@ -47,12 +57,20 @@ const GlobalNetworkMap = () => {
           { id: 'vietnam', name: 'Vietnam', x: 77, y: 50, type: 'Data Source' },
           { id: 'thailand', name: 'Thailand', x: 73, y: 50, type: 'Data Source' },
         ]);
+        // Fallback region cards
+        setRegionCards([
+          { name: 'Far East', countries: 'China, Taiwan, Japan, Korea', icon: '🏭', type: 'Manufacturing' },
+          { name: 'South East Asia', countries: 'Vietnam, Thailand', icon: '🔧', type: 'Assembly' },
+          { name: 'India', countries: 'Growing Hub', icon: '🚀', type: 'Design & Mfg' },
+          { name: 'Europe', countries: 'Germany, UK, France', icon: '🎯', type: 'High-End' },
+          { name: 'Americas', countries: 'USA, Mexico', icon: '🌎', type: 'Consumption' },
+        ]);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchLocations();
+    fetchData();
   }, []);
 
   // Flow paths showing global sourcing connections
