@@ -165,7 +165,12 @@ const GlobalNetworkMap = () => {
               })}
 
               {/* Location Markers */}
-              {locations.map((loc) => (
+              {locations.map((loc) => {
+                // Determine color based on type: Sourcing Hub = green, Data Source = blue
+                const markerColor = loc.type === 'Sourcing Hub' ? '#10b981' : '#3b82f6';
+                const isSourcingHub = loc.type === 'Sourcing Hub';
+                
+                return (
                 <g key={loc.id}>
                   {/* Pulse animation ring */}
                   <circle 
@@ -173,7 +178,7 @@ const GlobalNetworkMap = () => {
                     cy={loc.y} 
                     r="2" 
                     fill="none"
-                    stroke={loc.region === 'india' ? '#10b981' : '#3b82f6'} 
+                    stroke={markerColor} 
                     strokeWidth="0.3"
                     opacity="0.6"
                   >
@@ -184,8 +189,8 @@ const GlobalNetworkMap = () => {
                   <circle 
                     cx={loc.x} 
                     cy={loc.y} 
-                    r={loc.region === 'india' ? "1.2" : "1"} 
-                    fill={loc.region === 'india' ? '#10b981' : '#3b82f6'} 
+                    r={isSourcingHub ? "1.2" : "1"} 
+                    fill={markerColor} 
                     stroke="#fff" 
                     strokeWidth="0.3"
                     filter="url(#strongGlow)"
@@ -203,7 +208,8 @@ const GlobalNetworkMap = () => {
                     {loc.name}
                   </text>
                 </g>
-              ))}
+                );
+              })}
             </svg>
           </div>
 
