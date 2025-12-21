@@ -55,7 +55,8 @@ import {
   Settings,
   Layers,
   Save,
-  Rocket
+  Rocket,
+  MapPin
 } from 'lucide-react';
 import { logoUrl } from '../data/mock';
 
