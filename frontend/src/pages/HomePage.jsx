@@ -172,7 +172,7 @@ const HomePage = () => {
 
             {/* Trusted By - Customer Logos */}
             <div className="mt-12 pt-8 border-t border-slate-200 text-center">
-              <p className="text-slate-600 text-base font-semibold mb-4">
+              <p className="text-slate-800 text-base font-semibold mb-4">
                 Trusted by leading OEMs and EMS companies worldwide
               </p>
               <div className="flex flex-wrap justify-center items-center gap-x-8 gap-y-3">
