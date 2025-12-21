@@ -272,6 +272,8 @@ const MapLocationEditor = ({ locations, isLoading, onRefresh }) => {
             const isHovered = hoveredLocation?.id === location.id;
             const isDragging = draggingId === location.id;
             const markerColor = location.type === 'Sourcing Hub' ? '#10b981' : '#3b82f6';
+            // Scale Y by 0.5 for the 2:1 aspect ratio viewBox
+            const scaledY = pos.y * 0.5;
             
             return (
               <g 
@@ -282,14 +284,14 @@ const MapLocationEditor = ({ locations, isLoading, onRefresh }) => {
                 {(isSelected || isHovered) && (
                   <circle
                     cx={pos.x}
-                    cy={pos.y}
-                    r={isSelected ? 3 : 2.5}
+                    cy={scaledY}
+                    r={isSelected ? 1.8 : 1.5}
                     fill="none"
                     stroke={markerColor}
-                    strokeWidth="0.3"
+                    strokeWidth="0.2"
                     opacity="0.8"
                   >
-                    <animate attributeName="r" values="2;4;2" dur="1s" repeatCount="indefinite" />
+                    <animate attributeName="r" values="1.2;2.2;1.2" dur="1s" repeatCount="indefinite" />
                     <animate attributeName="opacity" values="0.8;0.2;0.8" dur="1s" repeatCount="indefinite" />
                   </circle>
                 )}
@@ -297,11 +299,11 @@ const MapLocationEditor = ({ locations, isLoading, onRefresh }) => {
                 {/* Main marker */}
                 <circle
                   cx={pos.x}
-                  cy={pos.y}
-                  r={isSelected ? 2 : 1.5}
+                  cy={scaledY}
+                  r={isSelected ? 1.2 : 0.8}
                   fill={markerColor}
                   stroke={isSelected ? '#fff' : 'rgba(255,255,255,0.7)'}
-                  strokeWidth={isSelected ? 0.5 : 0.3}
+                  strokeWidth={isSelected ? 0.3 : 0.15}
                   filter={isSelected ? 'url(#selectedGlow)' : 'url(#markerGlow)'}
                   onMouseDown={(e) => handleMouseDown(e, location)}
                   onMouseEnter={() => setHoveredLocation(location)}
@@ -312,10 +314,10 @@ const MapLocationEditor = ({ locations, isLoading, onRefresh }) => {
                 {/* Label */}
                 <text
                   x={pos.x}
-                  y={pos.y - 3}
+                  y={scaledY - 1.8}
                   textAnchor="middle"
                   fill="#fff"
-                  fontSize={isSelected ? 2.2 : 1.8}
+                  fontSize={isSelected ? 1.6 : 1.4}
                   fontWeight={isSelected ? '700' : '600'}
                   style={{ 
                     pointerEvents: 'none',
