@@ -28,6 +28,7 @@ import {
 import TestimonialsMarquee from '../components/TestimonialsMarquee';
 import DemoVideoModal, { DemoVideoSection } from '../components/DemoVideoModal';
 import ElectronicComponentsPattern from '../components/ElectronicComponentsPattern';
+import GlobalNetworkMap from '../components/GlobalNetworkMap';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
