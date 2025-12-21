@@ -804,6 +804,101 @@ async def seed_all_site_content():
     
     return results
 
+# =============================================
+# MAP LOCATIONS MODELS & ENDPOINTS
+# =============================================
+
+class MapLocationCreate(BaseModel):
+    name: str
+    x: float  # X coordinate (percentage, 0-100)
+    y: float  # Y coordinate (percentage, 0-100)
+    type: str = "Data Source"  # "Sourcing Hub" or "Data Source"
+    order: int = 0
+
+class MapLocationUpdate(BaseModel):
+    name: Optional[str] = None
+    x: Optional[float] = None
+    y: Optional[float] = None
+    type: Optional[str] = None
+    order: Optional[int] = None
+
+class MapLocation(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    x: float
+    y: float
+    type: str = "Data Source"
+    order: int = 0
+
+@api_router.get("/map-locations", response_model=List[MapLocation])
+async def get_map_locations():
+    """Get all map locations"""
+    locations = await db.map_locations.find({}, {"_id": 0}).to_list(100)
+    if not locations:
+        return []
+    locations.sort(key=lambda x: x.get('order', 0))
+    return locations
+
+@api_router.post("/map-locations", response_model=MapLocation)
+async def create_map_location(input: MapLocationCreate):
+    """Create a new map location"""
+    location = MapLocation(**input.model_dump())
+    await db.map_locations.insert_one(location.model_dump())
+    return location
+
+@api_router.put("/map-locations/{location_id}", response_model=MapLocation)
+async def update_map_location(location_id: str, input: MapLocationUpdate):
+    """Update a map location"""
+    update_data = {k: v for k, v in input.model_dump().items() if v is not None}
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    
+    result = await db.map_locations.update_one(
+        {"id": location_id},
+        {"$set": update_data}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Location not found")
+    
+    updated = await db.map_locations.find_one({"id": location_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/map-locations/{location_id}")
+async def delete_map_location(location_id: str):
+    """Delete a map location"""
+    result = await db.map_locations.delete_one({"id": location_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Location not found")
+    return {"message": "Location deleted successfully"}
+
+@api_router.post("/map-locations/seed")
+async def seed_map_locations():
+    """Seed default map locations with proper classification"""
+    count = await db.map_locations.count_documents({})
+    if count > 0:
+        return {"message": f"Locations already exist ({count} found)", "seeded": False}
+    
+    # Sourcing Hubs: China, Taiwan, Korea, Japan (green)
+    # Data Sources: USA, Europe, India, Vietnam, Thailand (blue)
+    default_locations = [
+        {"name": "USA", "x": 18, "y": 42, "type": "Data Source", "order": 0},
+        {"name": "Europe", "x": 48, "y": 32, "type": "Data Source", "order": 1},
+        {"name": "India", "x": 66, "y": 48, "type": "Data Source", "order": 2},
+        {"name": "China", "x": 76, "y": 36, "type": "Sourcing Hub", "order": 3},
+        {"name": "Korea", "x": 82, "y": 34, "type": "Sourcing Hub", "order": 4},
+        {"name": "Japan", "x": 87, "y": 36, "type": "Sourcing Hub", "order": 5},
+        {"name": "Taiwan", "x": 82, "y": 44, "type": "Sourcing Hub", "order": 6},
+        {"name": "Vietnam", "x": 77, "y": 50, "type": "Data Source", "order": 7},
+        {"name": "Thailand", "x": 73, "y": 50, "type": "Data Source", "order": 8},
+    ]
+    
+    for loc_data in default_locations:
+        location = MapLocation(**loc_data)
+        await db.map_locations.insert_one(location.model_dump())
+    
+    return {"message": f"Seeded {len(default_locations)} locations", "seeded": True}
+
 # Admin Authentication
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin@123")
 
