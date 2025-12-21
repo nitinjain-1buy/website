@@ -1647,6 +1647,9 @@ const AdminDashboard = ({ onLogout }) => {
                 <TabsTrigger value="map-locations" className="flex items-center gap-2">
                   <MapPin className="h-4 w-4" />Map ({mapLocations.length})
                 </TabsTrigger>
+                <TabsTrigger value="region-cards" className="flex items-center gap-2">
+                  <Globe className="h-4 w-4" />Regions ({regionCards.length})
+                </TabsTrigger>
                 <TabsTrigger value="testimonials" className="flex items-center gap-2">
                   <Quote className="h-4 w-4" />Testimonials ({testimonials.length})
                 </TabsTrigger>
