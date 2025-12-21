@@ -1049,6 +1049,282 @@ const SupplierRequestsTable = ({ requests, isLoading, onStatusUpdate, updatingId
   );
 };
 
+// Map Locations Manager Component
+const MapLocationsManager = ({ locations, isLoading, onRefresh }) => {
+  const [editingLocation, setEditingLocation] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [formData, setFormData] = useState({ name: '', x: 50, y: 50, type: 'Data Source', order: 0 });
+  const [isSaving, setIsSaving] = useState(false);
+
+  const openCreateDialog = () => {
+    setEditingLocation(null);
+    setFormData({ name: '', x: 50, y: 50, type: 'Data Source', order: 0 });
+    setIsDialogOpen(true);
+  };
+
+  const openEditDialog = (location) => {
+    setEditingLocation(location);
+    setFormData({ 
+      name: location.name, 
+      x: location.x, 
+      y: location.y, 
+      type: location.type || 'Data Source', 
+      order: location.order || 0 
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!formData.name) {
+      toast.error('Please enter a location name');
+      return;
+    }
+    setIsSaving(true);
+    try {
+      const payload = {
+        name: formData.name,
+        x: parseFloat(formData.x),
+        y: parseFloat(formData.y),
+        type: formData.type,
+        order: parseInt(formData.order) || 0
+      };
+      
+      if (editingLocation) {
+        await axios.put(`${API}/map-locations/${editingLocation.id}`, payload);
+        toast.success('Location updated successfully');
+      } else {
+        await axios.post(`${API}/map-locations`, payload);
+        toast.success('Location created successfully');
+      }
+      setIsDialogOpen(false);
+      onRefresh();
+    } catch (error) {
+      toast.error('Failed to save location');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this location?')) return;
+    try {
+      await axios.delete(`${API}/map-locations/${id}`);
+      toast.success('Location deleted successfully');
+      onRefresh();
+    } catch (error) {
+      toast.error('Failed to delete location');
+    }
+  };
+
+  const seedLocations = async () => {
+    try {
+      const result = await axios.post(`${API}/map-locations/seed`);
+      toast.success(result.data.message);
+      onRefresh();
+    } catch (error) {
+      toast.error('Failed to seed locations');
+    }
+  };
+
+  // Count by type
+  const sourcingHubs = locations.filter(l => l.type === 'Sourcing Hub').length;
+  const dataSources = locations.filter(l => l.type === 'Data Source').length;
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h3 className="text-lg font-semibold text-slate-900">Map Locations</h3>
+          <p className="text-sm text-slate-500">
+            Manage world map markers - 
+            <span className="text-emerald-600 ml-1">{sourcingHubs} Sourcing Hubs</span>, 
+            <span className="text-blue-600 ml-1">{dataSources} Data Sources</span>
+          </p>
+        </div>
+        <div className="flex gap-2">
+          {locations.length === 0 && (
+            <Button onClick={seedLocations} variant="outline">Load Defaults</Button>
+          )}
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={openCreateDialog} className="bg-emerald-600 hover:bg-emerald-700">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Location
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-lg">
+              <DialogHeader>
+                <DialogTitle>{editingLocation ? 'Edit Location' : 'Add Location'}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 mt-4">
+                <div className="space-y-2">
+                  <Label>Name *</Label>
+                  <Input
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="e.g., China, Taiwan, USA"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>X Coordinate (0-100)</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.5"
+                      value={formData.x}
+                      onChange={(e) => setFormData({ ...formData, x: e.target.value })}
+                      placeholder="50"
+                    />
+                    <p className="text-xs text-slate-500">0 = left edge, 100 = right edge</p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Y Coordinate (0-100)</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.5"
+                      value={formData.y}
+                      onChange={(e) => setFormData({ ...formData, y: e.target.value })}
+                      placeholder="50"
+                    />
+                    <p className="text-xs text-slate-500">0 = top edge, 100 = bottom edge</p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Type</Label>
+                  <Select value={formData.type} onValueChange={(v) => setFormData({ ...formData, type: v })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Sourcing Hub">
+                        <span className="flex items-center gap-2">
+                          <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
+                          Sourcing Hub (Green)
+                        </span>
+                      </SelectItem>
+                      <SelectItem value="Data Source">
+                        <span className="flex items-center gap-2">
+                          <span className="w-3 h-3 rounded-full bg-blue-500"></span>
+                          Data Source (Blue)
+                        </span>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Order</Label>
+                  <Input
+                    type="number"
+                    value={formData.order}
+                    onChange={(e) => setFormData({ ...formData, order: e.target.value })}
+                    placeholder="0"
+                  />
+                </div>
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+                  <Button onClick={handleSave} disabled={isSaving}>
+                    {isSaving ? 'Saving...' : 'Save'}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+
+      {/* Reference Guide */}
+      <div className="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
+        <h4 className="font-medium text-slate-900 mb-2">📍 Coordinate Guide</h4>
+        <p className="text-sm text-slate-600 mb-2">
+          The map uses percentage-based coordinates where (0,0) is top-left and (100,100) is bottom-right.
+        </p>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
+          <div className="flex items-center gap-2">
+            <span className="font-medium">USA:</span> ~18, 42
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-medium">Europe:</span> ~48, 32
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-medium">India:</span> ~66, 48
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-medium">China:</span> ~76, 36
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-medium">Japan:</span> ~87, 36
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-medium">Taiwan:</span> ~82, 44
+          </div>
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="text-center py-12">
+          <RefreshCw className="h-8 w-8 animate-spin mx-auto text-slate-400" />
+        </div>
+      ) : locations.length === 0 ? (
+        <div className="text-center py-12 bg-slate-50 rounded-lg">
+          <MapPin className="h-12 w-12 mx-auto text-slate-300" />
+          <p className="text-slate-500 mt-2">No map locations yet</p>
+          <Button onClick={seedLocations} variant="outline" className="mt-4">
+            Load Default Locations
+          </Button>
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-12">#</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>X Coord</TableHead>
+                <TableHead>Y Coord</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {locations.map((location, index) => (
+                <TableRow key={location.id}>
+                  <TableCell className="font-medium text-slate-500">{index + 1}</TableCell>
+                  <TableCell className="font-medium">{location.name}</TableCell>
+                  <TableCell>
+                    <Badge 
+                      variant="outline" 
+                      className={location.type === 'Sourcing Hub' 
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                        : 'bg-blue-50 text-blue-700 border-blue-200'}
+                    >
+                      <span className={`w-2 h-2 rounded-full mr-2 ${location.type === 'Sourcing Hub' ? 'bg-emerald-500' : 'bg-blue-500'}`}></span>
+                      {location.type}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{location.x}</TableCell>
+                  <TableCell>{location.y}</TableCell>
+                  <TableCell className="text-right">
+                    <Button variant="ghost" size="sm" onClick={() => openEditDialog(location)}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleDelete(location.id)} className="text-red-600">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // Testimonials Manager Component
 const TestimonialsManager = ({ testimonials, isLoading, onRefresh }) => {
   const [editingTestimonial, setEditingTestimonial] = useState(null);
