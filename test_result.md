@@ -372,3 +372,47 @@ agent_communication:
       message: "User explicitly requested end-to-end testing of testimonial management system. Please test: 1) Login at /admin with password 'admin@123', 2) Navigate to Testimonials tab, 3) Add a new test testimonial, 4) Verify it appears in admin list, 5) Navigate to homepage and verify new testimonial shows in carousel, 6) Return to admin and edit the testimonial, 7) Delete the testimonial and verify removal from both admin and homepage. Backend API is working - tested GET endpoint via curl and it returns 7 testimonials."
     - agent: "main"
       message: "E2E TESTING COMPLETE: ✅ ALL TESTIMONIAL MANAGEMENT FEATURES WORKING. Tested full CRUD flow: 1) Admin login works with password admin@123 2) Testimonials tab shows all 7 testimonials with Add/Edit/Delete controls 3) Added test testimonial - count updated to 8, toast notification shown 4) Homepage carousel updated to show 8 testimonials including new test entry 5) Edit modal opens with pre-filled data 6) Deleted test testimonial - count reverted to 7, toast shown 7) Homepage carousel correctly shows 7 testimonials, test entry removed. All features verified working end-to-end."
+# Map Locations Management Feature - Testing Required
+# Added by main agent on 2025-12-21
+
+backend:
+  - task: "Map Locations CRUD API endpoints"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Created /api/map-locations endpoints for CRUD operations. Seed endpoint creates 9 locations: China, Taiwan, Korea, Japan as Sourcing Hubs (green), USA, Europe, India, Vietnam, Thailand as Data Sources (blue). Verified via curl - all endpoints working."
+
+frontend:
+  - task: "GlobalNetworkMap dynamic locations"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/GlobalNetworkMap.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Updated GlobalNetworkMap to fetch locations from /api/map-locations endpoint. Markers now dynamically colored based on type: green for Sourcing Hub, blue for Data Source. Screenshot verified - map shows correct colors."
+
+  - task: "Admin Map Locations Manager UI"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/AdminPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Added MapLocationsManager component with full CRUD UI. Features: table view of all locations with name/type/x/y coordinates, Add Location button, Edit dialog with x/y coordinate inputs, Type dropdown (Sourcing Hub/Data Source), Delete functionality. Screenshot verified - all UI elements working."
+
+agent_communication:
+    - agent: "main"
+      message: "Map Locations feature implementation complete. Please test: 1) Login to /admin with password 'admin@123', 2) Navigate to 'Map (9)' tab, 3) Verify 4 Sourcing Hubs (China, Korea, Japan, Taiwan) and 5 Data Sources (USA, Europe, India, Vietnam, Thailand), 4) Test edit functionality - change x/y coordinates, 5) Go to homepage and scroll to world map - verify markers appear at correct positions with correct colors (green=Sourcing Hub, blue=Data Source), 6) Test add/delete location workflow."
