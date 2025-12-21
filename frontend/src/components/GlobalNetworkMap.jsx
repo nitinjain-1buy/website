@@ -270,7 +270,7 @@ const GlobalNetworkMap = () => {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-8">
           {regionCards.map((region) => (
             <div
-              key={region.name}
+              key={region.id || region.name}
               className="bg-slate-800/50 rounded-lg p-4 border border-slate-700 hover:border-emerald-500/50 transition-colors"
             >
               <div className="text-2xl mb-2">{region.icon}</div>
