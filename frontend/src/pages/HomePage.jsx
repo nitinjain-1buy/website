@@ -172,17 +172,39 @@ const HomePage = () => {
             </div>
           </div>
 
-          {/* Trusted By - Customer Logos - Full Width Centered */}
+          {/* Trusted By - Customer Logos - Full Width Centered with Marquee */}
           <div className="mt-12 pt-8 border-t border-slate-200 text-center">
-            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-6">
               Trusted by leading OEMs and EMS companies worldwide
             </h2>
-            <div className="flex flex-wrap justify-center items-center gap-x-10 gap-y-4 mt-6">
-              {customers.slice(0, 8).map((customer, index) => (
-                <span key={index} className="text-xl text-slate-400 font-semibold hover:text-slate-600 transition-colors">
-                  {customer}
-                </span>
-              ))}
+            
+            {/* Marquee Container */}
+            <div className="relative overflow-hidden py-4">
+              {/* Gradient Masks */}
+              <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-slate-50 to-transparent z-10"></div>
+              <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-slate-50 to-transparent z-10"></div>
+              
+              {/* Scrolling Content */}
+              <div className="flex animate-marquee whitespace-nowrap">
+                {/* First set */}
+                {customers.map((customer, index) => (
+                  <span 
+                    key={`first-${index}`} 
+                    className="text-xl text-slate-400 font-semibold mx-8 hover:text-slate-600 transition-colors"
+                  >
+                    {customer}
+                  </span>
+                ))}
+                {/* Duplicate set for seamless loop */}
+                {customers.map((customer, index) => (
+                  <span 
+                    key={`second-${index}`} 
+                    className="text-xl text-slate-400 font-semibold mx-8 hover:text-slate-600 transition-colors"
+                  >
+                    {customer}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
         </div>
