@@ -116,9 +116,9 @@ const GlobalNetworkMap = () => {
             
             {/* SVG Overlay for markers and flow lines */}
             <svg 
-              viewBox="0 0 100 50" 
+              viewBox="0 0 100 100" 
               className="absolute inset-0 w-full h-full"
-              preserveAspectRatio="xMidYMid meet"
+              preserveAspectRatio="none"
             >
               <defs>
                 <filter id="glow">
