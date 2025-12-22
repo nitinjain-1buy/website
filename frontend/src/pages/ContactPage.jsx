@@ -520,7 +520,7 @@ const ContactPage = () => {
                   </p>
                   <div className="flex items-center space-x-2 text-emerald-800">
                     <Mail className="h-5 w-5" />
-                    <span className="font-medium">enterprise@1buy.ai</span>
+                    <span className="font-medium">sales@1buy.ai</span>
                   </div>
                 </CardContent>
               </Card>
