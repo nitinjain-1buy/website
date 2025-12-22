@@ -23,12 +23,17 @@ import {
   Zap,
   DollarSign,
   ChevronRight,
-  Play
+  Play,
+  Sparkles
 } from 'lucide-react';
 import TestimonialsMarquee from '../components/TestimonialsMarquee';
-// DemoVideoModal removed - import kept for potential future use
 import ElectronicComponentsPattern from '../components/ElectronicComponentsPattern';
 import GlobalNetworkMap from '../components/GlobalNetworkMap';
+import AnimatedSection from '../components/AnimatedSection';
+import AnimatedCounter from '../components/AnimatedCounter';
+import TypewriterText from '../components/TypewriterText';
+import AnimatedCard from '../components/AnimatedCard';
+import useScrollAnimation from '../hooks/useScrollAnimation';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -95,12 +100,38 @@ const defaultProducts = [
   }
 ];
 
+// Animated Stats Component
+const AnimatedStat = ({ stat, index }) => {
+  const [ref, isVisible] = useScrollAnimation({ threshold: 0.3 });
+  
+  return (
+    <div 
+      ref={ref}
+      className={`text-center transition-all duration-700 ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+      }`}
+      style={{ transitionDelay: `${index * 150}ms` }}
+    >
+      <div className="text-3xl lg:text-4xl font-bold text-emerald-400 mb-2">
+        {isVisible ? (
+          <AnimatedCounter end={stat.value} duration={2000} />
+        ) : (
+          <span>0</span>
+        )}
+      </div>
+      <div className="text-white font-medium mb-1">{stat.label}</div>
+      <div className="text-slate-400 text-sm">{stat.description}</div>
+    </div>
+  );
+};
+
 const HomePage = () => {
   const [heroData, setHeroData] = useState(defaultHeroData);
   const [stats, setStats] = useState(defaultStats);
   const [customers, setCustomers] = useState(defaultCustomers);
   const [products, setProducts] = useState(defaultProducts);
   const [isLoading, setIsLoading] = useState(true);
+  const [headlineComplete, setHeadlineComplete] = useState(false);
 
   useEffect(() => {
     const fetchSiteContent = async () => {
@@ -144,35 +175,77 @@ const HomePage = () => {
   }, []);
 
   return (
-    <div className="bg-white">
+    <div className="bg-white overflow-x-hidden">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-slate-50">
+      <section className="relative overflow-hidden hero-gradient-bg">
         {/* Electronic Components Watermark Background */}
         <ElectronicComponentsPattern />
         <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
+        
+        {/* Floating particles effect */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 left-[10%] w-2 h-2 bg-emerald-400/30 rounded-full animate-floating-dots" />
+          <div className="absolute top-40 right-[20%] w-3 h-3 bg-blue-400/20 rounded-full animate-floating-dots" style={{ animationDelay: '1s' }} />
+          <div className="absolute bottom-40 left-[30%] w-2 h-2 bg-emerald-500/20 rounded-full animate-floating-dots" style={{ animationDelay: '2s' }} />
+          <div className="absolute top-60 right-[40%] w-1.5 h-1.5 bg-slate-400/30 rounded-full animate-floating-dots" style={{ animationDelay: '3s' }} />
+        </div>
+
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
           <div className="max-w-4xl">
-            <Badge variant="outline" className="mb-6 text-emerald-700 border-emerald-200 bg-emerald-50">
-              The Operating System for Electronics Procurement
-            </Badge>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 leading-tight mb-6">
-              {heroData.headline}
+            {/* Animated Badge */}
+            <AnimatedSection animation="fade-down" delay={0}>
+              <Badge 
+                variant="outline" 
+                className="mb-6 text-emerald-700 border-emerald-200 bg-emerald-50 animate-badge-pulse inline-flex items-center gap-2"
+              >
+                <Sparkles className="w-3 h-3 animate-pulse" />
+                The Operating System for Electronics Procurement
+              </Badge>
+            </AnimatedSection>
+
+            {/* Typewriter Headline */}
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 leading-tight mb-6 min-h-[120px] lg:min-h-[144px]">
+              <TypewriterText 
+                text={heroData.headline}
+                speed={40}
+                delay={300}
+                onComplete={() => setHeadlineComplete(true)}
+              />
             </h1>
-            <p className="text-xl text-slate-600 mb-8 leading-relaxed max-w-3xl">
+
+            {/* Sub-headline with fade-in after typewriter */}
+            <p 
+              className={`text-xl text-slate-600 mb-8 leading-relaxed max-w-3xl transition-all duration-700 ${
+                headlineComplete ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+              }`}
+            >
               {heroData.subHeadline}
             </p>
-            <div className="flex flex-col sm:flex-row gap-4">
+
+            {/* CTA Button with glow effect */}
+            <div 
+              className={`flex flex-col sm:flex-row gap-4 transition-all duration-700 delay-300 ${
+                headlineComplete ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+              }`}
+            >
               <Link to="/contact">
-                <Button size="lg" className="bg-slate-900 hover:bg-slate-800 text-white px-8 h-12">
-                  {heroData.ctaPrimary}
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                <Button 
+                  size="lg" 
+                  className="bg-slate-900 hover:bg-slate-800 text-white px-8 h-12 relative overflow-hidden group transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-slate-900/20"
+                >
+                  <span className="relative z-10 flex items-center">
+                    {heroData.ctaPrimary}
+                    <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                  </span>
+                  {/* Shimmer effect */}
+                  <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent group-hover:animate-shimmer" />
                 </Button>
               </Link>
             </div>
           </div>
 
           {/* Trusted By - Customer Logos - Full Width Centered with Marquee */}
-          <div className="mt-12 pt-8 border-t border-slate-200 text-center">
+          <AnimatedSection animation="fade-up" delay={800} className="mt-12 pt-8 border-t border-slate-200 text-center">
             <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-6">
               Trusted by leading OEMs and EMS companies worldwide
             </h2>
@@ -205,33 +278,35 @@ const HomePage = () => {
                 ))}
               </div>
             </div>
-          </div>
+          </AnimatedSection>
         </div>
 
-        {/* Product Screenshot */}
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-          <div className="relative rounded-xl overflow-hidden shadow-2xl border border-slate-200">
+        {/* Product Screenshot with zoom animation */}
+        <AnimatedSection animation="zoom-in" delay={1000} className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+          <div className="relative rounded-xl overflow-hidden shadow-2xl border border-slate-200 hover-lift">
             <img
               src={heroData.screenshotUrl}
               alt="1Buy.AI Platform Dashboard"
               className="w-full"
             />
+            {/* Subtle overlay glow */}
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/5 to-transparent pointer-events-none" />
           </div>
-        </div>
+        </AnimatedSection>
       </section>
 
       {/* Proof Points - Compact Stats Bar */}
-      <section className="bg-slate-900 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="bg-slate-900 py-12 relative overflow-hidden">
+        {/* Animated background lines */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-emerald-400 to-transparent animate-pulse" />
+          <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-emerald-400 to-transparent animate-pulse" style={{ animationDelay: '1s' }} />
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
-              <div key={stat.key || index} className="text-center">
-                <div className="text-3xl lg:text-4xl font-bold text-emerald-400 mb-2">
-                  {stat.value}
-                </div>
-                <div className="text-white font-medium mb-1">{stat.label}</div>
-                <div className="text-slate-400 text-sm">{stat.description}</div>
-              </div>
+              <AnimatedStat key={stat.key || index} stat={stat} index={index} />
             ))}
           </div>
         </div>
@@ -240,7 +315,7 @@ const HomePage = () => {
       {/* Problems Section */}
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <AnimatedSection animation="fade-up" className="text-center mb-16">
             <Badge variant="outline" className="mb-4 text-slate-600 border-slate-300">
               The Problem
             </Badge>
@@ -250,15 +325,20 @@ const HomePage = () => {
             <p className="text-xl text-slate-600 max-w-3xl mx-auto">
               Accountable for outcomes but lacking decision-grade tools. Distributors have conflict of interest. There's no independent benchmark.
             </p>
-          </div>
+          </AnimatedSection>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {problemsData.map((problem) => {
+            {problemsData.map((problem, index) => {
               const IconComponent = iconMap[problem.icon];
               return (
-                <Card key={problem.id} className="border-slate-200 hover:border-slate-300 transition-colors hover:shadow-lg">
+                <AnimatedCard 
+                  key={problem.id} 
+                  delay={index * 100}
+                  hoverEffect="lift"
+                  className="border-slate-200"
+                >
                   <CardContent className="p-6">
-                    <div className="w-12 h-12 rounded-lg bg-red-50 flex items-center justify-center mb-4">
+                    <div className="w-12 h-12 rounded-lg bg-red-50 flex items-center justify-center mb-4 transition-transform group-hover:scale-110">
                       <IconComponent className="h-6 w-6 text-red-600" />
                     </div>
                     <h3 className="text-lg font-semibold text-slate-900 mb-2">
@@ -268,7 +348,7 @@ const HomePage = () => {
                       {problem.description}
                     </p>
                   </CardContent>
-                </Card>
+                </AnimatedCard>
               );
             })}
           </div>
@@ -278,7 +358,7 @@ const HomePage = () => {
       {/* How It Works - Flow */}
       <section className="py-24 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <AnimatedSection animation="fade-up" className="text-center mb-16">
             <Badge variant="outline" className="mb-4 text-emerald-700 border-emerald-200 bg-emerald-50">
               How It Works
             </Badge>
@@ -288,21 +368,30 @@ const HomePage = () => {
             <p className="text-xl text-slate-600 max-w-3xl mx-auto">
               No rip-and-replace. Minimal disruption. Clear ROI before scale-up.
             </p>
-          </div>
+          </AnimatedSection>
 
           <div className="relative">
-            <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-0.5 bg-slate-200 -translate-y-1/2" />
+            {/* Animated connection line */}
+            <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-0.5 bg-slate-200 -translate-y-1/2 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-emerald-600 animate-shimmer" style={{ animationDuration: '3s' }} />
+            </div>
+            
             <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-8">
               {workflowSteps.map((step, index) => {
                 const IconComponent = iconMap[step.icon];
                 return (
-                  <div key={step.step} className="relative">
-                    <div className="bg-white rounded-xl p-6 border border-slate-200 hover:border-emerald-200 hover:shadow-lg transition-all h-full">
-                      <div className="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-lg mb-4">
+                  <AnimatedSection 
+                    key={step.step} 
+                    animation="fade-up"
+                    delay={index * 150}
+                    className="relative"
+                  >
+                    <div className="bg-white rounded-xl p-6 border border-slate-200 hover:border-emerald-200 hover:shadow-lg transition-all h-full hover:-translate-y-2 group">
+                      <div className="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-lg mb-4 group-hover:animate-pulse-glow transition-all">
                         {step.step}
                       </div>
-                      <div className="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center mb-4">
-                        <IconComponent className="h-6 w-6 text-slate-700" />
+                      <div className="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center mb-4 group-hover:bg-emerald-50 transition-colors">
+                        <IconComponent className="h-6 w-6 text-slate-700 group-hover:text-emerald-600 transition-colors" />
                       </div>
                       <h3 className="text-lg font-semibold text-slate-900 mb-2">
                         {step.title}
@@ -313,10 +402,10 @@ const HomePage = () => {
                     </div>
                     {index < workflowSteps.length - 1 && (
                       <div className="hidden lg:flex absolute top-1/2 -right-4 -translate-y-1/2 z-10">
-                        <ChevronRight className="h-6 w-6 text-slate-400" />
+                        <ChevronRight className="h-6 w-6 text-emerald-500 animate-subtle-bounce" />
                       </div>
                     )}
-                  </div>
+                  </AnimatedSection>
                 );
               })}
             </div>
@@ -327,8 +416,9 @@ const HomePage = () => {
       {/* Products Overview */}
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <Badge variant="outline" className="mb-4 text-emerald-700 border-emerald-200 bg-emerald-50">
+          <AnimatedSection animation="fade-up" className="text-center mb-16">
+            <Badge variant="outline" className="mb-4 text-emerald-700 border-emerald-200 bg-emerald-50 inline-flex items-center gap-2">
+              <Zap className="w-3 h-3" />
               Our Platform
             </Badge>
             <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
@@ -337,20 +427,25 @@ const HomePage = () => {
             <p className="text-xl text-slate-600 max-w-3xl mx-auto">
               Intelligence → Procurement → Liquidation. Built as one unified operating system.
             </p>
-          </div>
+          </AnimatedSection>
 
           <div className="grid lg:grid-cols-3 gap-8">
             {products.map((product, index) => {
               const IconComponent = iconMap[product.icon] || Database;
               const colors = [
-                { bg: 'bg-blue-50', icon: 'text-blue-600', border: 'border-blue-100' },
-                { bg: 'bg-emerald-50', icon: 'text-emerald-600', border: 'border-emerald-100' },
-                { bg: 'bg-amber-50', icon: 'text-amber-600', border: 'border-amber-100' }
+                { bg: 'bg-blue-50', icon: 'text-blue-600', border: 'border-blue-100', hover: 'hover:border-blue-300 hover:shadow-blue-100/50' },
+                { bg: 'bg-emerald-50', icon: 'text-emerald-600', border: 'border-emerald-100', hover: 'hover:border-emerald-300 hover:shadow-emerald-100/50' },
+                { bg: 'bg-amber-50', icon: 'text-amber-600', border: 'border-amber-100', hover: 'hover:border-amber-300 hover:shadow-amber-100/50' }
               ];
               return (
-                <Card key={product.productId || product.id} className={`border-2 ${colors[index % 3].border} hover:shadow-xl transition-all`}>
+                <AnimatedCard 
+                  key={product.productId || product.id} 
+                  delay={index * 150}
+                  hoverEffect="glow"
+                  className={`border-2 ${colors[index % 3].border} ${colors[index % 3].hover}`}
+                >
                   <CardContent className="p-8">
-                    <div className={`w-14 h-14 rounded-xl ${colors[index % 3].bg} flex items-center justify-center mb-6`}>
+                    <div className={`w-14 h-14 rounded-xl ${colors[index % 3].bg} flex items-center justify-center mb-6 transition-transform group-hover:scale-110`}>
                       <IconComponent className={`h-7 w-7 ${colors[index % 3].icon}`} />
                     </div>
                     <h3 className="text-2xl font-bold text-slate-900 mb-2">
@@ -364,20 +459,23 @@ const HomePage = () => {
                     </p>
                     <ul className="space-y-3 mb-6">
                       {(product.features || []).slice(0, 4).map((feature, idx) => (
-                        <li key={idx} className="flex items-start">
-                          <CheckCircle className="h-5 w-5 text-emerald-600 mr-2 flex-shrink-0 mt-0.5" />
+                        <li key={idx} className="flex items-start group/item">
+                          <CheckCircle className="h-5 w-5 text-emerald-600 mr-2 flex-shrink-0 mt-0.5 transition-transform group-hover/item:scale-110" />
                           <span className="text-slate-700 text-sm">{feature}</span>
                         </li>
                       ))}
                     </ul>
                     <Link to={`/products#${product.productId}`}>
-                      <Button variant="outline" className="w-full border-slate-300">
+                      <Button 
+                        variant="outline" 
+                        className="w-full border-slate-300 group/btn hover:border-slate-400 transition-all"
+                      >
                         Learn More
-                        <ArrowRight className="ml-2 h-4 w-4" />
+                        <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
                       </Button>
                     </Link>
                   </CardContent>
-                </Card>
+                </AnimatedCard>
               );
             })}
           </div>
@@ -388,34 +486,36 @@ const HomePage = () => {
       <GlobalNetworkMap />
 
       {/* Mental Model Section */}
-      <section className="py-24 bg-white">
+      <section className="py-24 bg-white overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto text-center">
+          <AnimatedSection animation="zoom-in" className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-8">
               Think of it as
             </h2>
             <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 text-xl">
-              <div className="flex items-center">
-                <span className="font-semibold text-blue-600">Bloomberg</span>
+              <AnimatedSection animation="fade-right" delay={200} className="flex items-center">
+                <span className="font-semibold text-blue-600 hover:text-blue-700 transition-colors">Bloomberg</span>
                 <span className="text-slate-400 ml-2">(1Data)</span>
-              </div>
-              <ArrowRight className="h-6 w-6 text-slate-400 hidden md:block" />
+              </AnimatedSection>
+              <ArrowRight className="h-6 w-6 text-slate-400 hidden md:block animate-subtle-bounce" />
               <div className="h-6 w-px bg-slate-300 md:hidden" />
-              <div className="flex items-center">
-                <span className="font-semibold text-emerald-600">Amazon</span>
+              <AnimatedSection animation="fade-up" delay={400} className="flex items-center">
+                <span className="font-semibold text-emerald-600 hover:text-emerald-700 transition-colors">Amazon</span>
                 <span className="text-slate-400 ml-2">(1Source)</span>
-              </div>
-              <ArrowRight className="h-6 w-6 text-slate-400 hidden md:block" />
+              </AnimatedSection>
+              <ArrowRight className="h-6 w-6 text-slate-400 hidden md:block animate-subtle-bounce" style={{ animationDelay: '0.5s' }} />
               <div className="h-6 w-px bg-slate-300 md:hidden" />
-              <div className="flex items-center">
-                <span className="font-semibold text-amber-600">eBay</span>
+              <AnimatedSection animation="fade-left" delay={600} className="flex items-center">
+                <span className="font-semibold text-amber-600 hover:text-amber-700 transition-colors">eBay</span>
                 <span className="text-slate-400 ml-2">(1Xcess)</span>
-              </div>
+              </AnimatedSection>
             </div>
-            <p className="text-slate-600 mt-6 text-lg">
-              For electronic components
-            </p>
-          </div>
+            <AnimatedSection animation="fade-up" delay={800}>
+              <p className="text-slate-600 mt-6 text-lg">
+                For electronic components
+              </p>
+            </AnimatedSection>
+          </AnimatedSection>
         </div>
       </section>
 
@@ -423,27 +523,49 @@ const HomePage = () => {
       <TestimonialsMarquee />
 
       {/* CTA Section */}
-      <section className="py-24 bg-slate-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-            Ready to transform your procurement?
-          </h2>
-          <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
-            Start with your BOM. See potential savings within days, not months.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/contact">
-              <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 h-12">
-                Request a Demo
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-            <Link to="/how-it-works">
-              <Button size="lg" variant="outline" className="border-slate-600 text-white hover:bg-slate-800 px-8 h-12">
-                See How It Works
-              </Button>
-            </Link>
-          </div>
+      <section className="py-24 bg-slate-900 relative overflow-hidden">
+        {/* Animated background effect */}
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
+          <AnimatedSection animation="fade-up">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+              Ready to transform your procurement?
+            </h2>
+          </AnimatedSection>
+          <AnimatedSection animation="fade-up" delay={200}>
+            <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
+              Start with your BOM. See potential savings within days, not months.
+            </p>
+          </AnimatedSection>
+          <AnimatedSection animation="fade-up" delay={400}>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/contact">
+                <Button 
+                  size="lg" 
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 h-12 relative overflow-hidden group transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-emerald-600/30"
+                >
+                  <span className="relative z-10 flex items-center">
+                    Request a Demo
+                    <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                  </span>
+                  <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:animate-shimmer" />
+                </Button>
+              </Link>
+              <Link to="/how-it-works">
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  className="border-slate-600 text-white hover:bg-slate-800 px-8 h-12 transition-all duration-300 hover:scale-105"
+                >
+                  See How It Works
+                </Button>
+              </Link>
+            </div>
+          </AnimatedSection>
         </div>
       </section>
     </div>
