@@ -1652,6 +1652,9 @@ const AdminDashboard = ({ onLogout }) => {
                 <TabsTrigger value="map-locations" className="flex items-center gap-2">
                   <MapPin className="h-4 w-4" />Map ({mapLocations.length})
                 </TabsTrigger>
+                <TabsTrigger value="flow-lines" className="flex items-center gap-2">
+                  <GitBranch className="h-4 w-4" />Flows ({flowLines.length})
+                </TabsTrigger>
                 <TabsTrigger value="region-cards" className="flex items-center gap-2">
                   <Globe className="h-4 w-4" />Regions ({regionCards.length})
                 </TabsTrigger>
