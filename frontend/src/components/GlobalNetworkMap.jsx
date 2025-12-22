@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
 const API = process.env.REACT_APP_BACKEND_URL;
@@ -6,13 +6,14 @@ const API = process.env.REACT_APP_BACKEND_URL;
 const GlobalNetworkMap = () => {
   const [activeFlow, setActiveFlow] = useState(0);
   const [locations, setLocations] = useState([]);
+  const [flowLines, setFlowLines] = useState([]);
   const [regionCards, setRegionCards] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // World map image URL
   const worldMapImage = "https://customer-assets.emergentagent.com/job_procure-sphere/artifacts/4a54wyou_Screenshot%20from%202025-12-21%2018-55-27.png";
 
-  // Fetch locations and region cards from API
+  // Fetch locations, flow lines, and region cards from API
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -34,6 +35,16 @@ const GlobalNetworkMap = () => {
           setLocations(transformedLocations);
         }
 
+        // Fetch flow lines
+        const flowResponse = await axios.get(`${API}/api/flow-lines`);
+        if (flowResponse.data && flowResponse.data.length > 0) {
+          setFlowLines(flowResponse.data.filter(f => f.isActive !== false));
+        } else {
+          await axios.post(`${API}/api/flow-lines/seed`);
+          const seededFlows = await axios.get(`${API}/api/flow-lines`);
+          setFlowLines(seededFlows.data.filter(f => f.isActive !== false));
+        }
+
         // Fetch region cards
         const cardResponse = await axios.get(`${API}/api/region-cards`);
         if (cardResponse.data && cardResponse.data.length > 0) {
@@ -45,7 +56,7 @@ const GlobalNetworkMap = () => {
         }
       } catch (error) {
         console.error('Error fetching data:', error);
-        // Fallback to default locations
+        // Fallback data
         setLocations([
           { id: 'usa', name: 'USA', x: 18, y: 42, type: 'Data Source' },
           { id: 'europe', name: 'Europe', x: 48, y: 32, type: 'Data Source' },
@@ -57,7 +68,7 @@ const GlobalNetworkMap = () => {
           { id: 'vietnam', name: 'Vietnam', x: 77, y: 50, type: 'Data Source' },
           { id: 'thailand', name: 'Thailand', x: 73, y: 50, type: 'Data Source' },
         ]);
-        // Fallback region cards
+        setFlowLines([]);
         setRegionCards([
           { name: 'Far East', countries: 'China, Taiwan, Japan, Korea', icon: '🏭', type: 'Manufacturing' },
           { name: 'South East Asia', countries: 'Vietnam, Thailand', icon: '🔧', type: 'Assembly' },
@@ -73,64 +84,13 @@ const GlobalNetworkMap = () => {
     fetchData();
   }, []);
 
-  // Source locations (Asian manufacturing/sourcing hubs) - flows originate FROM these
-  const sourceLocationNames = ['china', 'taiwan', 'korea', 'japan', 'vietnam', 'thailand', 'india'];
-  
-  // Colors for different source regions
-  const flowColors = {
-    china: '#8b5cf6',    // Purple
-    taiwan: '#10b981',   // Green
-    korea: '#3b82f6',    // Blue
-    japan: '#3b82f6',    // Blue
-    vietnam: '#f59e0b',  // Orange
-    thailand: '#f59e0b', // Orange
-    india: '#10b981',    // Green
-  };
-
-  // Dynamically generate flows from source locations to destination locations
-  const flows = React.useMemo(() => {
-    if (locations.length === 0) return [];
-    
-    const generatedFlows = [];
-    const sourceIds = sourceLocationNames.map(name => name.toLowerCase());
-    
-    // Get destination locations (any location not in source list)
-    const destinations = locations.filter(loc => 
-      !sourceIds.includes(loc.id?.toLowerCase()) && 
-      !sourceIds.includes(loc.name?.toLowerCase())
-    );
-    
-    // Get source locations that exist in our data
-    const sources = locations.filter(loc => 
-      sourceIds.includes(loc.id?.toLowerCase()) || 
-      sourceIds.includes(loc.name?.toLowerCase())
-    );
-    
-    // Generate flows from each source to each destination
-    sources.forEach(source => {
-      const sourceId = source.id?.toLowerCase() || source.name?.toLowerCase();
-      const color = flowColors[sourceId] || '#3b82f6';
-      
-      destinations.forEach(dest => {
-        const destId = dest.id?.toLowerCase() || dest.name?.toLowerCase();
-        
-        // Determine if line should curve below (for lines going to Americas from Asia)
-        // Curve below if destination is west of source (lower X value) and it's a long distance
-        const isGoingWest = dest.x < source.x;
-        const isLongDistance = Math.abs(dest.x - source.x) > 40;
-        const curveBelow = isGoingWest && isLongDistance;
-        
-        generatedFlows.push({
-          from: sourceId,
-          to: destId,
-          color,
-          curveBelow
-        });
-      });
-    });
-    
-    return generatedFlows;
-  }, [locations]);
+  // Transform flow lines from API format to component format
+  const flows = flowLines.map(line => ({
+    from: line.fromLocation.toLowerCase().replace(/\s+/g, ''),
+    to: line.toLocation.toLowerCase().replace(/\s+/g, ''),
+    color: line.color,
+    curveBelow: line.curveBelow
+  }));
 
   useEffect(() => {
     if (flows.length === 0) return;
