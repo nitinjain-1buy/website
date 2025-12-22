@@ -1492,13 +1492,14 @@ const AdminDashboard = ({ onLogout }) => {
   const [products, setProducts] = useState([]);
   const [mapLocations, setMapLocations] = useState([]);
   const [regionCards, setRegionCards] = useState([]);
+  const [flowLines, setFlowLines] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
 
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [customersRes, suppliersRes, testimonialsRes, statsRes, heroRes, logosRes, productsRes, mapLocationsRes, regionCardsRes] = await Promise.all([
+      const [customersRes, suppliersRes, testimonialsRes, statsRes, heroRes, logosRes, productsRes, mapLocationsRes, regionCardsRes, flowLinesRes] = await Promise.all([
         axios.get(`${API}/demo-requests`),
         axios.get(`${API}/supplier-requests`),
         axios.get(`${API}/testimonials`),
@@ -1507,7 +1508,8 @@ const AdminDashboard = ({ onLogout }) => {
         axios.get(`${API}/customer-logos`),
         axios.get(`${API}/products`),
         axios.get(`${API}/map-locations`),
-        axios.get(`${API}/region-cards`)
+        axios.get(`${API}/region-cards`),
+        axios.get(`${API}/flow-lines`)
       ]);
       setCustomerRequests(customersRes.data);
       setSupplierRequests(suppliersRes.data);
@@ -1518,6 +1520,7 @@ const AdminDashboard = ({ onLogout }) => {
       setProducts(productsRes.data);
       setMapLocations(mapLocationsRes.data);
       setRegionCards(regionCardsRes.data);
+      setFlowLines(flowLinesRes.data);
     } catch (err) {
       toast.error('Failed to fetch data');
     } finally {
