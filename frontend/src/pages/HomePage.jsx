@@ -26,7 +26,7 @@ import {
   Play
 } from 'lucide-react';
 import TestimonialsMarquee from '../components/TestimonialsMarquee';
-import DemoVideoModal, { DemoVideoSection } from '../components/DemoVideoModal';
+// DemoVideoModal removed - import kept for potential future use
 import ElectronicComponentsPattern from '../components/ElectronicComponentsPattern';
 import GlobalNetworkMap from '../components/GlobalNetworkMap';
 
