@@ -419,9 +419,6 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Demo Video Section */}
-      <DemoVideoSection />
-
       {/* Testimonials Marquee */}
       <TestimonialsMarquee />
 
