@@ -254,20 +254,6 @@ const GlobalNetworkMap = () => {
             </div>
             <p className="text-slate-500 text-xs mt-1">Live data flows updating in real-time</p>
           </div>
-
-          {/* Stats - Bottom Right */}
-          <div className="absolute bottom-6 right-6 bg-slate-900/80 backdrop-blur-sm rounded-lg px-4 py-3 border border-slate-700">
-            <div className="flex items-center gap-6">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-emerald-400">400+</p>
-                <p className="text-slate-400 text-xs">Data Sources</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-blue-400">9</p>
-                <p className="text-slate-400 text-xs">Regions</p>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Region Cards */}
