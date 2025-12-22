@@ -988,6 +988,116 @@ async def seed_region_cards():
     
     return {"message": f"Seeded {len(default_cards)} region cards", "seeded": True}
 
+# =============================================
+# FLOW LINES MODELS & ENDPOINTS
+# =============================================
+
+class FlowLineCreate(BaseModel):
+    fromLocation: str  # Location name (e.g., "China")
+    toLocation: str    # Location name (e.g., "USA")
+    color: str = "#3b82f6"  # Hex color
+    curveBelow: bool = False  # Whether line curves below (for westward routes)
+    isActive: bool = True
+
+class FlowLineUpdate(BaseModel):
+    fromLocation: Optional[str] = None
+    toLocation: Optional[str] = None
+    color: Optional[str] = None
+    curveBelow: Optional[bool] = None
+    isActive: Optional[bool] = None
+
+class FlowLine(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    fromLocation: str
+    toLocation: str
+    color: str = "#3b82f6"
+    curveBelow: bool = False
+    isActive: bool = True
+
+@api_router.get("/flow-lines", response_model=List[FlowLine])
+async def get_flow_lines():
+    """Get all flow lines"""
+    lines = await db.flow_lines.find({}, {"_id": 0}).to_list(500)
+    return lines if lines else []
+
+@api_router.post("/flow-lines", response_model=FlowLine)
+async def create_flow_line(input: FlowLineCreate):
+    """Create a new flow line"""
+    line = FlowLine(**input.model_dump())
+    await db.flow_lines.insert_one(line.model_dump())
+    return line
+
+@api_router.put("/flow-lines/{line_id}", response_model=FlowLine)
+async def update_flow_line(line_id: str, input: FlowLineUpdate):
+    """Update a flow line"""
+    update_data = {k: v for k, v in input.model_dump().items() if v is not None}
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    
+    result = await db.flow_lines.update_one(
+        {"id": line_id},
+        {"$set": update_data}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Flow line not found")
+    
+    updated = await db.flow_lines.find_one({"id": line_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/flow-lines/{line_id}")
+async def delete_flow_line(line_id: str):
+    """Delete a flow line"""
+    result = await db.flow_lines.delete_one({"id": line_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Flow line not found")
+    return {"message": "Flow line deleted successfully"}
+
+@api_router.post("/flow-lines/seed")
+async def seed_flow_lines():
+    """Seed default flow lines based on current locations"""
+    count = await db.flow_lines.count_documents({})
+    if count > 0:
+        return {"message": f"Flow lines already exist ({count} found)", "seeded": False}
+    
+    # Default flow lines
+    default_lines = [
+        # From China
+        {"fromLocation": "China", "toLocation": "USA", "color": "#8b5cf6", "curveBelow": False},
+        {"fromLocation": "China", "toLocation": "Europe", "color": "#8b5cf6", "curveBelow": False},
+        {"fromLocation": "China", "toLocation": "Brazil", "color": "#8b5cf6", "curveBelow": True},
+        # From Taiwan
+        {"fromLocation": "Taiwan", "toLocation": "USA", "color": "#10b981", "curveBelow": False},
+        {"fromLocation": "Taiwan", "toLocation": "Europe", "color": "#10b981", "curveBelow": False},
+        {"fromLocation": "Taiwan", "toLocation": "Brazil", "color": "#10b981", "curveBelow": True},
+        # From Korea
+        {"fromLocation": "Korea", "toLocation": "USA", "color": "#3b82f6", "curveBelow": False},
+        {"fromLocation": "Korea", "toLocation": "Europe", "color": "#3b82f6", "curveBelow": False},
+        {"fromLocation": "Korea", "toLocation": "Brazil", "color": "#3b82f6", "curveBelow": True},
+        # From Japan
+        {"fromLocation": "Japan", "toLocation": "USA", "color": "#3b82f6", "curveBelow": False},
+        {"fromLocation": "Japan", "toLocation": "Europe", "color": "#3b82f6", "curveBelow": False},
+        {"fromLocation": "Japan", "toLocation": "Brazil", "color": "#3b82f6", "curveBelow": True},
+        # From Vietnam
+        {"fromLocation": "Vietnam", "toLocation": "USA", "color": "#f59e0b", "curveBelow": True},
+        {"fromLocation": "Vietnam", "toLocation": "Europe", "color": "#f59e0b", "curveBelow": False},
+        {"fromLocation": "Vietnam", "toLocation": "Brazil", "color": "#f59e0b", "curveBelow": True},
+        # From Thailand
+        {"fromLocation": "Thailand", "toLocation": "USA", "color": "#f59e0b", "curveBelow": True},
+        {"fromLocation": "Thailand", "toLocation": "Europe", "color": "#f59e0b", "curveBelow": False},
+        {"fromLocation": "Thailand", "toLocation": "Brazil", "color": "#f59e0b", "curveBelow": True},
+        # From India
+        {"fromLocation": "India", "toLocation": "USA", "color": "#10b981", "curveBelow": True},
+        {"fromLocation": "India", "toLocation": "Europe", "color": "#10b981", "curveBelow": False},
+        {"fromLocation": "India", "toLocation": "Brazil", "color": "#10b981", "curveBelow": True},
+    ]
+    
+    for line_data in default_lines:
+        line = FlowLine(**line_data)
+        await db.flow_lines.insert_one(line.model_dump())
+    
+    return {"message": f"Seeded {len(default_lines)} flow lines", "seeded": True}
+
 # Admin Authentication
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin@123")
 
