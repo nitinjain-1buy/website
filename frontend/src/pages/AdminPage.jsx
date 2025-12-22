@@ -56,11 +56,13 @@ import {
   Layers,
   Save,
   Rocket,
-  MapPin
+  MapPin,
+  GitBranch
 } from 'lucide-react';
 import { logoUrl } from '../data/mock';
 import MapLocationEditor from '../components/MapLocationEditor';
 import RegionCardsManager from '../components/RegionCardsManager';
+import FlowLinesManager from '../components/FlowLinesManager';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
