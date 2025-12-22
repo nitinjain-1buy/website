@@ -323,7 +323,7 @@ const HomePage = () => {
               Procurement teams are flying blind
             </h2>
             <p className="text-xl text-slate-600 max-w-3xl mx-auto">
-              Accountable for outcomes but lacking decision-grade tools. Distributors have conflict of interest. There's no independent benchmark.
+              Accountable for outcomes but lacking decision-grade tools. Distributors have conflict of interest. There&apos;s no independent benchmark.
             </p>
           </AnimatedSection>
 
