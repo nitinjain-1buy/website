@@ -73,28 +73,77 @@ const GlobalNetworkMap = () => {
     fetchData();
   }, []);
 
-  // Flow paths showing global sourcing connections
-  const flows = [
-    { from: 'china', to: 'india', color: '#10b981' },
-    { from: 'taiwan', to: 'india', color: '#10b981' },
-    { from: 'korea', to: 'europe', color: '#3b82f6' },
-    { from: 'japan', to: 'usa', color: '#3b82f6' },
-    { from: 'china', to: 'europe', color: '#8b5cf6' },
-    { from: 'vietnam', to: 'usa', color: '#f59e0b', curveBelow: true },
-    { from: 'thailand', to: 'usa', color: '#f59e0b', curveBelow: true },
-    { from: 'india', to: 'usa', color: '#10b981', curveBelow: true },
-    { from: 'india', to: 'europe', color: '#10b981' },
-    { from: 'china', to: 'usa', color: '#8b5cf6' },
-  ];
+  // Source locations (Asian manufacturing/sourcing hubs) - flows originate FROM these
+  const sourceLocationNames = ['china', 'taiwan', 'korea', 'japan', 'vietnam', 'thailand', 'india'];
+  
+  // Colors for different source regions
+  const flowColors = {
+    china: '#8b5cf6',    // Purple
+    taiwan: '#10b981',   // Green
+    korea: '#3b82f6',    // Blue
+    japan: '#3b82f6',    // Blue
+    vietnam: '#f59e0b',  // Orange
+    thailand: '#f59e0b', // Orange
+    india: '#10b981',    // Green
+  };
+
+  // Dynamically generate flows from source locations to destination locations
+  const flows = React.useMemo(() => {
+    if (locations.length === 0) return [];
+    
+    const generatedFlows = [];
+    const sourceIds = sourceLocationNames.map(name => name.toLowerCase());
+    
+    // Get destination locations (any location not in source list)
+    const destinations = locations.filter(loc => 
+      !sourceIds.includes(loc.id?.toLowerCase()) && 
+      !sourceIds.includes(loc.name?.toLowerCase())
+    );
+    
+    // Get source locations that exist in our data
+    const sources = locations.filter(loc => 
+      sourceIds.includes(loc.id?.toLowerCase()) || 
+      sourceIds.includes(loc.name?.toLowerCase())
+    );
+    
+    // Generate flows from each source to each destination
+    sources.forEach(source => {
+      const sourceId = source.id?.toLowerCase() || source.name?.toLowerCase();
+      const color = flowColors[sourceId] || '#3b82f6';
+      
+      destinations.forEach(dest => {
+        const destId = dest.id?.toLowerCase() || dest.name?.toLowerCase();
+        
+        // Determine if line should curve below (for lines going to Americas from Asia)
+        // Curve below if destination is west of source (lower X value) and it's a long distance
+        const isGoingWest = dest.x < source.x;
+        const isLongDistance = Math.abs(dest.x - source.x) > 40;
+        const curveBelow = isGoingWest && isLongDistance;
+        
+        generatedFlows.push({
+          from: sourceId,
+          to: destId,
+          color,
+          curveBelow
+        });
+      });
+    });
+    
+    return generatedFlows;
+  }, [locations]);
 
   useEffect(() => {
+    if (flows.length === 0) return;
     const interval = setInterval(() => {
       setActiveFlow((prev) => (prev + 1) % flows.length);
     }, 2000);
     return () => clearInterval(interval);
   }, [flows.length]);
 
-  const getLocation = (id) => locations.find(loc => loc.id === id);
+  const getLocation = (id) => locations.find(loc => 
+    loc.id?.toLowerCase() === id?.toLowerCase() || 
+    loc.name?.toLowerCase() === id?.toLowerCase()
+  );
 
   // Generate curved SVG path between two points (using percentages)
   const generateCurvedPath = (from, to, curveBelow = false) => {
@@ -107,7 +156,7 @@ const GlobalNetworkMap = () => {
     const toY = toLoc.y * 0.5;
     const midX = (fromLoc.x + toLoc.x) / 2;
     
-    // Curve below for India-USA path, otherwise curve upward
+    // Curve below for westward long-distance paths, otherwise curve upward
     const midY = curveBelow 
       ? Math.max(fromY, toY) + 12  // Curve downward (below both points)
       : Math.min(fromY, toY) - 8;   // Curve upward (above both points)
