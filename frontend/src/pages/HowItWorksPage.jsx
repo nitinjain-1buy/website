@@ -275,21 +275,45 @@ const HowItWorksPage = () => {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-24 bg-slate-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-            Ready to see it in action?
+      {/* CTA Section - Same style as HomePage */}
+      <section className="py-24 relative overflow-hidden bg-slate-50">
+        {/* Electronic Components Watermark Background */}
+        <ElectronicComponentsPattern />
+        <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-8">
+            Ready to transform your procurement?
           </h2>
-          <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
-            Start with your BOM. No commitment required.
-          </p>
-          <Link to="/contact">
-            <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 h-12">
-              Start Your Pilot
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </Link>
+          
+          {/* White box container */}
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-300 p-8 md:p-12 max-w-3xl mx-auto">
+            <p className="text-xl text-slate-600 mb-8">
+              Start with your BOM. See potential savings within days, not months.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/contact">
+                <Button 
+                  size="lg" 
+                  className="bg-slate-900 hover:bg-slate-800 text-white px-8 h-12 relative overflow-hidden group transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-slate-900/30"
+                >
+                  <span className="relative z-10 flex items-center">
+                    Request a Demo
+                    <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                  </span>
+                </Button>
+              </Link>
+              <Link to="/how-it-works">
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  className="border-slate-300 text-slate-900 hover:bg-slate-100 px-8 h-12 transition-all duration-300 hover:scale-105"
+                >
+                  See How It Works
+                </Button>
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
     </div>
