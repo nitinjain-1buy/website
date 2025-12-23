@@ -42,7 +42,7 @@ const CustomerForm = () => {
     company: '',
     title: '',
     companySize: '',
-    interest: '',
+    interest: [],
     message: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
