@@ -262,36 +262,49 @@ async def scrape_article_content(url: str) -> dict:
     return result
 
 
-async def scrape_unscraped_articles(limit: int = 50):
+async def scrape_unscraped_articles(limit: int = 50, retry_failed: bool = False):
     """Background task to scrape articles that haven't been scraped yet.
     
     IMPORTANT: This function ONLY scrapes articles where scraped != True.
     Articles that already have fullContent will be skipped to avoid duplication.
+    
+    Args:
+        limit: Maximum number of articles to scrape
+        retry_failed: If True, also retry articles marked as retryable failures
     """
     logger.info("=" * 60)
     logger.info("[Scraper] Starting background article scraping...")
     logger.info("[Scraper] Note: Already scraped articles will be skipped")
+    logger.info("[Scraper] Note: Paywall sites (Reuters, Bloomberg, etc.) will be skipped")
     logger.info("=" * 60)
     
     try:
-        # Find articles that haven't been scraped yet (scraped != True)
-        # This ensures we never re-scrape articles that already have content
+        # Build query to find articles to scrape
+        # Skip: already scraped, permanent failures (paywalls)
+        query = {
+            "scraped": {"$ne": True},
+            "permanentFailure": {"$ne": True},  # Skip paywall/blocked sites
+            "link": {"$exists": True, "$ne": ""}
+        }
+        
+        # If not retrying, also skip any previously failed articles
+        if not retry_failed:
+            query["scrapeError"] = {"$exists": False}
+        
         unscraped = await db.news_articles.find(
-            {
-                "scraped": {"$ne": True},  # Skip already scraped articles
-                "link": {"$exists": True, "$ne": ""}
-            },
+            query,
             {"_id": 0, "id": 1, "link": 1, "title": 1}
         ).limit(limit).to_list(limit)
         
         if len(unscraped) == 0:
-            logger.info("[Scraper] No unscraped articles found - all articles already have content")
+            logger.info("[Scraper] No articles to scrape - all done or skipped (paywalls/permanent failures)")
             return
         
-        logger.info(f"[Scraper] Found {len(unscraped)} articles to scrape (skipping already scraped)")
+        logger.info(f"[Scraper] Found {len(unscraped)} articles to scrape")
         
         scraped_count = 0
         failed_count = 0
+        skipped_paywall = 0
         
         for article in unscraped:
             url = article.get("link")
