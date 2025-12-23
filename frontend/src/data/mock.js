@@ -319,8 +319,8 @@ export const demoVideoData = {
   thumbnailUrl: "https://customer-assets.emergentagent.com/job_baea0157-9ef6-48e3-8c0a-30cdc2e59356/artifacts/zedmi29e_Output.png"
 };
 
-export const logoUrl = "https://customer-assets.emergentagent.com/job_baea0157-9ef6-48e3-8c0a-30cdc2e59356/artifacts/y0k5c5x4_image.png";
-export const logoWhiteUrl = "https://customer-assets.emergentagent.com/job_baea0157-9ef6-48e3-8c0a-30cdc2e59356/artifacts/it9mkjbi_logo-w.svg";
+export const logoUrl = "https://customer-assets.emergentagent.com/job_intel-risk-scan/artifacts/5ktl9lb3_Untitled%20design.png";
+export const logoWhiteUrl = "https://customer-assets.emergentagent.com/job_intel-risk-scan/artifacts/5ktl9lb3_Untitled%20design.png";
 
 export const navigationData = [
   { name: "Products", href: "/products" },
