@@ -505,7 +505,7 @@ const HomePage = () => {
               Think of it as
             </h2>
             {/* White box container */}
-            <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-8 md:p-12">
+            <div className="bg-white rounded-2xl shadow-xl border-2 border-slate-200 p-8 md:p-12">
               <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 text-xl">
                 <AnimatedSection animation="fade-right" delay={200} className="flex items-center">
                   <span className="font-semibold text-blue-600 hover:text-blue-700 transition-colors">Bloomberg</span>
