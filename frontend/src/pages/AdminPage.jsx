@@ -1703,7 +1703,7 @@ const NewsManager = ({ isLoading: parentLoading, onRefresh }) => {
           <h3 className="text-lg font-semibold text-slate-900">Market Intelligence & News</h3>
           <p className="text-sm text-slate-500">SerpAPI + GDELT: Twice daily | MediaStack: Weekly (Mondays)</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Button onClick={handleRefreshNews} disabled={isRefreshing} variant="outline">
             <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
             {isRefreshing ? 'Refreshing...' : 'Refresh Daily'}
@@ -1717,8 +1717,53 @@ const NewsManager = ({ isLoading: parentLoading, onRefresh }) => {
             <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshingMediaStack ? 'animate-spin' : ''}`} />
             {isRefreshingMediaStack ? 'Refreshing...' : 'MediaStack (Weekly)'}
           </Button>
+          <Button 
+            onClick={handleStartScraping} 
+            disabled={isScraping}
+            variant="outline"
+            className="border-indigo-300 text-indigo-700 hover:bg-indigo-50"
+          >
+            <FileText className={`h-4 w-4 mr-2 ${isScraping ? 'animate-pulse' : ''}`} />
+            {isScraping ? 'Scraping...' : 'Scrape Content'}
+          </Button>
         </div>
       </div>
+
+      {/* Scrape Stats Banner */}
+      {scrapeStats && (
+        <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-6">
+              <div>
+                <p className="text-xs text-indigo-600 font-medium">CONTENT SCRAPING</p>
+                <p className="text-lg font-bold text-indigo-900">{scrapeStats.scrapeRate}% Complete</p>
+              </div>
+              <div className="flex gap-6 text-sm">
+                <div>
+                  <span className="text-indigo-600">Scraped:</span>
+                  <span className="ml-1 font-semibold text-indigo-900">{scrapeStats.scraped}</span>
+                </div>
+                <div>
+                  <span className="text-indigo-600">Pending:</span>
+                  <span className="ml-1 font-semibold text-indigo-900">{scrapeStats.unscraped}</span>
+                </div>
+                <div>
+                  <span className="text-indigo-600">Failed:</span>
+                  <span className="ml-1 font-semibold text-amber-600">{scrapeStats.failed}</span>
+                </div>
+              </div>
+            </div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={fetchScrapeStats}
+              className="text-indigo-600"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Tab Navigation */}
       <div className="border-b border-slate-200">
