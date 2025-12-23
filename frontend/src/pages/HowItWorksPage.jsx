@@ -291,7 +291,7 @@ const HowItWorksPage = () => {
             <p className="text-xl text-slate-600 mb-8">
               Start with your BOM. See potential savings within days, not months.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex justify-center">
               <Link to="/contact">
                 <Button 
                   size="lg" 
@@ -301,15 +301,6 @@ const HowItWorksPage = () => {
                     Request a Demo
                     <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                   </span>
-                </Button>
-              </Link>
-              <Link to="/how-it-works">
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="border-slate-300 text-slate-900 hover:bg-slate-100 px-8 h-12 transition-all duration-300 hover:scale-105"
-                >
-                  See How It Works
                 </Button>
               </Link>
             </div>
