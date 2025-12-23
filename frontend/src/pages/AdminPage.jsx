@@ -1595,12 +1595,30 @@ const NewsManager = ({ isLoading: parentLoading, onRefresh }) => {
     try {
       setIsRefreshing(true);
       await axios.post(`${API}/news/refresh`);
-      toast.success('News refresh triggered');
+      toast.success('News refresh triggered (SerpAPI + GDELT)');
       setTimeout(fetchNewsData, 3000); // Wait for fetch to complete
     } catch (error) {
       toast.error('Failed to refresh news');
     } finally {
       setIsRefreshing(false);
+    }
+  };
+
+  const [isRefreshingMediaStack, setIsRefreshingMediaStack] = useState(false);
+  
+  const handleRefreshMediaStack = async () => {
+    if (!window.confirm('MediaStack has rate limits. Are you sure you want to refresh? (Runs weekly on Mondays automatically)')) {
+      return;
+    }
+    try {
+      setIsRefreshingMediaStack(true);
+      await axios.post(`${API}/news/refresh-mediastack`);
+      toast.success('MediaStack refresh triggered');
+      setTimeout(fetchNewsData, 5000); // Wait for fetch to complete
+    } catch (error) {
+      toast.error('Failed to refresh MediaStack news');
+    } finally {
+      setIsRefreshingMediaStack(false);
     }
   };
 
