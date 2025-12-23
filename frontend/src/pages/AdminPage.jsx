@@ -57,7 +57,10 @@ import {
   Save,
   Rocket,
   MapPin,
-  GitBranch
+  GitBranch,
+  Newspaper,
+  Search,
+  ExternalLink
 } from 'lucide-react';
 import { logoUrl } from '../data/mock';
 import MapLocationEditor from '../components/MapLocationEditor';
