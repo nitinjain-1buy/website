@@ -252,6 +252,16 @@ const SupplierForm = () => {
   const handleSelectChange = (name, value) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
+  const handleCategoryToggle = (category) => {
+    setFormData(prev => {
+      const currentCategories = prev.productCategories;
+      if (currentCategories.includes(category)) {
+        return { ...prev, productCategories: currentCategories.filter(c => c !== category) };
+      } else {
+        return { ...prev, productCategories: [...currentCategories, category] };
+      }
+    });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
