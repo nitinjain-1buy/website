@@ -418,6 +418,109 @@ agent_communication:
       message: "Map Locations feature implementation complete. Please test: 1) Login to /admin with password 'admin@123', 2) Navigate to 'Map (9)' tab, 3) Verify 4 Sourcing Hubs (China, Korea, Japan, Taiwan) and 5 Data Sources (USA, Europe, India, Vietnam, Thailand), 4) Test edit functionality - change x/y coordinates, 5) Go to homepage and scroll to world map - verify markers appear at correct positions with correct colors (green=Sourcing Hub, blue=Data Source), 6) Test add/delete location workflow."
     - agent: "main"
       message: "HOMEPAGE SCROLL ANIMATIONS IMPLEMENTED. New features added: 1) Typewriter effect on hero headline - text types character by character 2) Scroll-triggered fade-up/zoom-in animations on all sections 3) Animated stat counters that count up when visible 4) Staggered card animations in problem/product sections 5) Pulsing badge with sparkles icon 6) Floating particles in hero background 7) Button hover effects with scale/glow/shimmer 8) Animated gradient background on hero 9) Subtle bounce animations on workflow arrows. Files changed: index.css (keyframes), HomePage.jsx, new components: AnimatedSection.jsx, AnimatedCounter.jsx, TypewriterText.jsx, AnimatedCard.jsx, GlowButton.jsx, useScrollAnimation.js hook."
+    - agent: "main"
+      message: "COMPREHENSIVE TESTING REQUIRED - NEW FORM FEATURES AND UI UPDATES. Please run extensive tests on: 1) CUSTOMER FORM (For Customers tab on /contact): Test multi-select checkboxes for 'What are you interested in', NEW 'Factory Locations' field (Asia Pacific, Europe, North America, South America), NEW 'Head Office Location' field (same options). Submit form and verify data appears correctly in admin panel (/admin -> Demo Requests tab). 2) SUPPLIER FORM (For Suppliers tab on /contact): Test multi-select checkboxes for 'Product Categories' and 'Regions Served'. Submit and verify in admin panel (Suppliers tab). 3) ADMIN PANEL: Verify Demo Requests table shows new columns (Factory Locations, Head Office) with colored badges. Verify Suppliers table shows Products and Regions columns with badges. 4) ALL PAGE BADGES: Every green badge should have sparkle animation and relevant icon - test Use Cases (Target icon), Team (Users icon), About (Building2 icon), Leadership (Award icon), Products (Layers icon), Contact (Rocket icon), How It Works (Cog icon), Start Small (Play icon). 5) FULL WEBSITE NAVIGATION: Test all pages load correctly, navigation works, no console errors."
+
+# New Form Features - Testing Required
+# Added by main agent on 2025-12-23
+
+backend:
+  - task: "Demo Requests API with new location fields"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Updated DemoRequest model with factoryLocations and headOfficeLocation fields as List[str]. Added field validator for backward compatibility with old string data. POST /api/demo-requests accepts arrays. Verified via curl."
+
+  - task: "Supplier Requests API with array fields"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Updated SupplierRequest model - productCategories and regionsServed now accept List[str]. Added field validator for backward compatibility. Verified via curl."
+
+frontend:
+  - task: "Customer form multi-select fields"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/ContactPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Added Factory Locations and Head Office Location as multi-select checkbox fields with options: Asia Pacific, Europe, North America, South America. Interest field also converted to multi-select. Verified via screenshots."
+
+  - task: "Supplier form multi-select fields"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/ContactPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Product Categories and Regions Served converted to multi-select checkbox grids. Verified via screenshots."
+
+  - task: "Admin Demo Requests table with new columns"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/AdminPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Added Factory Locations and Head Office columns to Demo Requests table. Arrays display as colored badges (blue for factory, purple for head office). Interest also displays as badges now. Verified via screenshots."
+
+  - task: "Admin Suppliers table with Regions column"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/AdminPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Added Regions column to Suppliers table. Product Categories and Regions display as colored badges. Verified via screenshots."
+
+  - task: "Sparkle badges across all pages"
+    implemented: true
+    working: true
+    file: "Multiple files"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Updated all green badges with animate-badge-pulse and relevant icons: Use Cases (Target), Team (Users), About (Building2), Leadership (Award), Products (Layers), Contact (Rocket), How It Works (Cog), Start Small (Play), The Problem (AlertTriangle), Our Platform (Layers). Verified via screenshots."
+
+test_plan:
+  current_focus:
+    - "Customer form multi-select fields"
+    - "Supplier form multi-select fields"
+    - "Admin Demo Requests table with new columns"
+    - "Admin Suppliers table with Regions column"
+    - "Sparkle badges across all pages"
+    - "Full website navigation and functionality"
+  stuck_tasks: []
+  test_all: true
+  test_priority: "high_first"
 
 # Homepage Animation Features - Testing Required
 # Added by main agent on 2025-12-22
