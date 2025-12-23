@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Badge } from '../components/ui/badge';
 import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import {
   Newspaper,
   ExternalLink,
@@ -9,7 +10,9 @@ import {
   TrendingUp,
   RefreshCw,
   Search,
-  Sparkles
+  Sparkles,
+  Archive,
+  ChevronDown
 } from 'lucide-react';
 import ElectronicComponentsPattern from '../components/ElectronicComponentsPattern';
 
@@ -17,21 +20,29 @@ const MarketIntelligencePage = () => {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedQuery, setSelectedQuery] = useState('all');
-  const [queries, setQueries] = useState([]);
+  const [visibleCount, setVisibleCount] = useState(10);
+  const [activeTab, setActiveTab] = useState('recent');
 
   const API_URL = process.env.REACT_APP_BACKEND_URL;
 
   useEffect(() => {
     fetchNews();
-    fetchQueries();
   }, []);
 
   const fetchNews = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/api/news?limit=50`);
+      const response = await fetch(`${API_URL}/api/news?limit=200`);
       const data = await response.json();
-      setArticles(data);
+      
+      // Sort by date (most recent first)
+      const sortedData = data.sort((a, b) => {
+        const dateA = new Date(a.iso_date || a.fetchedAt);
+        const dateB = new Date(b.iso_date || b.fetchedAt);
+        return dateB - dateA;
+      });
+      
+      setArticles(sortedData);
     } catch (error) {
       console.error('Error fetching news:', error);
     } finally {
@@ -39,19 +50,30 @@ const MarketIntelligencePage = () => {
     }
   };
 
-  const fetchQueries = async () => {
-    try {
-      const response = await fetch(`${API_URL}/api/news/queries`);
-      const data = await response.json();
-      setQueries(data);
-    } catch (error) {
-      console.error('Error fetching queries:', error);
-    }
-  };
+  // Calculate 8 months ago
+  const eightMonthsAgo = new Date();
+  eightMonthsAgo.setMonth(eightMonthsAgo.getMonth() - 8);
 
-  const filteredArticles = selectedQuery === 'all' 
+  // Filter articles by query
+  const queryFilteredArticles = selectedQuery === 'all' 
     ? articles 
     : articles.filter(a => a.query === selectedQuery);
+
+  // Separate recent and archived articles
+  const recentArticles = queryFilteredArticles.filter(a => {
+    const articleDate = new Date(a.iso_date || a.fetchedAt);
+    return articleDate >= eightMonthsAgo;
+  });
+
+  const archivedArticles = queryFilteredArticles.filter(a => {
+    const articleDate = new Date(a.iso_date || a.fetchedAt);
+    return articleDate < eightMonthsAgo;
+  });
+
+  // Get articles to display based on active tab
+  const displayArticles = activeTab === 'recent' ? recentArticles : archivedArticles;
+  const visibleArticles = displayArticles.slice(0, visibleCount);
+  const hasMore = visibleCount < displayArticles.length;
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
@@ -65,6 +87,15 @@ const MarketIntelligencePage = () => {
     } catch {
       return dateStr;
     }
+  };
+
+  const handleLoadMore = () => {
+    setVisibleCount(prev => prev + 10);
+  };
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setVisibleCount(10); // Reset visible count when switching tabs
   };
 
   // Get unique queries from articles
@@ -93,37 +124,59 @@ const MarketIntelligencePage = () => {
         </div>
       </section>
 
-      {/* Filters Section */}
+      {/* Filters & Tabs Section */}
       <section className="py-8 bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-2 text-slate-600">
-              <Search className="w-4 h-4" />
-              <span className="font-medium">Filter by topic:</span>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant={selectedQuery === 'all' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setSelectedQuery('all')}
-                className={selectedQuery === 'all' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
-              >
-                All News
-              </Button>
-              {uniqueQueries.map((query) => (
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            {/* Query Filters */}
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex items-center gap-2 text-slate-600">
+                <Search className="w-4 h-4" />
+                <span className="font-medium">Filter by topic:</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
                 <Button
-                  key={query}
-                  variant={selectedQuery === query ? 'default' : 'outline'}
+                  variant={selectedQuery === 'all' ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setSelectedQuery(query)}
-                  className={selectedQuery === query ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
+                  onClick={() => { setSelectedQuery('all'); setVisibleCount(10); }}
+                  className={selectedQuery === 'all' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
                 >
-                  {query}
+                  All News
                 </Button>
-              ))}
+                {uniqueQueries.map((query) => (
+                  <Button
+                    key={query}
+                    variant={selectedQuery === query ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => { setSelectedQuery(query); setVisibleCount(10); }}
+                    className={selectedQuery === query ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
+                  >
+                    {query}
+                  </Button>
+                ))}
+              </div>
             </div>
-            <div className="ml-auto text-sm text-slate-500">
-              {filteredArticles.length} articles
+
+            {/* Recent/Archived Tabs */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant={activeTab === 'recent' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => handleTabChange('recent')}
+                className={activeTab === 'recent' ? 'bg-slate-800 hover:bg-slate-900' : ''}
+              >
+                <Clock className="w-4 h-4 mr-2" />
+                Recent ({recentArticles.length})
+              </Button>
+              <Button
+                variant={activeTab === 'archived' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => handleTabChange('archived')}
+                className={activeTab === 'archived' ? 'bg-slate-800 hover:bg-slate-900' : ''}
+              >
+                <Archive className="w-4 h-4 mr-2" />
+                Archived ({archivedArticles.length})
+              </Button>
             </div>
           </div>
         </div>
@@ -137,29 +190,61 @@ const MarketIntelligencePage = () => {
               <RefreshCw className="w-8 h-8 animate-spin text-emerald-600" />
               <span className="ml-3 text-slate-600">Loading news...</span>
             </div>
-          ) : filteredArticles.length === 0 ? (
+          ) : displayArticles.length === 0 ? (
             <div className="text-center py-20">
-              <Newspaper className="w-16 h-16 mx-auto text-slate-300 mb-4" />
-              <p className="text-slate-500">No news articles available</p>
+              {activeTab === 'archived' ? (
+                <>
+                  <Archive className="w-16 h-16 mx-auto text-slate-300 mb-4" />
+                  <p className="text-slate-500">No archived articles (older than 8 months)</p>
+                </>
+              ) : (
+                <>
+                  <Newspaper className="w-16 h-16 mx-auto text-slate-300 mb-4" />
+                  <p className="text-slate-500">No recent news articles available</p>
+                </>
+              )}
             </div>
           ) : (
             <>
-              {/* Featured Article */}
-              {filteredArticles[0] && (
-                <div className="mb-12">
+              {/* Section Title */}
+              <div className="mb-8">
+                <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
+                  {activeTab === 'recent' ? (
+                    <>
+                      <Clock className="w-6 h-6 text-emerald-600" />
+                      Recent News
+                    </>
+                  ) : (
+                    <>
+                      <Archive className="w-6 h-6 text-slate-500" />
+                      Archived News
+                    </>
+                  )}
+                </h2>
+                <p className="text-slate-500 mt-1">
+                  {activeTab === 'recent' 
+                    ? 'Latest articles from the past 8 months'
+                    : 'Articles older than 8 months'
+                  }
+                </p>
+              </div>
+
+              {/* Featured Article (only for recent tab and first load) */}
+              {activeTab === 'recent' && visibleArticles[0] && (
+                <div className="mb-10">
                   <a 
-                    href={filteredArticles[0].link} 
+                    href={visibleArticles[0].link} 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="block group"
                   >
                     <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 border-0 shadow-lg">
                       <div className="grid md:grid-cols-2 gap-0">
-                        <div className="relative h-64 md:h-auto bg-slate-100">
-                          {filteredArticles[0].thumbnail ? (
+                        <div className="relative h-64 md:h-80 bg-slate-100">
+                          {visibleArticles[0].thumbnail ? (
                             <img 
-                              src={filteredArticles[0].thumbnail} 
-                              alt={filteredArticles[0].title}
+                              src={visibleArticles[0].thumbnail} 
+                              alt={visibleArticles[0].title}
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                             />
                           ) : (
@@ -172,23 +257,23 @@ const MarketIntelligencePage = () => {
                           <Badge className="w-fit mb-4 bg-emerald-100 text-emerald-700 hover:bg-emerald-100">
                             Featured
                           </Badge>
-                          <h2 className="text-2xl font-bold text-slate-900 mb-4 group-hover:text-emerald-600 transition-colors">
-                            {filteredArticles[0].title}
+                          <h2 className="text-2xl font-bold text-slate-900 mb-4 group-hover:text-emerald-600 transition-colors line-clamp-3">
+                            {visibleArticles[0].title}
                           </h2>
                           <div className="flex items-center gap-4 text-sm text-slate-500">
                             <div className="flex items-center gap-2">
-                              {filteredArticles[0].source?.icon && (
+                              {visibleArticles[0].source?.icon && (
                                 <img 
-                                  src={filteredArticles[0].source.icon} 
-                                  alt={filteredArticles[0].source.name}
+                                  src={visibleArticles[0].source.icon} 
+                                  alt={visibleArticles[0].source.name}
                                   className="w-4 h-4 rounded"
                                 />
                               )}
-                              <span>{filteredArticles[0].source?.name}</span>
+                              <span>{visibleArticles[0].source?.name}</span>
                             </div>
                             <div className="flex items-center gap-1">
                               <Clock className="w-4 h-4" />
-                              <span>{formatDate(filteredArticles[0].iso_date)}</span>
+                              <span>{formatDate(visibleArticles[0].iso_date)}</span>
                             </div>
                           </div>
                           <div className="mt-6 flex items-center text-emerald-600 font-medium">
@@ -204,7 +289,7 @@ const MarketIntelligencePage = () => {
 
               {/* News Grid */}
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredArticles.slice(1).map((article) => (
+                {visibleArticles.slice(activeTab === 'recent' ? 1 : 0).map((article) => (
                   <a 
                     key={article.id || article.link}
                     href={article.link} 
@@ -253,6 +338,30 @@ const MarketIntelligencePage = () => {
                   </a>
                 ))}
               </div>
+
+              {/* Load More Button */}
+              {hasMore && (
+                <div className="mt-10 text-center">
+                  <Button 
+                    variant="outline" 
+                    size="lg"
+                    onClick={handleLoadMore}
+                    className="px-8"
+                  >
+                    <ChevronDown className="w-4 h-4 mr-2" />
+                    Load More ({displayArticles.length - visibleCount} remaining)
+                  </Button>
+                </div>
+              )}
+
+              {/* End of articles indicator */}
+              {!hasMore && visibleArticles.length > 0 && (
+                <div className="mt-10 text-center">
+                  <p className="text-slate-400 text-sm">
+                    — Showing all {displayArticles.length} {activeTab === 'archived' ? 'archived' : 'recent'} articles —
+                  </p>
+                </div>
+              )}
             </>
           )}
         </div>
