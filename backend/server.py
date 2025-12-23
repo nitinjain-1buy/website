@@ -325,6 +325,22 @@ async def scrape_unscraped_articles(limit: int = 50, retry_failed: bool = False)
             
             if scrape_result.get("scraped"):
                 scraped_count += 1
+                # Compute risk for the scraped article
+                full_article = await db.news_articles.find_one({"id": article_id}, {"_id": 0})
+                if full_article:
+                    risk_data = analyze_article(full_article)
+                    await db.news_articles.update_one(
+                        {"id": article_id},
+                        {"$set": {
+                            "risk_score": risk_data["risk_score"],
+                            "risk_band": risk_data["risk_band"],
+                            "risk_categories": risk_data["risk_categories"],
+                            "confidence": risk_data["confidence"],
+                            "time_horizon": risk_data["time_horizon"],
+                            "category_strength": risk_data["category_strength"],
+                            "riskAnalyzedAt": datetime.now(timezone.utc).isoformat()
+                        }}
+                    )
             elif scrape_result.get("permanentFailure"):
                 skipped_paywall += 1
             else:
@@ -334,10 +350,61 @@ async def scrape_unscraped_articles(limit: int = 50, retry_failed: bool = False)
             await asyncio.sleep(1)
         
         logger.info(f"[Scraper] Completed: {scraped_count} scraped, {failed_count} failed, {skipped_paywall} paywall/blocked")
+        logger.info(f"[Scraper] Risk analysis computed for {scraped_count} articles")
         logger.info("=" * 60)
         
     except Exception as e:
         logger.error(f"[Scraper] Error in background scraping: {str(e)}")
+
+
+async def compute_risk_for_unanalyzed_articles(limit: int = 100):
+    """Compute risk scores for articles that haven't been analyzed yet"""
+    logger.info("=" * 60)
+    logger.info("[RiskEngine] Starting risk analysis for unanalyzed articles...")
+    logger.info("=" * 60)
+    
+    try:
+        # Find articles without risk_score
+        unanalyzed = await db.news_articles.find(
+            {"risk_score": {"$exists": False}},
+            {"_id": 0}
+        ).limit(limit).to_list(limit)
+        
+        if not unanalyzed:
+            logger.info("[RiskEngine] No unanalyzed articles found")
+            return 0
+        
+        logger.info(f"[RiskEngine] Found {len(unanalyzed)} articles to analyze")
+        
+        analyzed_count = 0
+        for article in unanalyzed:
+            article_id = article.get("id")
+            if not article_id:
+                continue
+            
+            risk_data = analyze_article(article)
+            
+            await db.news_articles.update_one(
+                {"id": article_id},
+                {"$set": {
+                    "risk_score": risk_data["risk_score"],
+                    "risk_band": risk_data["risk_band"],
+                    "risk_categories": risk_data["risk_categories"],
+                    "confidence": risk_data["confidence"],
+                    "time_horizon": risk_data["time_horizon"],
+                    "category_strength": risk_data["category_strength"],
+                    "riskAnalyzedAt": datetime.now(timezone.utc).isoformat()
+                }}
+            )
+            analyzed_count += 1
+        
+        logger.info(f"[RiskEngine] Completed: {analyzed_count} articles analyzed")
+        logger.info("=" * 60)
+        return analyzed_count
+        
+    except Exception as e:
+        logger.error(f"[RiskEngine] Error: {str(e)}")
+        return 0
 
 
 def normalize_url(url: str) -> str:
