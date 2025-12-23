@@ -360,8 +360,12 @@ const HomePage = () => {
       </section>
 
       {/* How It Works - Flow */}
-      <section className="py-24 bg-slate-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-24 relative overflow-hidden bg-slate-50">
+        {/* Electronic Components Watermark Background */}
+        <ElectronicComponentsPattern />
+        <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimatedSection animation="fade-up" className="text-center mb-16">
             <Badge variant="outline" className="mb-4 text-emerald-700 border-emerald-200 bg-emerald-50">
               How It Works
