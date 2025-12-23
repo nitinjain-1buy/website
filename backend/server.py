@@ -217,6 +217,11 @@ async def scrape_article_content(url: str) -> dict:
                 if full_content:
                     word_count = len(full_content.split())
                     
+                    # Require minimum content (at least 30 words)
+                    if word_count < 30:
+                        result["scrapeError"] = f"Content too short ({word_count} words)"
+                        return result
+                    
                     # Create a summary (first 500 chars)
                     summary = full_content[:500] + '...' if len(full_content) > 500 else full_content
                     
@@ -228,16 +233,28 @@ async def scrape_article_content(url: str) -> dict:
                     
                     logger.info(f"[Scraper] Successfully scraped {word_count} words from {url[:50]}...")
                 else:
-                    result["scrapeError"] = "No meaningful content found"
+                    result["scrapeError"] = "No meaningful content found (empty)"
             else:
                 result["scrapeError"] = "Could not locate article content"
                 
     except httpx.TimeoutException:
-        result["scrapeError"] = "Timeout while fetching URL"
+        result["scrapeError"] = "Timeout - can retry later"
+        result["retryable"] = True
         logger.warning(f"[Scraper] Timeout: {url[:50]}...")
     except httpx.HTTPStatusError as e:
-        result["scrapeError"] = f"HTTP {e.response.status_code}"
-        logger.warning(f"[Scraper] HTTP Error {e.response.status_code}: {url[:50]}...")
+        status = e.response.status_code
+        if status == 429:
+            result["scrapeError"] = "Rate limited (429) - can retry later"
+            result["retryable"] = True
+        elif status in [401, 403]:
+            result["scrapeError"] = f"Access denied (HTTP {status}) - likely paywall"
+            result["permanentFailure"] = True
+        elif status == 404:
+            result["scrapeError"] = "Article not found (404)"
+            result["permanentFailure"] = True
+        else:
+            result["scrapeError"] = f"HTTP {status}"
+        logger.warning(f"[Scraper] HTTP Error {status}: {url[:50]}...")
     except Exception as e:
         result["scrapeError"] = str(e)[:100]
         logger.warning(f"[Scraper] Error scraping {url[:50]}...: {str(e)[:50]}")
