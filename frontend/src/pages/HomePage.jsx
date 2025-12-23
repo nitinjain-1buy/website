@@ -293,8 +293,8 @@ const HomePage = () => {
         </AnimatedSection>
       </section>
 
-      {/* Proof Points - Compact Stats Bar */}
-      <section className="bg-slate-900 py-12 relative overflow-hidden">
+      {/* Proof Points - Compact Stats Bar - solid dark background */}
+      <section className="bg-slate-900 py-12 relative overflow-hidden z-10">
         {/* Animated background lines */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-emerald-400 to-transparent animate-pulse" />
