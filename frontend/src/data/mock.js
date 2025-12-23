@@ -324,7 +324,6 @@ export const logoWhiteUrl = "https://customer-assets.emergentagent.com/job_baea0
 
 export const navigationData = [
   { name: "Products", href: "/products" },
-  { name: "Why 1Buy", href: "/why-1buy" },
   { name: "How It Works", href: "/how-it-works" },
   { name: "Use Cases", href: "/use-cases" },
   { name: "Team", href: "/team" },
