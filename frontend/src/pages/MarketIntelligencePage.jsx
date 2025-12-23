@@ -36,8 +36,15 @@ const MarketIntelligencePage = () => {
       const response = await fetch(`${API_URL}/api/news?limit=2000`);
       const data = await response.json();
       
+      // Filter out articles without valid links or content
+      const validArticles = data.filter(
+        article => article.link && article.link.trim() !== '' && 
+                   article.title && article.title.trim() !== '' &&
+                   article.source?.name
+      );
+      
       // Sort by date (most recent first)
-      const sortedData = data.sort((a, b) => {
+      const sortedData = validArticles.sort((a, b) => {
         const dateA = new Date(a.iso_date || a.fetchedAt || 0);
         const dateB = new Date(b.iso_date || b.fetchedAt || 0);
         return dateB - dateA;
