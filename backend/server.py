@@ -1934,7 +1934,7 @@ async def get_news_queries():
 
 @api_router.post("/news/queries", response_model=dict)
 async def create_news_query(query_data: NewsQueryCreate):
-    """Create a new news search query"""
+    """Create a new news search query and immediately fetch news for it"""
     # Check for duplicate (case-insensitive)
     existing = await db.news_queries.find_one(
         {"query": {"$regex": f"^{query_data.query}$", "$options": "i"}}
@@ -1949,6 +1949,12 @@ async def create_news_query(query_data: NewsQueryCreate):
         "createdAt": datetime.now(timezone.utc).isoformat()
     }
     await db.news_queries.insert_one(query_doc)
+    
+    # Immediately trigger news fetch for this new query in background
+    if query_data.isActive:
+        logger.info(f"[NewQuery] Triggering immediate news fetch for new query: '{query_data.query}'")
+        asyncio.create_task(fetch_news_for_single_query(query_data.query.strip()))
+    
     return {k: v for k, v in query_doc.items() if k != "_id"}
 
 @api_router.patch("/news/queries/{query_id}")
