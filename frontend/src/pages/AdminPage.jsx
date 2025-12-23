@@ -1588,7 +1588,11 @@ const NewsManager = ({ isLoading: parentLoading, onRefresh }) => {
       setNewQuery('');
       fetchNewsData();
     } catch (error) {
-      toast.error('Failed to add query');
+      if (error.response?.status === 400) {
+        toast.error('Query already exists');
+      } else {
+        toast.error('Failed to add query');
+      }
     }
   };
 
