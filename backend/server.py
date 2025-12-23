@@ -45,7 +45,9 @@ class DemoRequestCreate(BaseModel):
     company: str
     title: Optional[str] = None
     companySize: Optional[str] = None
-    interest: Optional[str] = None
+    interest: Optional[List[str]] = None
+    factoryLocations: Optional[List[str]] = None
+    headOfficeLocation: Optional[List[str]] = None
     message: Optional[str] = None
 
 class DemoRequest(BaseModel):
