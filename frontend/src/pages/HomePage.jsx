@@ -243,9 +243,26 @@ const HomePage = () => {
               </Link>
             </div>
           </div>
+        </div>
 
-          {/* Trusted By - Customer Logos - Full Width Centered with Marquee */}
-          <AnimatedSection animation="fade-up" delay={800} className="mt-12 pt-8 border-t border-slate-200 text-center">
+        {/* Product Screenshot with zoom animation */}
+        <AnimatedSection animation="zoom-in" delay={1000} className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+          <div className="relative rounded-xl overflow-hidden shadow-2xl border border-slate-200 hover-lift">
+            <img
+              src={heroData.screenshotUrl}
+              alt="1Buy.AI Platform Dashboard"
+              className="w-full"
+            />
+            {/* Subtle overlay glow */}
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/5 to-transparent pointer-events-none" />
+          </div>
+        </AnimatedSection>
+      </section>
+
+      {/* Trusted By - Customer Logos - Separate white section */}
+      <section className="py-12 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <AnimatedSection animation="fade-up" className="text-center">
             <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-6">
               Trusted by leading OEMs and EMS companies worldwide
             </h2>
@@ -253,8 +270,8 @@ const HomePage = () => {
             {/* Marquee Container */}
             <div className="relative overflow-hidden py-4">
               {/* Gradient Masks */}
-              <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-slate-50 to-transparent z-10"></div>
-              <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-slate-50 to-transparent z-10"></div>
+              <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-white to-transparent z-10"></div>
+              <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white to-transparent z-10"></div>
               
               {/* Scrolling Content */}
               <div className="flex animate-marquee whitespace-nowrap">
@@ -280,19 +297,6 @@ const HomePage = () => {
             </div>
           </AnimatedSection>
         </div>
-
-        {/* Product Screenshot with zoom animation */}
-        <AnimatedSection animation="zoom-in" delay={1000} className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-          <div className="relative rounded-xl overflow-hidden shadow-2xl border border-slate-200 hover-lift">
-            <img
-              src={heroData.screenshotUrl}
-              alt="1Buy.AI Platform Dashboard"
-              className="w-full"
-            />
-            {/* Subtle overlay glow */}
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/5 to-transparent pointer-events-none" />
-          </div>
-        </AnimatedSection>
       </section>
 
       {/* Proof Points - Compact Stats Bar */}
