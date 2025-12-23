@@ -32,6 +32,9 @@ logger = logging.getLogger(__name__)
 # SerpAPI Key
 SERPAPI_KEY = os.environ.get("SERPAPI_KEY", "")
 
+# MediaStack API Key
+MEDIASTACK_KEY = os.environ.get("MEDIASTACK_KEY", "")
+
 # News fetching function
 async def fetch_news_from_serpapi(query: str) -> List[dict]:
     """Fetch news from SerpAPI for a given query"""
