@@ -83,7 +83,8 @@ async def fetch_news_from_mediastack(query: str) -> List[dict]:
         return []
     
     encoded_query = query.replace(' ', '%20')
-    url = f"https://api.mediastack.com/v1/news?access_key={MEDIASTACK_KEY}&keywords={encoded_query}&categories=technology,business&languages=en&countries=us,cn,tw,in,jp,kr,de&sort=published_desc&limit=25"
+    # Note: Removed categories filter as it was returning 0 results with country filter
+    url = f"https://api.mediastack.com/v1/news?access_key={MEDIASTACK_KEY}&keywords={encoded_query}&languages=en&countries=us,cn,tw,in,jp,kr,de&sort=published_desc&limit=25"
     
     try:
         async with httpx.AsyncClient(timeout=30.0) as http_client:
