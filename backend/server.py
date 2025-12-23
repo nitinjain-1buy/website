@@ -96,11 +96,20 @@ class SupplierRequest(BaseModel):
     email: str
     phone: Optional[str] = None
     website: Optional[str] = None
-    productCategories: Optional[List[str]] = None
-    regionsServed: Optional[List[str]] = None
+    productCategories: Optional[Union[List[str], str]] = None
+    regionsServed: Optional[Union[List[str], str]] = None
     inventoryDescription: Optional[str] = None
     status: str = "new"  # new, contacted, approved, rejected
     createdAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    
+    @field_validator('productCategories', 'regionsServed', mode='before')
+    @classmethod
+    def normalize_list_fields(cls, v):
+        if v is None or v == '':
+            return []
+        if isinstance(v, str):
+            return [v] if v else []
+        return v
 
 # Testimonial Models
 class TestimonialCreate(BaseModel):
