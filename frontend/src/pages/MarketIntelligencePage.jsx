@@ -437,10 +437,17 @@ const MarketIntelligencePage = () => {
                             <Newspaper className="w-12 h-12 text-slate-400" />
                           </div>
                         )}
-                        <div className="absolute top-3 left-3">
-                          <Badge className="bg-white/95 text-slate-700 text-xs font-medium shadow-sm">
-                            {getArticleQueries(article)[0]}
-                          </Badge>
+                        <div className="absolute top-3 left-3 flex flex-wrap gap-1 max-w-[90%]">
+                          {getArticleQueries(article).slice(0, 3).map((tag, idx) => (
+                            <Badge key={idx} className="bg-white/95 text-slate-700 text-xs font-medium shadow-sm">
+                              {tag.length > 20 ? tag.substring(0, 18) + '...' : tag}
+                            </Badge>
+                          ))}
+                          {getArticleQueries(article).length > 3 && (
+                            <Badge className="bg-emerald-500/90 text-white text-xs font-medium shadow-sm">
+                              +{getArticleQueries(article).length - 3}
+                            </Badge>
+                          )}
                         </div>
                       </div>
                       <CardContent className="p-5">
