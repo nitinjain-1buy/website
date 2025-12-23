@@ -76,6 +76,29 @@ async def fetch_news_from_gdelt(query: str) -> List[dict]:
         logger.error(f"[GDELT] Error fetching news for query '{query}': {str(e)}")
         return []
 
+async def fetch_news_from_mediastack(query: str) -> List[dict]:
+    """Fetch news from MediaStack API for a given query (rate limited - weekly only)"""
+    if not MEDIASTACK_KEY:
+        logger.error("MEDIASTACK_KEY not configured")
+        return []
+    
+    encoded_query = query.replace(' ', '%20')
+    url = f"https://api.mediastack.com/v1/news?access_key={MEDIASTACK_KEY}&keywords={encoded_query}&categories=technology,business&languages=en&countries=us,cn,tw,in,jp,kr,de&sort=published_desc&limit=25"
+    
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as http_client:
+            response = await http_client.get(url, headers={"Accept": "application/json"})
+            response.raise_for_status()
+            data = response.json()
+            
+            # MediaStack returns articles in "data" array
+            articles = data.get("data", [])
+            logger.info(f"[MediaStack] Fetched {len(articles)} articles for query: {query}")
+            return articles
+    except Exception as e:
+        logger.error(f"[MediaStack] Error fetching news for query '{query}': {str(e)}")
+        return []
+
 def normalize_url(url: str) -> str:
     """Normalize URL for duplicate detection - remove trailing slashes, www, etc."""
     if not url:
