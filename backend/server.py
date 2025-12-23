@@ -120,7 +120,6 @@ async def fetch_and_store_all_news():
         logger.info(f"Found {len(global_seen_urls)} existing articles in database")
         
         total_new_articles = 0
-        total_duplicates_skipped = 0
         
         for q in queries:
             query_text = q["query"]
