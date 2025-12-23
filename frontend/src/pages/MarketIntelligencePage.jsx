@@ -418,19 +418,6 @@ const MarketIntelligencePage = () => {
                 {articles.length}
               </span>
             </button>
-                selectedTopics.length === 0
-                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-md'
-                  : 'bg-white text-slate-700 border-slate-300 hover:border-emerald-400 hover:bg-emerald-50'
-              }`}
-            >
-              {selectedTopics.length === 0 && <Check className="w-3 h-3" />}
-              <span>All News</span>
-              <span className={`text-xs px-1.5 py-0.5 rounded-full ${
-                selectedTopics.length === 0 ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-500'
-              }`}>
-                {articles.length}
-              </span>
-            </button>
 
             {/* Individual Topic Chips */}
             {topicsWithCounts.map(({ topic, count }) => {
