@@ -128,6 +128,24 @@ async def scrape_article_content(url: str) -> dict:
         "Accept-Language": "en-US,en;q=0.5",
     }
     
+    # Known paywall/blocked domains - mark as permanent failures
+    PAYWALL_DOMAINS = [
+        'reuters.com',
+        'bloomberg.com', 
+        'wsj.com',
+        'ft.com',
+        'nytimes.com',
+        'washingtonpost.com',
+        'economist.com'
+    ]
+    
+    # Check if URL is from a known paywall site
+    for domain in PAYWALL_DOMAINS:
+        if domain in url.lower():
+            result["scrapeError"] = f"Paywall site ({domain})"
+            result["permanentFailure"] = True
+            return result
+    
     try:
         async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as client:
             response = await client.get(url, headers=headers)
@@ -137,13 +155,13 @@ async def scrape_article_content(url: str) -> dict:
             soup = BeautifulSoup(html, 'lxml')
             
             # Remove unwanted elements
-            for element in soup.find_all(['script', 'style', 'nav', 'header', 'footer', 'aside', 'advertisement', 'iframe', 'noscript']):
+            for element in soup.find_all(['script', 'style', 'nav', 'header', 'footer', 'aside', 'advertisement', 'iframe', 'noscript', 'form', 'button']):
                 element.decompose()
             
             # Try to find article content using common selectors
             article_content = None
             
-            # Priority selectors for article content
+            # Priority selectors for article content (expanded list)
             selectors = [
                 'article',
                 '[role="article"]',
@@ -157,7 +175,16 @@ async def scrape_article_content(url: str) -> dict:
                 '.article__body',
                 'main article',
                 '.news-article',
-                '.story-content'
+                '.story-content',
+                '.blog-post-content',
+                '.rich-text',
+                '.post-body',
+                '[itemprop="articleBody"]',
+                '.wysiwyg-content',
+                '.text-content',
+                '.page-content',
+                '#content',
+                '.content'
             ]
             
             for selector in selectors:
