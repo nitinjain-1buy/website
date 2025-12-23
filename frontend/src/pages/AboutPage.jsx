@@ -27,8 +27,12 @@ const AboutPage = () => {
   return (
     <div className="bg-white">
       {/* Hero */}
-      <section className="bg-slate-50 py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative overflow-hidden bg-slate-50 py-20">
+        {/* Electronic Components Watermark Background */}
+        <ElectronicComponentsPattern />
+        <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
             <Badge variant="outline" className="mb-4 text-emerald-700 border-emerald-200 bg-emerald-50">
               About 1Buy.AI
@@ -37,7 +41,7 @@ const AboutPage = () => {
               Building the operating system for electronics procurement
             </h1>
             <p className="text-xl text-slate-600 leading-relaxed">
-              We're on a mission to make global electronics procurement intelligent, transparent, and optimized for everyone.
+              We&apos;re on a mission to make global electronics procurement intelligent, transparent, and optimized for everyone.
             </p>
           </div>
         </div>
