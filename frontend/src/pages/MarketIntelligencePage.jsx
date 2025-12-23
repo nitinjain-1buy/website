@@ -419,10 +419,10 @@ const MarketIntelligencePage = () => {
       </section>
 
       {/* Filter Section */}
-      <section className="py-6 bg-white border-b shadow-sm sticky top-0 z-10">
+      <section className="py-4 md:py-6 bg-white border-b shadow-sm md:sticky md:top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Top Row: Filter Label + Sort + Tabs */}
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
             <div className="flex items-center gap-3">
               <Filter className="w-5 h-5 text-slate-500" />
               <span className="font-semibold text-slate-700">Filter by Topic</span>
@@ -432,19 +432,20 @@ const MarketIntelligencePage = () => {
                 </Badge>
               )}
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
               {/* Sort Toggle */}
               <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
                 <button
                   onClick={() => setSortBy('newest')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+                  className={`flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-all ${
                     sortBy === 'newest' 
                       ? 'bg-white shadow-sm text-slate-900' 
                       : 'text-slate-500 hover:text-slate-700'
                   }`}
                 >
                   <Clock className="w-3.5 h-3.5" />
-                  Newest
+                  <span className="hidden sm:inline">Newest</span>
+                  <span className="sm:hidden">New</span>
                 </button>
                 <button
                   onClick={() => setSortBy('risk')}
