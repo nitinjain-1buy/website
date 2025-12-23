@@ -639,8 +639,92 @@ frontend:
     file: "/app/frontend/src/index.css"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: true
           agent: "main"
           comment: "Added 15+ CSS animation keyframes: fadeUp, fadeDown, fadeLeft, fadeRight, zoomIn, scaleUp, blurIn, glowIn, blink, float, pulseGlow, shimmer, gradientShift, floatingDots, badgePulse, subtleBounce, glowRing, dataFlow, processingPulse."
+
+# Risk Engine Feature - Testing Required
+# Added by main agent on 2025-12-23
+
+backend:
+  - task: "Risk Engine API - compute risk for articles"
+    implemented: true
+    working: true
+    file: "/app/backend/risk_engine.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Rule-based Risk Engine implemented with keyword matching, electronics context gating. Computes risk_score (0-100), risk_band (LOW/WATCH/HIGH/CRITICAL), risk_categories, confidence, time_horizon, and category_strength. Already processed 1720 articles."
+
+  - task: "News API returns risk data"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "GET /api/news endpoint returns all risk fields (risk_score, risk_band, risk_categories, confidence, time_horizon, category_strength). Verified via curl - articles have risk data populated."
+
+frontend:
+  - task: "Risk Engine UI - Filter by Risk chip row"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/MarketIntelligencePage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Filter by Risk chip row implemented with All Risks chip and individual risk category chips with counts. Multi-select (OR logic) supported. Clear All Filters button appears when filters active. Counts update correctly based on filtered data."
+
+  - task: "Risk Engine UI - Sort by Highest Risk toggle"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/MarketIntelligencePage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Sort toggle between Newest (default) and Highest Risk implemented. Clicking Highest Risk sorts articles by risk_score descending. CRITICAL articles appear first. Verified via screenshots - articles with CRITICAL • 100 shown at top."
+
+  - task: "Risk Engine UI - Article card risk display"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/MarketIntelligencePage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Article cards now display: 1) Risk badge (RISK_BAND • score) with color coding (CRITICAL=red, HIGH=orange, WATCH=yellow, LOW=gray), 2) Up to 3 risk category chips (sorted by strength), 3) Horizon & Confidence meta line (shown for non-LOW articles). Featured article also displays risk info."
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: true
+
+test_plan:
+  current_focus:
+    - "Risk Engine UI - Filter by Risk chip row"
+    - "Risk Engine UI - Sort by Highest Risk toggle"
+    - "Risk Engine UI - Article card risk display"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+    - agent: "main"
+      message: "RISK ENGINE UI IMPLEMENTATION COMPLETE. Fixed syntax error in MarketIntelligencePage.jsx that was blocking the page. Added risk display to article cards including: risk badges with color coding, risk category chips (top 3 by strength), horizon & confidence meta line. All features verified working via screenshots. Please test: 1) Go to /market-intelligence page 2) Verify Filter by Risk chips with counts 3) Click risk category chips - should filter articles 4) Click 'Highest Risk' sort - CRITICAL articles should appear first 5) Verify article cards show risk badges, category chips, and meta info 6) Test multi-select risk filtering (OR logic) 7) Verify Clear All Filters button works"
