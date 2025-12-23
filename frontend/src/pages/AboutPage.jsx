@@ -188,14 +188,14 @@ const AboutPage = () => {
         </div>
       </section>
 
-      {/* Values */}
-      <section className="py-24 bg-slate-50">
+      {/* Values - Dark background */}
+      <section className="py-24 bg-slate-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
               Our values
             </h2>
-            <p className="text-xl text-slate-600 max-w-3xl mx-auto">
+            <p className="text-xl text-slate-300 max-w-3xl mx-auto">
               Principles that guide how we build and operate.
             </p>
           </div>
@@ -204,15 +204,15 @@ const AboutPage = () => {
             {aboutData.values.map((value, index) => {
               const IconComponent = iconMap[value.title];
               return (
-                <Card key={index} className="border-slate-200 hover:border-emerald-200 transition-colors">
+                <Card key={index} className="bg-slate-800 border-slate-700 hover:border-emerald-500/50 transition-colors">
                   <CardContent className="p-6">
-                    <div className="w-12 h-12 rounded-lg bg-emerald-50 flex items-center justify-center mb-4">
-                      <IconComponent className="h-6 w-6 text-emerald-600" />
+                    <div className="w-12 h-12 rounded-lg bg-emerald-500/20 flex items-center justify-center mb-4">
+                      <IconComponent className="h-6 w-6 text-emerald-400" />
                     </div>
-                    <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                    <h3 className="text-lg font-semibold text-white mb-2">
                       {value.title}
                     </h3>
-                    <p className="text-slate-600 text-sm">
+                    <p className="text-slate-400 text-sm">
                       {value.description}
                     </p>
                   </CardContent>
