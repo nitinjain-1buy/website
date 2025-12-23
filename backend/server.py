@@ -1923,17 +1923,30 @@ async def trigger_article_scraping(limit: int = 50):
 
 @api_router.get("/news/scrape-stats", response_model=dict)
 async def get_scrape_stats():
-    """Get scraping statistics"""
+    """Get detailed scraping statistics"""
     total = await db.news_articles.count_documents({})
     scraped = await db.news_articles.count_documents({"scraped": True})
-    unscraped = await db.news_articles.count_documents({"scraped": {"$ne": True}})
-    failed = await db.news_articles.count_documents({"scraped": False, "scrapeError": {"$exists": True}})
+    permanent_failures = await db.news_articles.count_documents({"permanentFailure": True})
+    retryable_failures = await db.news_articles.count_documents({"retryable": True})
+    other_failures = await db.news_articles.count_documents({
+        "scraped": {"$ne": True},
+        "scrapeError": {"$exists": True},
+        "permanentFailure": {"$ne": True},
+        "retryable": {"$ne": True}
+    })
+    pending = await db.news_articles.count_documents({
+        "scraped": {"$ne": True},
+        "scrapeError": {"$exists": False},
+        "permanentFailure": {"$ne": True}
+    })
     
     return {
         "total": total,
         "scraped": scraped,
-        "unscraped": unscraped,
-        "failed": failed,
+        "pending": pending,
+        "permanentFailures": permanent_failures,
+        "retryableFailures": retryable_failures,
+        "otherFailures": other_failures,
         "scrapeRate": round((scraped / total * 100), 1) if total > 0 else 0
     }
 
