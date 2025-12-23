@@ -310,9 +310,10 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Problems Section */}
-      <section className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Problems Section - semi-transparent to show pattern */}
+      <section className="py-24 relative">
+        <div className="absolute inset-0 bg-white/90" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <AnimatedSection animation="fade-up" className="text-center mb-16">
             <Badge variant="outline" className="mb-4 text-slate-600 border-slate-300">
               The Problem
