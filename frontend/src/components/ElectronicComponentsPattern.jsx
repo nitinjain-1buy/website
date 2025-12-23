@@ -172,7 +172,7 @@ const ElectronicComponentsPattern = ({ className = '' }) => {
       </svg>
 
       {/* Dense scattered components - outline watermark style */}
-      <div className="absolute inset-0 text-slate-500" style={{ opacity: 0.22 }}>
+      <div className="absolute inset-0 text-slate-500" style={{ opacity: 0.15 }}>
         {/* Row 1 */}
         <svg className="absolute top-[2%] left-[2%] w-14 h-10" style={{ transform: 'rotate(15deg)' }}><use href="#resistor-bands" /></svg>
         <svg className="absolute top-[5%] left-[12%] w-12 h-10" style={{ transform: 'rotate(-5deg)' }}><use href="#cap-ceramic" /></svg>
