@@ -244,19 +244,6 @@ const HomePage = () => {
             </div>
           </div>
         </div>
-
-        {/* Product Screenshot with zoom animation */}
-        <AnimatedSection animation="zoom-in" delay={1000} className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-          <div className="relative rounded-xl overflow-hidden shadow-2xl border border-slate-200 hover-lift">
-            <img
-              src={heroData.screenshotUrl}
-              alt="1Buy.AI Platform Dashboard"
-              className="w-full"
-            />
-            {/* Subtle overlay glow */}
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/5 to-transparent pointer-events-none" />
-          </div>
-        </AnimatedSection>
       </section>
 
       {/* Trusted By - Customer Logos - Separate white section */}
@@ -297,6 +284,25 @@ const HomePage = () => {
             </div>
           </AnimatedSection>
         </div>
+      </section>
+
+      {/* Product Screenshot Section */}
+      <section className="relative overflow-hidden bg-slate-50 py-16">
+        {/* Electronic Components Watermark Background */}
+        <ElectronicComponentsPattern />
+        <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
+        
+        <AnimatedSection animation="zoom-in" className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="relative rounded-xl overflow-hidden shadow-2xl border border-slate-200 hover-lift">
+            <img
+              src={heroData.screenshotUrl}
+              alt="1Buy.AI Platform Dashboard"
+              className="w-full"
+            />
+            {/* Subtle overlay glow */}
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/5 to-transparent pointer-events-none" />
+          </div>
+        </AnimatedSection>
       </section>
 
       {/* Proof Points - Compact Stats Bar */}
