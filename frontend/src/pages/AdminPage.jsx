@@ -1625,7 +1625,7 @@ const NewsManager = ({ isLoading: parentLoading, onRefresh }) => {
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold text-slate-900">Market Intelligence & News</h3>
-          <p className="text-sm text-slate-500">Automatically fetched every 5 hours from configured sources</p>
+          <p className="text-sm text-slate-500">Automatically fetched twice daily from configured sources</p>
         </div>
         <Button onClick={handleRefreshNews} disabled={isRefreshing}>
           <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
