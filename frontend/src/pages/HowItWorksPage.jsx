@@ -17,7 +17,8 @@ import {
   BarChart3,
   RefreshCw,
   Sparkles,
-  Cog
+  Cog,
+  Play
 } from 'lucide-react';
 import ElectronicComponentsPattern from '../components/ElectronicComponentsPattern';
 
@@ -186,7 +187,8 @@ const HowItWorksPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
-              <Badge variant="outline" className="mb-4 text-emerald-400 border-emerald-400/50 bg-emerald-400/10">
+              <Badge variant="outline" className="mb-4 text-emerald-400 border-emerald-400/50 bg-emerald-400/10 animate-badge-pulse inline-flex items-center gap-2">
+                <Play className="w-3 h-3 animate-pulse" />
                 Start Small
               </Badge>
               <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
