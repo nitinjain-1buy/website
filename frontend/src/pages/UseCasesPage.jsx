@@ -16,6 +16,7 @@ import {
   Users,
   Globe
 } from 'lucide-react';
+import ElectronicComponentsPattern from '../components/ElectronicComponentsPattern';
 
 const iconMap = {
   Zap,
