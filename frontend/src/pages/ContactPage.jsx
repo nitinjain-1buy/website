@@ -43,6 +43,8 @@ const CustomerForm = () => {
     title: '',
     companySize: '',
     interest: [],
+    factoryLocations: [],
+    headOfficeLocation: [],
     message: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -64,6 +66,28 @@ const CustomerForm = () => {
         return { ...prev, interest: currentInterests.filter(i => i !== interest) };
       } else {
         return { ...prev, interest: [...currentInterests, interest] };
+      }
+    });
+  };
+
+  const handleFactoryLocationToggle = (location) => {
+    setFormData(prev => {
+      const current = prev.factoryLocations;
+      if (current.includes(location)) {
+        return { ...prev, factoryLocations: current.filter(l => l !== location) };
+      } else {
+        return { ...prev, factoryLocations: [...current, location] };
+      }
+    });
+  };
+
+  const handleHeadOfficeToggle = (location) => {
+    setFormData(prev => {
+      const current = prev.headOfficeLocation;
+      if (current.includes(location)) {
+        return { ...prev, headOfficeLocation: current.filter(l => l !== location) };
+      } else {
+        return { ...prev, headOfficeLocation: [...current, location] };
       }
     });
   };
