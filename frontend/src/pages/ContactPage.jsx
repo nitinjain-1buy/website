@@ -186,23 +186,34 @@ const CustomerForm = () => {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="interest">What are you interested in?</Label>
-        <Select
-          value={formData.interest}
-          onValueChange={(value) => handleSelectChange('interest', value)}
-        >
-          <SelectTrigger className="h-12">
-            <SelectValue placeholder="Select an option" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="demo">Request a Demo</SelectItem>
-            <SelectItem value="pilot">Start a Pilot</SelectItem>
-            <SelectItem value="1data">Learn about 1Data</SelectItem>
-            <SelectItem value="1source">Learn about 1Source</SelectItem>
-            <SelectItem value="1xcess">Learn about 1Xcess</SelectItem>
-            <SelectItem value="general">General Inquiry</SelectItem>
-          </SelectContent>
-        </Select>
+        <Label>What are you interested in? <span className="text-slate-500 font-normal">(Select all that apply)</span></Label>
+        <div className="grid grid-cols-2 gap-3 mt-2">
+          {[
+            { value: 'demo', label: 'Request a Demo' },
+            { value: 'pilot', label: 'Start a Pilot' },
+            { value: '1data', label: 'Learn about 1Data' },
+            { value: '1source', label: 'Learn about 1Source' },
+            { value: '1xcess', label: 'Learn about 1Xcess' },
+            { value: 'general', label: 'General Inquiry' }
+          ].map((item) => (
+            <label
+              key={item.value}
+              className={`flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                formData.interest.includes(item.value)
+                  ? 'border-emerald-500 bg-emerald-50'
+                  : 'border-slate-200 hover:border-slate-300'
+              }`}
+            >
+              <input
+                type="checkbox"
+                checked={formData.interest.includes(item.value)}
+                onChange={() => handleInterestToggle(item.value)}
+                className="w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500"
+              />
+              <span className="text-sm text-slate-700">{item.label}</span>
+            </label>
+          ))}
+        </div>
       </div>
 
       <div className="space-y-2">
