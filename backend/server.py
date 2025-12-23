@@ -322,15 +322,17 @@ async def scrape_unscraped_articles(limit: int = 50, retry_failed: bool = False)
                 {"$set": scrape_result}
             )
             
-            if scrape_result["scraped"]:
+            if scrape_result.get("scraped"):
                 scraped_count += 1
+            elif scrape_result.get("permanentFailure"):
+                skipped_paywall += 1
             else:
                 failed_count += 1
             
             # Rate limiting - wait 1 second between requests
             await asyncio.sleep(1)
         
-        logger.info(f"[Scraper] Completed: {scraped_count} scraped, {failed_count} failed")
+        logger.info(f"[Scraper] Completed: {scraped_count} scraped, {failed_count} failed, {skipped_paywall} paywall/blocked")
         logger.info("=" * 60)
         
     except Exception as e:
