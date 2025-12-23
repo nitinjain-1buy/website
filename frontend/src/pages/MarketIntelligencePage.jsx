@@ -382,7 +382,7 @@ const MarketIntelligencePage = () => {
                       </div>
                       <CardContent className="p-8 flex flex-col justify-center bg-white">
                         <Badge variant="outline" className="w-fit mb-3 text-emerald-600 border-emerald-200">
-                          {visibleArticles[0].query}
+                          {getArticleQueries(visibleArticles[0])[0]}
                         </Badge>
                         <h2 className="text-2xl font-bold text-slate-900 mb-4 group-hover:text-emerald-600 transition-colors line-clamp-3">
                           {visibleArticles[0].title}
@@ -439,7 +439,7 @@ const MarketIntelligencePage = () => {
                         )}
                         <div className="absolute top-3 left-3">
                           <Badge className="bg-white/95 text-slate-700 text-xs font-medium shadow-sm">
-                            {article.query}
+                            {getArticleQueries(article)[0]}
                           </Badge>
                         </div>
                       </div>
