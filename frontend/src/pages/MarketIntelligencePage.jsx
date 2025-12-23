@@ -125,39 +125,14 @@ const MarketIntelligencePage = () => {
       </section>
 
       {/* Filters & Tabs Section */}
-      <section className="py-8 bg-white border-b">
+      <section className="py-6 bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            {/* Query Filters */}
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="flex items-center gap-2 text-slate-600">
-                <Search className="w-4 h-4" />
-                <span className="font-medium">Filter by topic:</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  variant={selectedQuery === 'all' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => { setSelectedQuery('all'); setVisibleCount(10); }}
-                  className={selectedQuery === 'all' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
-                >
-                  All News
-                </Button>
-                {uniqueQueries.map((query) => (
-                  <Button
-                    key={query}
-                    variant={selectedQuery === query ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => { setSelectedQuery(query); setVisibleCount(10); }}
-                    className={selectedQuery === query ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
-                  >
-                    {query}
-                  </Button>
-                ))}
-              </div>
+          {/* Recent/Archived Tabs */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2 text-slate-600">
+              <Search className="w-4 h-4" />
+              <span className="font-medium">Filter by topic:</span>
             </div>
-
-            {/* Recent/Archived Tabs */}
             <div className="flex items-center gap-2">
               <Button
                 variant={activeTab === 'recent' ? 'default' : 'outline'}
@@ -178,6 +153,32 @@ const MarketIntelligencePage = () => {
                 Archived ({archivedArticles.length})
               </Button>
             </div>
+          </div>
+
+          {/* Query Filters - Scrollable */}
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant={selectedQuery === 'all' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => { setSelectedQuery('all'); setVisibleCount(10); }}
+              className={selectedQuery === 'all' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
+            >
+              All News ({articles.length})
+            </Button>
+            {uniqueQueries.sort().map((query) => {
+              const count = articles.filter(a => a.query === query).length;
+              return (
+                <Button
+                  key={query}
+                  variant={selectedQuery === query ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => { setSelectedQuery(query); setVisibleCount(10); }}
+                  className={selectedQuery === query ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
+                >
+                  {query} ({count})
+                </Button>
+              );
+            })}
           </div>
         </div>
       </section>
