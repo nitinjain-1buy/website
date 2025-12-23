@@ -27,7 +27,6 @@ import {
   Sparkles
 } from 'lucide-react';
 import TestimonialsMarquee from '../components/TestimonialsMarquee';
-import ElectronicComponentsPattern from '../components/ElectronicComponentsPattern';
 import GlobalNetworkMap from '../components/GlobalNetworkMap';
 import AnimatedSection from '../components/AnimatedSection';
 import AnimatedCounter from '../components/AnimatedCounter';
