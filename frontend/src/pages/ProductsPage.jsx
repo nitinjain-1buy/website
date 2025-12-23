@@ -18,6 +18,7 @@ import {
   Clock,
   DollarSign
 } from 'lucide-react';
+import ElectronicComponentsPattern from '../components/ElectronicComponentsPattern';
 
 const iconMap = {
   Database,
