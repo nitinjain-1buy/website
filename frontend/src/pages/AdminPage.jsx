@@ -1826,8 +1826,8 @@ const NewsManager = ({ isLoading: parentLoading, onRefresh }) => {
                           <>
                             {log.articlesFound || log.articlesCount} found, 
                             <span className="text-emerald-600 font-medium ml-1">{log.newArticles} new</span>
-                            {log.duplicatesSkipped > 0 && (
-                              <span className="text-slate-400 ml-1">({log.duplicatesSkipped} dupes)</span>
+                            {log.existingUpdated > 0 && (
+                              <span className="text-blue-500 ml-1">({log.existingUpdated} tagged)</span>
                             )}
                           </>
                         ) : (
