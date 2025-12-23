@@ -1823,10 +1823,26 @@ const AdminDashboard = ({ onLogout }) => {
     onLogout();
   };
 
+  const [activeTab, setActiveTab] = useState('site-settings');
+
+  const sidebarItems = [
+    { id: 'site-settings', label: 'Site Settings', icon: Settings, count: null },
+    { id: 'news', label: 'News & Intelligence', icon: Newspaper, count: null },
+    { id: 'stats', label: 'Stats', icon: BarChart3, count: siteStats.length },
+    { id: 'customers-list', label: 'Customers', icon: Building2, count: customerLogos.length },
+    { id: 'products', label: 'Products', icon: Layers, count: products.length },
+    { id: 'map-locations', label: 'Map', icon: MapPin, count: mapLocations.length },
+    { id: 'flow-lines', label: 'Flows', icon: GitBranch, count: flowLines.length },
+    { id: 'region-cards', label: 'Regions', icon: Globe, count: regionCards.length },
+    { id: 'testimonials', label: 'Testimonials', icon: Quote, count: testimonials.length },
+    { id: 'demo-requests', label: 'Demo Requests', icon: Users, count: customerRequests.length },
+    { id: 'suppliers', label: 'Suppliers', icon: Package, count: supplierRequests.length },
+  ];
+
   return (
     <div className="min-h-screen bg-slate-100">
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-20">
+        <div className="px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
               <img src={logoUrl} alt="1Buy.AI" className="h-8 w-auto" />
@@ -1853,133 +1869,127 @@ const AdminDashboard = ({ onLogout }) => {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-2xl font-bold text-slate-900">{customerRequests.length}</p>
-                  <p className="text-slate-500 text-sm">Demo Requests</p>
-                </div>
-                <Users className="h-8 w-8 text-blue-500" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-2xl font-bold text-slate-900">{supplierRequests.length}</p>
-                  <p className="text-slate-500 text-sm">Supplier Requests</p>
-                </div>
-                <Package className="h-8 w-8 text-emerald-500" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-2xl font-bold text-slate-900">{testimonials.filter(t => t.isActive).length}</p>
-                  <p className="text-slate-500 text-sm">Testimonials</p>
-                </div>
-                <Quote className="h-8 w-8 text-purple-500" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-2xl font-bold text-slate-900">{customerLogos.length}</p>
-                  <p className="text-slate-500 text-sm">Customers Listed</p>
-                </div>
-                <Building2 className="h-8 w-8 text-amber-500" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+      <div className="flex">
+        {/* Sidebar */}
+        <aside className="w-64 bg-white border-r border-slate-200 min-h-[calc(100vh-64px)] sticky top-16 overflow-y-auto">
+          <nav className="p-4 space-y-1">
+            {sidebarItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                    activeTab === item.id
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon className="h-4 w-4" />
+                    <span>{item.label}</span>
+                  </div>
+                  {item.count !== null && (
+                    <Badge variant="secondary" className={`text-xs ${activeTab === item.id ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100'}`}>
+                      {item.count}
+                    </Badge>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
+        </aside>
 
-        <Card>
-          <CardContent className="p-6">
-            <Tabs defaultValue="site-settings">
-              <TabsList className="mb-6 flex-wrap">
-                <TabsTrigger value="site-settings" className="flex items-center gap-2">
-                  <Settings className="h-4 w-4" />Site Settings
-                </TabsTrigger>
-                <TabsTrigger value="stats" className="flex items-center gap-2">
-                  <BarChart3 className="h-4 w-4" />Stats ({siteStats.length})
-                </TabsTrigger>
-                <TabsTrigger value="customers-list" className="flex items-center gap-2">
-                  <Building2 className="h-4 w-4" />Customers ({customerLogos.length})
-                </TabsTrigger>
-                <TabsTrigger value="products" className="flex items-center gap-2">
-                  <Layers className="h-4 w-4" />Products ({products.length})
-                </TabsTrigger>
-                <TabsTrigger value="map-locations" className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />Map ({mapLocations.length})
-                </TabsTrigger>
-                <TabsTrigger value="flow-lines" className="flex items-center gap-2">
-                  <GitBranch className="h-4 w-4" />Flows ({flowLines.length})
-                </TabsTrigger>
-                <TabsTrigger value="region-cards" className="flex items-center gap-2">
-                  <Globe className="h-4 w-4" />Regions ({regionCards.length})
-                </TabsTrigger>
-                <TabsTrigger value="testimonials" className="flex items-center gap-2">
-                  <Quote className="h-4 w-4" />Testimonials ({testimonials.length})
-                </TabsTrigger>
-                <TabsTrigger value="demo-requests" className="flex items-center gap-2">
-                  <Users className="h-4 w-4" />Demo Requests ({customerRequests.length})
-                </TabsTrigger>
-                <TabsTrigger value="suppliers" className="flex items-center gap-2">
-                  <Package className="h-4 w-4" />Suppliers ({supplierRequests.length})
-                </TabsTrigger>
-              </TabsList>
+        {/* Main Content */}
+        <main className="flex-1 p-6 overflow-auto">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-2xl font-bold text-slate-900">{customerRequests.length}</p>
+                    <p className="text-slate-500 text-sm">Demo Requests</p>
+                  </div>
+                  <Users className="h-8 w-8 text-blue-500" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-2xl font-bold text-slate-900">{supplierRequests.length}</p>
+                    <p className="text-slate-500 text-sm">Supplier Requests</p>
+                  </div>
+                  <Package className="h-8 w-8 text-emerald-500" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-2xl font-bold text-slate-900">{testimonials.filter(t => t.isActive).length}</p>
+                    <p className="text-slate-500 text-sm">Testimonials</p>
+                  </div>
+                  <Quote className="h-8 w-8 text-purple-500" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-2xl font-bold text-slate-900">{customerLogos.length}</p>
+                    <p className="text-slate-500 text-sm">Customers Listed</p>
+                  </div>
+                  <Building2 className="h-8 w-8 text-amber-500" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-              <TabsContent value="site-settings">
+          {/* Content Area */}
+          <Card>
+            <CardContent className="p-6">
+              {activeTab === 'site-settings' && (
                 <HeroSectionManager heroData={heroSection} isLoading={isLoading} onRefresh={fetchData} />
-              </TabsContent>
-
-              <TabsContent value="stats">
+              )}
+              {activeTab === 'news' && (
+                <NewsManager isLoading={isLoading} onRefresh={fetchData} />
+              )}
+              {activeTab === 'stats' && (
                 <SiteStatsManager stats={siteStats} isLoading={isLoading} onRefresh={fetchData} />
-              </TabsContent>
-
-              <TabsContent value="customers-list">
+              )}
+              {activeTab === 'customers-list' && (
                 <CustomerLogosManager logos={customerLogos} isLoading={isLoading} onRefresh={fetchData} />
-              </TabsContent>
-
-              <TabsContent value="products">
+              )}
+              {activeTab === 'products' && (
                 <ProductsManager products={products} isLoading={isLoading} onRefresh={fetchData} />
-              </TabsContent>
-
-              <TabsContent value="map-locations">
+              )}
+              {activeTab === 'map-locations' && (
                 <MapLocationEditor locations={mapLocations} isLoading={isLoading} onRefresh={fetchData} />
-              </TabsContent>
-
-              <TabsContent value="flow-lines">
+              )}
+              {activeTab === 'flow-lines' && (
                 <FlowLinesManager flowLines={flowLines} locations={mapLocations} isLoading={isLoading} onRefresh={fetchData} />
-              </TabsContent>
-
-              <TabsContent value="region-cards">
+              )}
+              {activeTab === 'region-cards' && (
                 <RegionCardsManager regionCards={regionCards} isLoading={isLoading} onRefresh={fetchData} />
-              </TabsContent>
-
-              <TabsContent value="testimonials">
+              )}
+              {activeTab === 'testimonials' && (
                 <TestimonialsManager testimonials={testimonials} isLoading={isLoading} onRefresh={fetchData} />
-              </TabsContent>
-
-              <TabsContent value="demo-requests">
+              )}
+              {activeTab === 'demo-requests' && (
                 <CustomerRequestsTable requests={customerRequests} isLoading={isLoading} onStatusUpdate={updateStatus} updatingId={updatingId} />
-              </TabsContent>
-
-              <TabsContent value="suppliers">
+              )}
+              {activeTab === 'suppliers' && (
                 <SupplierRequestsTable requests={supplierRequests} isLoading={isLoading} onStatusUpdate={updateStatus} updatingId={updatingId} />
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-      </main>
+              )}
+            </CardContent>
+          </Card>
+        </main>
+      </div>
     </div>
   );
 };
