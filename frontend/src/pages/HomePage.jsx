@@ -555,38 +555,40 @@ const HomePage = () => {
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <AnimatedSection animation="fade-up">
-            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-8">
               Ready to transform your procurement?
             </h2>
           </AnimatedSection>
+          
+          {/* White box container */}
           <AnimatedSection animation="fade-up" delay={200}>
-            <p className="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
-              Start with your BOM. See potential savings within days, not months.
-            </p>
-          </AnimatedSection>
-          <AnimatedSection animation="fade-up" delay={400}>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/contact">
-                <Button 
-                  size="lg" 
-                  className="bg-slate-900 hover:bg-slate-800 text-white px-8 h-12 relative overflow-hidden group transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-slate-900/30"
-                >
-                  <span className="relative z-10 flex items-center">
-                    Request a Demo
-                    <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-                  </span>
-                  <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:animate-shimmer" />
-                </Button>
-              </Link>
-              <Link to="/how-it-works">
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="border-slate-300 text-slate-900 hover:bg-slate-100 px-8 h-12 transition-all duration-300 hover:scale-105"
-                >
-                  See How It Works
-                </Button>
-              </Link>
+            <div className="bg-white rounded-2xl shadow-xl border-2 border-slate-200 p-8 md:p-12 max-w-3xl mx-auto">
+              <p className="text-xl text-slate-600 mb-8">
+                Start with your BOM. See potential savings within days, not months.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link to="/contact">
+                  <Button 
+                    size="lg" 
+                    className="bg-slate-900 hover:bg-slate-800 text-white px-8 h-12 relative overflow-hidden group transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-slate-900/30"
+                  >
+                    <span className="relative z-10 flex items-center">
+                      Request a Demo
+                      <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                    </span>
+                    <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:animate-shimmer" />
+                  </Button>
+                </Link>
+                <Link to="/how-it-works">
+                  <Button 
+                    size="lg" 
+                    variant="outline" 
+                    className="border-slate-300 text-slate-900 hover:bg-slate-100 px-8 h-12 transition-all duration-300 hover:scale-105"
+                  >
+                    See How It Works
+                  </Button>
+                </Link>
+              </div>
             </div>
           </AnimatedSection>
         </div>
