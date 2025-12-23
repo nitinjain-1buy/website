@@ -1667,15 +1667,28 @@ const NewsManager = ({ isLoading: parentLoading, onRefresh }) => {
 
   return (
     <div className="space-y-6">
-      {/* Header with Refresh */}
-      <div className="flex items-center justify-between">
+      {/* Header with Refresh Buttons */}
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h3 className="text-lg font-semibold text-slate-900">Market Intelligence & News</h3>
-          <p className="text-sm text-slate-500">Automatically fetched daily at 8:00 AM and 4:00 PM</p>
+          <p className="text-sm text-slate-500">SerpAPI + GDELT: Twice daily | MediaStack: Weekly (Mondays)</p>
         </div>
-        <Button onClick={handleRefreshNews} disabled={isRefreshing}>
-          <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-          {isRefreshing ? 'Refreshing...' : 'Refresh Now'}
+        <div className="flex gap-2">
+          <Button onClick={handleRefreshNews} disabled={isRefreshing} variant="outline">
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+            {isRefreshing ? 'Refreshing...' : 'Refresh Daily'}
+          </Button>
+          <Button 
+            onClick={handleRefreshMediaStack} 
+            disabled={isRefreshingMediaStack}
+            variant="outline"
+            className="border-amber-300 text-amber-700 hover:bg-amber-50"
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshingMediaStack ? 'animate-spin' : ''}`} />
+            {isRefreshingMediaStack ? 'Refreshing...' : 'MediaStack (Weekly)'}
+          </Button>
+        </div>
+      </div>
         </Button>
       </div>
 
