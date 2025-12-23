@@ -330,7 +330,8 @@ const HomePage = () => {
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimatedSection animation="fade-up" className="text-center mb-16">
-            <Badge variant="outline" className="mb-4 text-emerald-700 border-emerald-200 bg-emerald-50">
+            <Badge variant="outline" className="mb-4 text-emerald-700 border-emerald-200 bg-emerald-50 animate-badge-pulse inline-flex items-center gap-2">
+              <Sparkles className="w-3 h-3 animate-pulse" />
               The Problem
             </Badge>
             <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
@@ -435,8 +436,8 @@ const HomePage = () => {
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimatedSection animation="fade-up" className="text-center mb-16">
-            <Badge variant="outline" className="mb-4 text-emerald-700 border-emerald-200 bg-emerald-50 inline-flex items-center gap-2">
-              <Zap className="w-3 h-3" />
+            <Badge variant="outline" className="mb-4 text-emerald-700 border-emerald-200 bg-emerald-50 animate-badge-pulse inline-flex items-center gap-2">
+              <Sparkles className="w-3 h-3 animate-pulse" />
               Our Platform
             </Badge>
             <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
