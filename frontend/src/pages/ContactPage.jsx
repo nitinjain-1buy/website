@@ -371,25 +371,36 @@ const SupplierForm = () => {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="productCategories">Product Categories *</Label>
-        <Select
-          value={formData.productCategories}
-          onValueChange={(value) => handleSelectChange('productCategories', value)}
-        >
-          <SelectTrigger className="h-12">
-            <SelectValue placeholder="Select primary category" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="semiconductors">Semiconductors / ICs</SelectItem>
-            <SelectItem value="passive">Passive Components (Capacitors, Resistors)</SelectItem>
-            <SelectItem value="connectors">Connectors</SelectItem>
-            <SelectItem value="electromechanical">Electromechanical Components</SelectItem>
-            <SelectItem value="power">Power Management</SelectItem>
-            <SelectItem value="sensors">Sensors</SelectItem>
-            <SelectItem value="displays">Displays & Optoelectronics</SelectItem>
-            <SelectItem value="multiple">Multiple Categories</SelectItem>
-          </SelectContent>
-        </Select>
+        <Label>Product Categories * <span className="text-slate-500 font-normal">(Select all that apply)</span></Label>
+        <div className="grid grid-cols-2 gap-3 mt-2">
+          {[
+            { value: 'semiconductors', label: 'Semiconductors / ICs' },
+            { value: 'passive', label: 'Passive Components' },
+            { value: 'connectors', label: 'Connectors' },
+            { value: 'electromechanical', label: 'Electromechanical' },
+            { value: 'power', label: 'Power Management' },
+            { value: 'sensors', label: 'Sensors' },
+            { value: 'displays', label: 'Displays & Optoelectronics' },
+            { value: 'other', label: 'Other' }
+          ].map((category) => (
+            <label
+              key={category.value}
+              className={`flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                formData.productCategories.includes(category.value)
+                  ? 'border-emerald-500 bg-emerald-50'
+                  : 'border-slate-200 hover:border-slate-300'
+              }`}
+            >
+              <input
+                type="checkbox"
+                checked={formData.productCategories.includes(category.value)}
+                onChange={() => handleCategoryToggle(category.value)}
+                className="w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500"
+              />
+              <span className="text-sm text-slate-700">{category.label}</span>
+            </label>
+          ))}
+        </div>
       </div>
 
       <div className="space-y-2">
