@@ -271,9 +271,27 @@ const MarketIntelligencePage = () => {
       return categories.some(cat => PRIORITY_RISK_CATEGORIES.includes(cat));
     });
     
-    // If we have priority articles, sort them by risk_score and return highest
+    // If we have priority articles, sort them by:
+    // 1. Number of priority categories (more is better)
+    // 2. Risk score (higher is better)
+    // 3. Date (more recent is better)
     if (priorityArticles.length > 0) {
-      const sorted = [...priorityArticles].sort((a, b) => (b.risk_score || 0) - (a.risk_score || 0));
+      const sorted = [...priorityArticles].sort((a, b) => {
+        const aCats = (a.risk_categories || []).filter(c => PRIORITY_RISK_CATEGORIES.includes(c)).length;
+        const bCats = (b.risk_categories || []).filter(c => PRIORITY_RISK_CATEGORIES.includes(c)).length;
+        
+        // First: more priority categories wins
+        if (bCats !== aCats) return bCats - aCats;
+        
+        // Second: higher risk score wins
+        const scoreDiff = (b.risk_score || 0) - (a.risk_score || 0);
+        if (scoreDiff !== 0) return scoreDiff;
+        
+        // Third: more recent wins
+        const dateA = new Date(a.iso_date || a.fetchedAt || 0);
+        const dateB = new Date(b.iso_date || b.fetchedAt || 0);
+        return dateB - dateA;
+      });
       return sorted[0];
     }
     
