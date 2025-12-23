@@ -116,9 +116,9 @@ scheduler = AsyncIOScheduler()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
-    scheduler.add_job(fetch_and_store_all_news, 'interval', hours=5, id='news_fetch_job')
+    scheduler.add_job(fetch_and_store_all_news, 'interval', hours=12, id='news_fetch_job')
     scheduler.start()
-    logger.info("News scheduler started - will fetch every 5 hours")
+    logger.info("News scheduler started - will fetch twice daily (every 12 hours)")
     
     # Run initial fetch on startup
     await fetch_and_store_all_news()
