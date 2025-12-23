@@ -326,6 +326,7 @@ export const navigationData = [
   { name: "Products", href: "/products" },
   { name: "How It Works", href: "/how-it-works" },
   { name: "Use Cases", href: "/use-cases" },
+  { name: "Market Intelligence", href: "/market-intelligence" },
   { name: "Team", href: "/team" },
   { name: "About", href: "/about" }
 ];
