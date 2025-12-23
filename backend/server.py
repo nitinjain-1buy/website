@@ -15,6 +15,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from contextlib import asynccontextmanager
 from bs4 import BeautifulSoup
 import re
+from risk_engine import analyze_article, analyze_articles_batch, RISK_CATEGORIES
 
 
 ROOT_DIR = Path(__file__).parent
