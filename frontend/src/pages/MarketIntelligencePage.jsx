@@ -457,9 +457,63 @@ const MarketIntelligencePage = () => {
             })}
           </div>
 
+          {/* Risk Category Filter Chips */}
+          <div className="mb-4">
+            <div className="flex items-center gap-3 mb-2">
+              <AlertTriangle className="w-5 h-5 text-orange-500" />
+              <span className="font-semibold text-slate-700">Filter by Risk</span>
+              {selectedRiskCategories.length > 0 && (
+                <Badge className="bg-orange-100 text-orange-700">
+                  {selectedRiskCategories.length} selected
+                </Badge>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {/* All Risks Chip */}
+              <button
+                onClick={handleClearRiskFilters}
+                className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 border ${
+                  selectedRiskCategories.length === 0
+                    ? 'bg-orange-500 text-white border-orange-500 shadow-md'
+                    : 'bg-white text-slate-700 border-slate-300 hover:border-orange-400 hover:bg-orange-50'
+                }`}
+              >
+                {selectedRiskCategories.length === 0 && <Check className="w-3 h-3" />}
+                <span>All Risks</span>
+              </button>
+
+              {/* Individual Risk Category Chips */}
+              {Object.entries(filteredRiskCategoryCounts)
+                .filter(([_, count]) => count > 0)
+                .sort((a, b) => b[1] - a[1])
+                .map(([category, count]) => {
+                  const isSelected = selectedRiskCategories.includes(category);
+                  return (
+                    <button
+                      key={category}
+                      onClick={() => handleRiskCategoryToggle(category)}
+                      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 border ${
+                        isSelected
+                          ? 'bg-orange-500 text-white border-orange-500 shadow-md'
+                          : 'bg-white text-slate-700 border-slate-300 hover:border-orange-400 hover:bg-orange-50'
+                      }`}
+                    >
+                      {isSelected && <Check className="w-3 h-3" />}
+                      <span>{RISK_CATEGORY_LABELS[category] || category}</span>
+                      <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                        isSelected ? 'bg-orange-400 text-white' : 'bg-slate-100 text-slate-500'
+                      }`}>
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+            </div>
+          </div>
+
           {/* Action Buttons */}
           <div className="flex items-center gap-3">
-            {selectedTopics.length > 0 ? (
+            {(selectedTopics.length > 0 || selectedRiskCategories.length > 0) ? (
               <Button
                 variant="outline"
                 size="sm"
@@ -471,18 +525,8 @@ const MarketIntelligencePage = () => {
               </Button>
             ) : (
               <span className="text-sm text-slate-500">
-                Showing all {articles.length} articles • Click topics above to filter
+                Showing all {sortedArticles.length} articles • Click topics or risk categories to filter
               </span>
-            )}
-            {selectedTopics.length > 0 && selectedTopics.length < topicsWithCounts.length && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleSelectAll}
-                className="text-slate-500"
-              >
-                Select All
-              </Button>
             )}
           </div>
         </div>
