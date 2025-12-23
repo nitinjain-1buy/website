@@ -249,29 +249,27 @@ const HowItWorksPage = () => {
 
             {/* Typical Pilot Results */}
             <div>
-              <Card className="border-2 border-emerald-500/30 bg-slate-800/50 backdrop-blur">
-                <CardContent className="p-8">
-                  <h3 className="text-2xl font-bold text-white mb-6">Typical Pilot Results</h3>
-                  <div className="space-y-6">
-                    <div className="bg-slate-700/50 rounded-lg p-4">
-                      <div className="text-3xl font-bold text-emerald-400 mb-1">$14.77M</div>
-                      <div className="text-slate-300">Potential savings identified</div>
-                    </div>
-                    <div className="bg-slate-700/50 rounded-lg p-4">
-                      <div className="text-3xl font-bold text-emerald-400 mb-1">15-20%</div>
-                      <div className="text-slate-300">Average savings on analyzed parts</div>
-                    </div>
-                    <div className="bg-slate-700/50 rounded-lg p-4">
-                      <div className="text-3xl font-bold text-emerald-400 mb-1">100%</div>
-                      <div className="text-slate-300">MPN match rate</div>
-                    </div>
-                    <div className="bg-slate-700/50 rounded-lg p-4">
-                      <div className="text-3xl font-bold text-emerald-400 mb-1">2 Weeks</div>
-                      <div className="text-slate-300">Time to initial results</div>
-                    </div>
+              <div className="bg-white rounded-2xl shadow-xl p-8 md:p-10">
+                <h3 className="text-2xl font-bold text-slate-900 mb-6">Typical Pilot Results</h3>
+                <div className="space-y-6">
+                  <div className="bg-slate-50 rounded-lg p-4">
+                    <div className="text-3xl font-bold text-emerald-600 mb-1">$14.77M</div>
+                    <div className="text-slate-600">Potential savings identified</div>
                   </div>
-                </CardContent>
-              </Card>
+                  <div className="bg-slate-50 rounded-lg p-4">
+                    <div className="text-3xl font-bold text-emerald-600 mb-1">15-20%</div>
+                    <div className="text-slate-600">Average savings on analyzed parts</div>
+                  </div>
+                  <div className="bg-slate-50 rounded-lg p-4">
+                    <div className="text-3xl font-bold text-emerald-600 mb-1">100%</div>
+                    <div className="text-slate-600">MPN match rate</div>
+                  </div>
+                  <div className="bg-slate-50 rounded-lg p-4">
+                    <div className="text-3xl font-bold text-emerald-600 mb-1">2 Weeks</div>
+                    <div className="text-slate-600">Time to initial results</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
