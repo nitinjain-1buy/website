@@ -57,6 +57,17 @@ const CustomerForm = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleInterestToggle = (interest) => {
+    setFormData(prev => {
+      const currentInterests = prev.interest;
+      if (currentInterests.includes(interest)) {
+        return { ...prev, interest: currentInterests.filter(i => i !== interest) };
+      } else {
+        return { ...prev, interest: [...currentInterests, interest] };
+      }
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -217,7 +228,7 @@ const CustomerForm = () => {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="message">Message (Optional)</Label>
+        <Label htmlFor="message">Message <span className="text-slate-500 font-normal">(Optional)</span></Label>
         <Textarea
           id="message"
           name="message"
