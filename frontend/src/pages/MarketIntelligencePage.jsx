@@ -241,6 +241,36 @@ const MarketIntelligencePage = () => {
   const visibleArticles = displayArticles.slice(0, visibleCount);
   const hasMore = visibleCount < displayArticles.length;
 
+  // Get featured article: highest risk from the last 7 days
+  const featuredArticle = useMemo(() => {
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    
+    // Filter articles from the last week with valid risk scores
+    const lastWeekArticles = recentArticles.filter(article => {
+      const articleDate = new Date(article.iso_date || article.fetchedAt || 0);
+      return articleDate >= oneWeekAgo && (article.risk_score || 0) > 0;
+    });
+    
+    if (lastWeekArticles.length === 0) {
+      // Fallback to first recent article if no high-risk articles in last week
+      return recentArticles[0] || null;
+    }
+    
+    // Sort by risk_score descending and return the highest
+    const sorted = [...lastWeekArticles].sort((a, b) => (b.risk_score || 0) - (a.risk_score || 0));
+    return sorted[0];
+  }, [recentArticles]);
+
+  // Get display articles excluding the featured article to avoid duplication
+  const gridArticles = useMemo(() => {
+    if (!featuredArticle || activeTab !== 'recent' || selectedTopics.length > 0 || selectedRiskCategories.length > 0) {
+      return visibleArticles;
+    }
+    // Remove featured article from the grid
+    return visibleArticles.filter(a => a.id !== featuredArticle.id);
+  }, [visibleArticles, featuredArticle, activeTab, selectedTopics, selectedRiskCategories]);
+
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
     try {
