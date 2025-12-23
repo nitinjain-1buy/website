@@ -1844,7 +1844,13 @@ const NewsManager = ({ isLoading: parentLoading, onRefresh }) => {
                       {log.api && (
                         <Badge 
                           variant="outline" 
-                          className={log.api === 'SerpAPI' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-purple-50 text-purple-700 border-purple-200'}
+                          className={
+                            log.api === 'SerpAPI' 
+                              ? 'bg-blue-50 text-blue-700 border-blue-200' 
+                              : log.api === 'MediaStack'
+                              ? 'bg-amber-50 text-amber-700 border-amber-200'
+                              : 'bg-purple-50 text-purple-700 border-purple-200'
+                          }
                         >
                           {log.api}
                         </Badge>
