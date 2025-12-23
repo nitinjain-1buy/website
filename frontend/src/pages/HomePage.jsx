@@ -562,7 +562,7 @@ const HomePage = () => {
           
           {/* White box container */}
           <AnimatedSection animation="fade-up" delay={200}>
-            <div className="bg-white rounded-2xl shadow-xl border-2 border-slate-200 p-8 md:p-12 max-w-3xl mx-auto">
+            <div className="bg-white rounded-2xl shadow-2xl border border-slate-300 p-8 md:p-12 max-w-3xl mx-auto">
               <p className="text-xl text-slate-600 mb-8">
                 Start with your BOM. See potential savings within days, not months.
               </p>
