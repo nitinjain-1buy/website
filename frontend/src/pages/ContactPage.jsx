@@ -430,17 +430,21 @@ const ContactPage = () => {
   return (
     <div className="bg-white">
       {/* Hero */}
-      <section className="bg-slate-50 py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative overflow-hidden bg-slate-50 py-20">
+        {/* Electronic Components Watermark Background */}
+        <ElectronicComponentsPattern />
+        <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
             <Badge variant="outline" className="mb-4 text-emerald-700 border-emerald-200 bg-emerald-50">
               Get Started
             </Badge>
             <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-6">
-              Let's work together
+              Let&apos;s work together
             </h1>
             <p className="text-xl text-slate-600 leading-relaxed">
-              Whether you're looking to optimize your procurement or partner with us as a supplier — we're here to help.
+              Whether you&apos;re looking to optimize your procurement or partner with us as a supplier — we&apos;re here to help.
             </p>
           </div>
         </div>
