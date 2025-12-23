@@ -1622,6 +1622,36 @@ const NewsManager = ({ isLoading: parentLoading, onRefresh }) => {
     }
   };
 
+  const [isScraping, setIsScraping] = useState(false);
+  const [scrapeStats, setScrapeStats] = useState(null);
+
+  const fetchScrapeStats = async () => {
+    try {
+      const res = await axios.get(`${API}/news/scrape-stats`);
+      setScrapeStats(res.data);
+    } catch (error) {
+      console.error('Failed to fetch scrape stats');
+    }
+  };
+
+  useEffect(() => {
+    fetchScrapeStats();
+  }, []);
+
+  const handleStartScraping = async () => {
+    try {
+      setIsScraping(true);
+      await axios.post(`${API}/news/scrape?limit=100`);
+      toast.success('Article scraping started (100 articles)');
+      // Refresh stats after a delay
+      setTimeout(fetchScrapeStats, 10000);
+    } catch (error) {
+      toast.error('Failed to start scraping');
+    } finally {
+      setIsScraping(false);
+    }
+  };
+
   const handleAddQuery = async () => {
     if (!newQuery.trim()) return;
     try {
