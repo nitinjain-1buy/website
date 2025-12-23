@@ -120,8 +120,12 @@ const UseCasesPage = () => {
       </section>
 
       {/* Industry Verticals */}
-      <section className="py-24 bg-slate-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-24 relative overflow-hidden bg-slate-50">
+        {/* Electronic Components Watermark Background */}
+        <ElectronicComponentsPattern />
+        <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
               High BOM-sensitivity industries
@@ -135,7 +139,7 @@ const UseCasesPage = () => {
             {useCasesData.map((useCase, index) => {
               const IconComponent = iconMap[useCase.icon];
               return (
-                <Card key={index} className="border-slate-200 hover:shadow-lg transition-shadow">
+                <Card key={index} className="border-slate-200 bg-white hover:shadow-lg transition-shadow">
                   <CardContent className="p-6">
                     <div className="w-12 h-12 rounded-lg bg-emerald-50 flex items-center justify-center mb-4">
                       <IconComponent className="h-6 w-6 text-emerald-600" />
