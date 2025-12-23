@@ -62,9 +62,17 @@ async def fetch_and_store_all_news():
         # Get all active queries
         queries = await db.news_queries.find({"isActive": True}, {"_id": 0}).to_list(100)
         
-        # If no queries, use default
+        # If no queries, create the default one
         if not queries:
-            queries = [{"query": "electronics parts", "isActive": True}]
+            default_query = {
+                "id": str(uuid.uuid4()),
+                "query": "electronics parts",
+                "isActive": True,
+                "createdAt": datetime.now(timezone.utc).isoformat()
+            }
+            await db.news_queries.insert_one(default_query)
+            queries = [default_query]
+            logger.info("Created default search query: electronics parts")
         
         total_articles = 0
         for q in queries:
