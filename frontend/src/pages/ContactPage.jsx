@@ -238,7 +238,7 @@ const SupplierForm = () => {
     phone: '',
     website: '',
     productCategories: [],
-    regionsServed: '',
+    regionsServed: [],
     inventoryDescription: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
