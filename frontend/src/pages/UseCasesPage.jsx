@@ -14,7 +14,8 @@ import {
   Factory,
   CheckCircle,
   Users,
-  Globe
+  Globe,
+  Target
 } from 'lucide-react';
 import ElectronicComponentsPattern from '../components/ElectronicComponentsPattern';
 
@@ -79,7 +80,8 @@ const UseCasesPage = () => {
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
-            <Badge variant="outline" className="mb-4 text-emerald-700 border-emerald-200 bg-emerald-50">
+            <Badge variant="outline" className="mb-4 text-emerald-700 border-emerald-200 bg-emerald-50 animate-badge-pulse inline-flex items-center gap-2">
+              <Target className="w-3 h-3 animate-pulse" />
               Use Cases
             </Badge>
             <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-6">
