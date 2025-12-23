@@ -185,16 +185,21 @@ const HowItWorksPage = () => {
         <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <Badge variant="outline" className="mb-4 text-emerald-700 border-emerald-200 bg-emerald-50">
-                Start Small
-              </Badge>
-              <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-6">
-                What a pilot looks like
-              </h2>
+          {/* Section Heading */}
+          <div className="text-center mb-12">
+            <Badge variant="outline" className="mb-4 text-emerald-700 border-emerald-200 bg-emerald-50">
+              Start Small
+            </Badge>
+            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900">
+              What a pilot looks like
+            </h2>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-12 items-start">
+            {/* White box with weeks content */}
+            <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8 md:p-10">
               <p className="text-lg text-slate-600 mb-8 leading-relaxed">
-                We don't ask for commitment upfront. Start with 10-30 parts, see measurable results, then decide to scale.
+                We don&apos;t ask for commitment upfront. Start with 10-30 parts, see measurable results, then decide to scale.
               </p>
 
               <div className="space-y-6">
@@ -240,6 +245,7 @@ const HowItWorksPage = () => {
               </div>
             </div>
 
+            {/* Typical Pilot Results */}
             <div>
               <Card className="border-2 border-emerald-200 bg-emerald-50">
                 <CardContent className="p-8">
