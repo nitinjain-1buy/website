@@ -598,12 +598,45 @@ const MarketIntelligencePage = () => {
                         </div>
                       </div>
                       <CardContent className="p-8 flex flex-col justify-center bg-white">
-                        <Badge variant="outline" className="w-fit mb-3 text-emerald-600 border-emerald-200">
-                          {getArticleQueries(visibleArticles[0])[0]}
-                        </Badge>
-                        <h2 className="text-2xl font-bold text-slate-900 mb-4 group-hover:text-emerald-600 transition-colors line-clamp-3">
+                        <div className="flex items-start justify-between gap-3 mb-3">
+                          <Badge variant="outline" className="w-fit text-emerald-600 border-emerald-200">
+                            {getArticleQueries(visibleArticles[0])[0]}
+                          </Badge>
+                          {visibleArticles[0].risk_band && (
+                            <Badge className={`${RISK_BAND_CONFIG[visibleArticles[0].risk_band]?.color || 'bg-slate-400 text-white'} text-sm font-bold px-3 py-1`}>
+                              {visibleArticles[0].risk_band} • {visibleArticles[0].risk_score || 0}
+                            </Badge>
+                          )}
+                        </div>
+                        <h2 className="text-2xl font-bold text-slate-900 mb-3 group-hover:text-emerald-600 transition-colors line-clamp-3">
                           {visibleArticles[0].title}
                         </h2>
+                        
+                        {/* Risk Categories for Featured */}
+                        {visibleArticles[0].risk_categories && visibleArticles[0].risk_categories.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 mb-3">
+                            {(() => {
+                              const categoryStrength = visibleArticles[0].category_strength || {};
+                              const sortedCategories = [...visibleArticles[0].risk_categories]
+                                .sort((a, b) => (categoryStrength[b] || 0) - (categoryStrength[a] || 0))
+                                .slice(0, 3);
+                              return sortedCategories.map((cat, idx) => (
+                                <span key={idx} className="text-xs px-2 py-1 bg-slate-100 text-slate-600 rounded-full">
+                                  {RISK_CATEGORY_LABELS[cat] || cat}
+                                </span>
+                              ));
+                            })()}
+                          </div>
+                        )}
+                        
+                        {/* Horizon & Confidence for Featured */}
+                        {visibleArticles[0].risk_band && visibleArticles[0].risk_band !== 'LOW' && (
+                          <div className="text-sm text-slate-500 mb-3">
+                            <span className="font-medium">Horizon:</span> {visibleArticles[0].time_horizon?.replace(/_/g, ' ') || 'N/A'} • 
+                            <span className="font-medium ml-1">Confidence:</span> {visibleArticles[0].confidence || 0}
+                          </div>
+                        )}
+                        
                         <div className="flex items-center gap-4 text-sm text-slate-500 mb-4">
                           <div className="flex items-center gap-2">
                             {visibleArticles[0].source?.icon && (
