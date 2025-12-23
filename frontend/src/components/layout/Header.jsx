@@ -89,11 +89,6 @@ const Header = () => {
           {/* CTA Buttons */}
           <div className="hidden lg:flex items-center space-x-3">
             <Link to="/contact">
-              <Button variant="outline" className="border-slate-300 text-slate-700 hover:bg-slate-50">
-                Talk to Us
-              </Button>
-            </Link>
-            <Link to="/contact">
               <Button className="bg-slate-900 hover:bg-slate-800 text-white">
                 Request Demo
               </Button>
