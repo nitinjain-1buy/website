@@ -295,8 +295,8 @@ const HomePage = () => {
         </AnimatedSection>
       </section>
 
-      {/* Proof Points - Compact Stats Bar - solid dark background */}
-      <section className="bg-slate-900 py-12 relative overflow-hidden z-10">
+      {/* Proof Points - Compact Stats Bar */}
+      <section className="bg-slate-900 py-12 relative overflow-hidden">
         {/* Animated background lines */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-emerald-400 to-transparent animate-pulse" />
@@ -312,10 +312,9 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Problems Section - semi-transparent to show pattern */}
-      <section className="py-24 relative">
-        <div className="absolute inset-0 bg-white/90" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+      {/* Problems Section */}
+      <section className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimatedSection animation="fade-up" className="text-center mb-16">
             <Badge variant="outline" className="mb-4 text-slate-600 border-slate-300">
               The Problem
@@ -356,10 +355,9 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* How It Works - Flow - semi-transparent to show pattern */}
-      <section className="py-24 relative">
-        <div className="absolute inset-0 bg-slate-50/90" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+      {/* How It Works - Flow */}
+      <section className="py-24 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimatedSection animation="fade-up" className="text-center mb-16">
             <Badge variant="outline" className="mb-4 text-emerald-700 border-emerald-200 bg-emerald-50">
               How It Works
@@ -415,10 +413,9 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Products Overview - semi-transparent to show pattern */}
-      <section className="py-24 relative">
-        <div className="absolute inset-0 bg-white/90" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+      {/* Products Overview */}
+      <section className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimatedSection animation="fade-up" className="text-center mb-16">
             <Badge variant="outline" className="mb-4 text-emerald-700 border-emerald-200 bg-emerald-50 inline-flex items-center gap-2">
               <Zap className="w-3 h-3" />
@@ -488,10 +485,9 @@ const HomePage = () => {
       {/* Global Network Map */}
       <GlobalNetworkMap />
 
-      {/* Mental Model Section - semi-transparent to show pattern */}
-      <section className="py-24 overflow-hidden relative">
-        <div className="absolute inset-0 bg-white/90" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+      {/* Mental Model Section */}
+      <section className="py-24 bg-white overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimatedSection animation="zoom-in" className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-8">
               Think of it as
@@ -526,8 +522,8 @@ const HomePage = () => {
       {/* Testimonials Marquee */}
       <TestimonialsMarquee />
 
-      {/* CTA Section - solid dark background */}
-      <section className="py-24 bg-slate-900 relative overflow-hidden z-10">
+      {/* CTA Section */}
+      <section className="py-24 bg-slate-900 relative overflow-hidden">
         {/* Animated background effect */}
         <div className="absolute inset-0">
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />
