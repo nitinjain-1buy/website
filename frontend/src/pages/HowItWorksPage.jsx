@@ -178,42 +178,65 @@ const HowItWorksPage = () => {
         </div>
       </section>
 
-      {/* Pilot Section - Similar to Leadership section on About page */}
-      <section className="py-24 bg-white">
+      {/* Pilot Section - Dark background */}
+      <section className="py-24 bg-slate-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
-              <Badge variant="outline" className="mb-4 text-emerald-700 border-emerald-200 bg-emerald-50">
+              <Badge variant="outline" className="mb-4 text-emerald-400 border-emerald-400/50 bg-emerald-400/10">
                 Start Small
               </Badge>
-              <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-6">
+              <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
                 What a pilot looks like
               </h2>
-              <p className="text-lg text-slate-600 mb-8 leading-relaxed">
+              <p className="text-lg text-slate-300 mb-8 leading-relaxed">
                 We don&apos;t ask for commitment upfront. Start with 10-30 parts, see measurable results, then decide to scale.
               </p>
 
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <Upload className="h-6 w-6 text-emerald-600" />
-                  <span className="text-slate-700"><strong>Week 1:</strong> Data Onboarding — Upload sample BOM data (10-30 parts)</span>
+              <div className="space-y-6">
+                <div className="flex items-start space-x-4">
+                  <div className="w-12 h-12 rounded-lg bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                    <Upload className="h-6 w-6 text-emerald-400" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-white">Week 1: Data Onboarding</h4>
+                    <p className="text-slate-400">Upload sample BOM data (10-30 parts)</p>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <BarChart3 className="h-6 w-6 text-emerald-600" />
-                  <span className="text-slate-700"><strong>Week 2:</strong> Analysis — Receive detailed savings and risk report</span>
+
+                <div className="flex items-start space-x-4">
+                  <div className="w-12 h-12 rounded-lg bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                    <BarChart3 className="h-6 w-6 text-emerald-400" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-white">Week 2: Analysis</h4>
+                    <p className="text-slate-400">Receive detailed savings and risk report</p>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <Monitor className="h-6 w-6 text-emerald-600" />
-                  <span className="text-slate-700"><strong>Week 3:</strong> Review — Walk through findings with our team</span>
+
+                <div className="flex items-start space-x-4">
+                  <div className="w-12 h-12 rounded-lg bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                    <Monitor className="h-6 w-6 text-emerald-400" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-white">Week 3: Review</h4>
+                    <p className="text-slate-400">Walk through findings with our team</p>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <RefreshCw className="h-6 w-6 text-emerald-600" />
-                  <span className="text-slate-700"><strong>Week 4+:</strong> Decide — Scale up based on proven ROI</span>
+
+                <div className="flex items-start space-x-4">
+                  <div className="w-12 h-12 rounded-lg bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                    <RefreshCw className="h-6 w-6 text-emerald-400" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-white">Week 4+: Decide</h4>
+                    <p className="text-slate-400">Scale up based on proven ROI</p>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-slate-900 rounded-2xl p-8 lg:p-12">
+            <div className="bg-slate-800 rounded-2xl p-8 lg:p-12">
               <h3 className="text-2xl font-bold text-white mb-6">Typical Pilot Results</h3>
               <div className="space-y-6">
                 <div className="flex items-start space-x-4">
