@@ -24,7 +24,8 @@ import {
   DollarSign,
   ChevronRight,
   Play,
-  Sparkles
+  Sparkles,
+  Cog
 } from 'lucide-react';
 import TestimonialsMarquee from '../components/TestimonialsMarquee';
 import ElectronicComponentsPattern from '../components/ElectronicComponentsPattern';
