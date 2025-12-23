@@ -241,7 +241,15 @@ const MarketIntelligencePage = () => {
   const visibleArticles = displayArticles.slice(0, visibleCount);
   const hasMore = visibleCount < displayArticles.length;
 
-  // Get featured article: highest risk from the last 7 days
+  // Priority risk categories for featured article selection
+  const PRIORITY_RISK_CATEGORIES = [
+    'SUPPLY_SHORTAGE',
+    'GEOPOLITICAL_CONFLICT', 
+    'TARIFF_TRADE_POLICY',
+    'FACTORY_FAB_OUTAGE'
+  ];
+
+  // Get featured article: highest risk from the last 7 days, prioritizing key risk categories
   const featuredArticle = useMemo(() => {
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
@@ -257,7 +265,19 @@ const MarketIntelligencePage = () => {
       return recentArticles[0] || null;
     }
     
-    // Sort by risk_score descending and return the highest
+    // First, try to find articles with priority risk categories
+    const priorityArticles = lastWeekArticles.filter(article => {
+      const categories = article.risk_categories || [];
+      return categories.some(cat => PRIORITY_RISK_CATEGORIES.includes(cat));
+    });
+    
+    // If we have priority articles, sort them by risk_score and return highest
+    if (priorityArticles.length > 0) {
+      const sorted = [...priorityArticles].sort((a, b) => (b.risk_score || 0) - (a.risk_score || 0));
+      return sorted[0];
+    }
+    
+    // Fallback: sort all last week articles by risk_score descending
     const sorted = [...lastWeekArticles].sort((a, b) => (b.risk_score || 0) - (a.risk_score || 0));
     return sorted[0];
   }, [recentArticles]);
