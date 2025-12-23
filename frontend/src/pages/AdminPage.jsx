@@ -1805,17 +1805,37 @@ const NewsManager = ({ isLoading: parentLoading, onRefresh }) => {
               <div className="space-y-2">
                 {logs.map((log) => (
                   <div key={log.id} className="flex items-center justify-between text-sm p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 flex-wrap">
                       <Badge 
                         variant={log.status === 'success' ? 'default' : 'secondary'} 
                         className={log.status === 'success' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}
                       >
                         {log.status}
                       </Badge>
+                      {log.api && (
+                        <Badge 
+                          variant="outline" 
+                          className={log.api === 'SerpAPI' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-purple-50 text-purple-700 border-purple-200'}
+                        >
+                          {log.api}
+                        </Badge>
+                      )}
                       <span className="font-medium text-slate-700">"{log.query}"</span>
-                      <span className="text-slate-500">- {log.articlesCount} articles fetched</span>
+                      <span className="text-slate-500">
+                        {log.newArticles !== undefined ? (
+                          <>
+                            {log.articlesFound || log.articlesCount} found, 
+                            <span className="text-emerald-600 font-medium ml-1">{log.newArticles} new</span>
+                            {log.duplicatesSkipped > 0 && (
+                              <span className="text-slate-400 ml-1">({log.duplicatesSkipped} dupes)</span>
+                            )}
+                          </>
+                        ) : (
+                          <>{log.articlesCount} articles</>
+                        )}
+                      </span>
                     </div>
-                    <span className="text-slate-400 text-xs">{formatDate(log.fetchedAt)}</span>
+                    <span className="text-slate-400 text-xs whitespace-nowrap ml-2">{formatDate(log.fetchedAt)}</span>
                   </div>
                 ))}
                 
