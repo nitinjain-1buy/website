@@ -1535,6 +1535,220 @@ const TestimonialsManager = ({ testimonials, isLoading, onRefresh }) => {
   );
 };
 
+// News Manager Component
+const NewsManager = ({ isLoading: parentLoading, onRefresh }) => {
+  const [articles, setArticles] = useState([]);
+  const [queries, setQueries] = useState([]);
+  const [logs, setLogs] = useState([]);
+  const [newQuery, setNewQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  useEffect(() => {
+    fetchNewsData();
+  }, []);
+
+  const fetchNewsData = async () => {
+    try {
+      setIsLoading(true);
+      const [articlesRes, queriesRes, logsRes] = await Promise.all([
+        axios.get(`${API}/news?limit=100`),
+        axios.get(`${API}/news/queries`),
+        axios.get(`${API}/news/logs`)
+      ]);
+      setArticles(articlesRes.data);
+      setQueries(queriesRes.data);
+      setLogs(logsRes.data);
+    } catch (error) {
+      console.error('Error fetching news data:', error);
+      toast.error('Failed to fetch news data');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRefreshNews = async () => {
+    try {
+      setIsRefreshing(true);
+      await axios.post(`${API}/news/refresh`);
+      toast.success('News refresh triggered');
+      setTimeout(fetchNewsData, 3000); // Wait for fetch to complete
+    } catch (error) {
+      toast.error('Failed to refresh news');
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  const handleAddQuery = async () => {
+    if (!newQuery.trim()) return;
+    try {
+      await axios.post(`${API}/news/queries`, { query: newQuery, isActive: true });
+      toast.success('Search query added');
+      setNewQuery('');
+      fetchNewsData();
+    } catch (error) {
+      toast.error('Failed to add query');
+    }
+  };
+
+  const handleToggleQuery = async (queryId, isActive) => {
+    try {
+      await axios.patch(`${API}/news/queries/${queryId}?isActive=${!isActive}`);
+      fetchNewsData();
+    } catch (error) {
+      toast.error('Failed to update query');
+    }
+  };
+
+  const handleDeleteQuery = async (queryId) => {
+    if (!window.confirm('Delete this search query?')) return;
+    try {
+      await axios.delete(`${API}/news/queries/${queryId}`);
+      toast.success('Query deleted');
+      fetchNewsData();
+    } catch (error) {
+      toast.error('Failed to delete query');
+    }
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '';
+    return new Date(dateStr).toLocaleString('en-US', {
+      month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header with Refresh */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-semibold text-slate-900">Market Intelligence & News</h3>
+          <p className="text-sm text-slate-500">Automatically fetched every 5 hours from configured sources</p>
+        </div>
+        <Button onClick={handleRefreshNews} disabled={isRefreshing}>
+          <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+          {isRefreshing ? 'Refreshing...' : 'Refresh Now'}
+        </Button>
+      </div>
+
+      {/* Search Queries Management */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Search Queries</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-2 mb-4">
+            <Input
+              placeholder="Add new search query (e.g., semiconductor shortage)"
+              value={newQuery}
+              onChange={(e) => setNewQuery(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleAddQuery()}
+            />
+            <Button onClick={handleAddQuery}>
+              <Plus className="h-4 w-4 mr-2" />Add
+            </Button>
+          </div>
+          <div className="space-y-2">
+            {queries.length === 0 ? (
+              <p className="text-sm text-slate-500">No search queries configured. Default "electronics parts" will be used.</p>
+            ) : (
+              queries.map((q) => (
+                <div key={q.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Search className="h-4 w-4 text-slate-400" />
+                    <span className="font-medium">{q.query}</span>
+                    <Badge variant={q.isActive ? 'default' : 'secondary'} className={q.isActive ? 'bg-emerald-100 text-emerald-700' : ''}>
+                      {q.isActive ? 'Active' : 'Paused'}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch checked={q.isActive} onCheckedChange={() => handleToggleQuery(q.id, q.isActive)} />
+                    <Button variant="ghost" size="sm" onClick={() => handleDeleteQuery(q.id)} className="text-red-600">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Fetch Logs */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Recent Fetch Logs</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {logs.length === 0 ? (
+            <p className="text-sm text-slate-500">No fetch logs yet</p>
+          ) : (
+            <div className="space-y-2">
+              {logs.slice(0, 5).map((log) => (
+                <div key={log.id} className="flex items-center justify-between text-sm p-2 bg-slate-50 rounded">
+                  <div className="flex items-center gap-2">
+                    <Badge variant={log.status === 'success' ? 'default' : 'secondary'} className={log.status === 'success' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}>
+                      {log.status}
+                    </Badge>
+                    <span className="text-slate-600">"{log.query}"</span>
+                    <span className="text-slate-400">- {log.articlesCount} articles</span>
+                  </div>
+                  <span className="text-slate-400">{formatDate(log.fetchedAt)}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Articles List */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Fetched Articles ({articles.length})</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="text-center py-8">
+              <RefreshCw className="h-8 w-8 animate-spin mx-auto text-slate-400" />
+            </div>
+          ) : articles.length === 0 ? (
+            <div className="text-center py-8">
+              <Newspaper className="h-12 w-12 mx-auto text-slate-300" />
+              <p className="text-slate-500 mt-2">No articles fetched yet</p>
+            </div>
+          ) : (
+            <div className="space-y-3 max-h-[500px] overflow-y-auto">
+              {articles.map((article) => (
+                <div key={article.id || article.link} className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                  {article.thumbnail_small && (
+                    <img src={article.thumbnail_small} alt="" className="w-16 h-12 object-cover rounded" />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <a href={article.link} target="_blank" rel="noopener noreferrer" className="font-medium text-slate-900 hover:text-emerald-600 line-clamp-2">
+                      {article.title}
+                    </a>
+                    <div className="flex items-center gap-2 mt-1 text-xs text-slate-500">
+                      <span>{article.source?.name}</span>
+                      <span>•</span>
+                      <span>{formatDate(article.iso_date)}</span>
+                      <Badge variant="outline" className="text-xs">{article.query}</Badge>
+                    </div>
+                  </div>
+                  <a href={article.link} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="h-4 w-4 text-slate-400 hover:text-emerald-600" />
+                  </a>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
 // Dashboard Component
 const AdminDashboard = ({ onLogout }) => {
   const [customerRequests, setCustomerRequests] = useState([]);
