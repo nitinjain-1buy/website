@@ -1045,6 +1045,7 @@ const SupplierRequestsTable = ({ requests, isLoading, onStatusUpdate, updatingId
                 <TableHead>Company</TableHead>
                 <TableHead>Contact</TableHead>
                 <TableHead>Products</TableHead>
+                <TableHead>Regions</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Actions</TableHead>
@@ -1060,7 +1061,26 @@ const SupplierRequestsTable = ({ requests, isLoading, onStatusUpdate, updatingId
                       <p className="text-sm text-slate-500">{request.email}</p>
                     </div>
                   </TableCell>
-                  <TableCell><p className="capitalize">{request.productCategories || '-'}</p></TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {Array.isArray(request.productCategories) && request.productCategories.length > 0
+                        ? request.productCategories.map((cat, idx) => (
+                            <Badge key={idx} variant="outline" className="text-xs capitalize">{cat}</Badge>
+                          ))
+                        : <span className="text-slate-400">-</span>
+                      }
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {Array.isArray(request.regionsServed) && request.regionsServed.length > 0
+                        ? request.regionsServed.map((region, idx) => (
+                            <Badge key={idx} variant="outline" className="text-xs bg-emerald-50 text-emerald-700 border-emerald-200">{region.replace('-', ' ')}</Badge>
+                          ))
+                        : <span className="text-slate-400">-</span>
+                      }
+                    </div>
+                  </TableCell>
                   <TableCell><p className="text-sm">{formatDate(request.createdAt)}</p></TableCell>
                   <TableCell>{getStatusBadge(request.status)}</TableCell>
                   <TableCell>
