@@ -175,12 +175,11 @@ const HomePage = () => {
   }, []);
 
   return (
-    <div className="bg-white overflow-x-hidden">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden hero-gradient-bg">
-        {/* Electronic Components Watermark Background */}
-        <ElectronicComponentsPattern />
-        <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
+    <div className="overflow-x-hidden">
+      {/* Hero Section - transparent to show global pattern */}
+      <section className="relative overflow-hidden">
+        {/* Semi-transparent overlay for hero section */}
+        <div className="absolute inset-0 bg-slate-50/80" />
         
         {/* Floating particles effect */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
