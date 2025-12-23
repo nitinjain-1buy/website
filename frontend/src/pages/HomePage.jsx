@@ -547,22 +547,20 @@ const HomePage = () => {
       {/* Testimonials Marquee */}
       <TestimonialsMarquee />
 
-      {/* CTA Section */}
-      <section className="py-24 bg-slate-900 relative overflow-hidden">
-        {/* Animated background effect */}
-        <div className="absolute inset-0">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-        </div>
+      {/* CTA Section - White background with electronic components */}
+      <section className="py-24 relative overflow-hidden bg-slate-50">
+        {/* Electronic Components Watermark Background */}
+        <ElectronicComponentsPattern />
+        <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
         
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <AnimatedSection animation="fade-up">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
               Ready to transform your procurement?
             </h2>
           </AnimatedSection>
           <AnimatedSection animation="fade-up" delay={200}>
-            <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
+            <p className="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
               Start with your BOM. See potential savings within days, not months.
             </p>
           </AnimatedSection>
@@ -571,7 +569,7 @@ const HomePage = () => {
               <Link to="/contact">
                 <Button 
                   size="lg" 
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 h-12 relative overflow-hidden group transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-emerald-600/30"
+                  className="bg-slate-900 hover:bg-slate-800 text-white px-8 h-12 relative overflow-hidden group transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-slate-900/30"
                 >
                   <span className="relative z-10 flex items-center">
                     Request a Demo
@@ -584,7 +582,7 @@ const HomePage = () => {
                 <Button 
                   size="lg" 
                   variant="outline" 
-                  className="border-slate-600 text-white hover:bg-slate-800 px-8 h-12 transition-all duration-300 hover:scale-105"
+                  className="border-slate-300 text-slate-900 hover:bg-slate-100 px-8 h-12 transition-all duration-300 hover:scale-105"
                 >
                   See How It Works
                 </Button>
