@@ -188,17 +188,17 @@ async def fetch_and_store_all_news():
                 "query": query_text,
                 "articlesFound": len(serpapi_articles),
                 "newArticles": serpapi_new,
-                "duplicatesSkipped": serpapi_duplicates,
+                "existingUpdated": serpapi_existing_updated,
                 "status": "success" if serpapi_articles else "no_results",
                 "fetchedAt": datetime.now(timezone.utc).isoformat()
             }
             await db.news_fetch_logs.insert_one(serpapi_log)
-            logger.info(f"[SerpAPI] Query '{query_text}': {len(serpapi_articles)} found, {serpapi_new} new, {serpapi_duplicates} duplicates skipped")
+            logger.info(f"[SerpAPI] Query '{query_text}': {len(serpapi_articles)} found, {serpapi_new} new, {serpapi_existing_updated} existing updated")
             
             # ========== GDELT ==========
             gdelt_articles = await fetch_news_from_gdelt(query_text)
             gdelt_new = 0
-            gdelt_duplicates = 0
+            gdelt_existing_updated = 0
             
             for article in gdelt_articles:
                 link = article.get("url", "")
@@ -207,17 +207,26 @@ async def fetch_and_store_all_news():
                     
                 normalized_link = normalize_url(link)
                 
-                # Check for duplicates
-                if normalized_link in global_seen_urls or normalized_link in query_seen_urls:
-                    gdelt_duplicates += 1
+                # Skip if we've already processed this URL in this query batch
+                if normalized_link in query_seen_urls:
                     continue
                 
                 query_seen_urls.add(normalized_link)
-                global_seen_urls.add(normalized_link)
                 
-                # Parse GDELT date format (YYYYMMDDTHHMMSSZ)
-                gdelt_date = article.get("seendate", "")
-                iso_date = None
+                # Check if article already exists in database
+                existing = await db.news_articles.find_one({"link": link})
+                
+                if existing:
+                    # Article exists - just add this query to its queries array
+                    await db.news_articles.update_one(
+                        {"link": link},
+                        {"$addToSet": {"queries": query_text}}
+                    )
+                    gdelt_existing_updated += 1
+                else:
+                    # Parse GDELT date format (YYYYMMDDTHHMMSSZ)
+                    gdelt_date = article.get("seendate", "")
+                    iso_date = None
                 if gdelt_date:
                     try:
                         # Convert GDELT date format to ISO
