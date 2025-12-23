@@ -456,11 +456,14 @@ frontend:
     file: "/app/frontend/src/pages/ContactPage.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: true
           agent: "main"
           comment: "Added Factory Locations and Head Office Location as multi-select checkbox fields with options: Asia Pacific, Europe, North America, South America. Interest field also converted to multi-select. Verified via screenshots."
+        - working: true
+          agent: "testing"
+          comment: "✅ PASSED: Customer form multi-select functionality working perfectly. Tested 'What are you interested in?' (3 checkboxes), Factory Locations (4 checkboxes: Asia Pacific, Europe, North America, South America), Head Office Location (4 checkboxes: same options). All checkboxes respond correctly and can be selected/deselected. Form accepts realistic data and displays properly."
 
   - task: "Supplier form multi-select fields"
     implemented: true
