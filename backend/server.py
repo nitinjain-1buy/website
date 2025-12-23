@@ -1837,6 +1837,40 @@ async def refresh_mediastack_news():
     await fetch_mediastack_news()
     return {"success": True, "message": "MediaStack news refresh triggered (weekly API)"}
 
+@api_router.post("/news/scrape")
+async def trigger_article_scraping(limit: int = 50):
+    """Manually trigger article content scraping for unscraped articles"""
+    # Run scraping in background
+    asyncio.create_task(scrape_unscraped_articles(limit=limit))
+    return {"success": True, "message": f"Scraping started for up to {limit} articles"}
+
+@api_router.get("/news/scrape-stats", response_model=dict)
+async def get_scrape_stats():
+    """Get scraping statistics"""
+    total = await db.news_articles.count_documents({})
+    scraped = await db.news_articles.count_documents({"scraped": True})
+    unscraped = await db.news_articles.count_documents({"scraped": {"$ne": True}})
+    failed = await db.news_articles.count_documents({"scraped": False, "scrapeError": {"$exists": True}})
+    
+    return {
+        "total": total,
+        "scraped": scraped,
+        "unscraped": unscraped,
+        "failed": failed,
+        "scrapeRate": round((scraped / total * 100), 1) if total > 0 else 0
+    }
+
+@api_router.get("/news/{article_id}/content", response_model=dict)
+async def get_article_content(article_id: str):
+    """Get full scraped content for an article"""
+    article = await db.news_articles.find_one(
+        {"id": article_id},
+        {"_id": 0, "id": 1, "title": 1, "link": 1, "scraped": 1, "fullContent": 1, "summary": 1, "wordCount": 1, "scrapedAt": 1, "scrapeError": 1}
+    )
+    if not article:
+        raise HTTPException(status_code=404, detail="Article not found")
+    return article
+
 @api_router.patch("/news/{article_id}/hide")
 async def toggle_article_visibility(article_id: str, isHidden: bool):
     """Hide or unhide a news article"""
