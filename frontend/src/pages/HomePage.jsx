@@ -493,36 +493,43 @@ const HomePage = () => {
       {/* Global Network Map */}
       <GlobalNetworkMap />
 
-      {/* Mental Model Section - Plain white background for contrast */}
-      <section className="py-24 bg-white overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Mental Model Section - with pattern background */}
+      <section className="py-24 relative overflow-hidden bg-slate-50">
+        {/* Electronic Components Watermark Background */}
+        <ElectronicComponentsPattern />
+        <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimatedSection animation="zoom-in" className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-8">
               Think of it as
             </h2>
-            <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 text-xl">
-              <AnimatedSection animation="fade-right" delay={200} className="flex items-center">
-                <span className="font-semibold text-blue-600 hover:text-blue-700 transition-colors">Bloomberg</span>
-                <span className="text-slate-400 ml-2">(1Data)</span>
-              </AnimatedSection>
-              <ArrowRight className="h-6 w-6 text-slate-400 hidden md:block animate-subtle-bounce" />
-              <div className="h-6 w-px bg-slate-300 md:hidden" />
-              <AnimatedSection animation="fade-up" delay={400} className="flex items-center">
-                <span className="font-semibold text-emerald-600 hover:text-emerald-700 transition-colors">Amazon</span>
-                <span className="text-slate-400 ml-2">(1Source)</span>
-              </AnimatedSection>
-              <ArrowRight className="h-6 w-6 text-slate-400 hidden md:block animate-subtle-bounce" style={{ animationDelay: '0.5s' }} />
-              <div className="h-6 w-px bg-slate-300 md:hidden" />
-              <AnimatedSection animation="fade-left" delay={600} className="flex items-center">
-                <span className="font-semibold text-amber-600 hover:text-amber-700 transition-colors">eBay</span>
-                <span className="text-slate-400 ml-2">(1Xcess)</span>
+            {/* White box container */}
+            <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-8 md:p-12">
+              <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 text-xl">
+                <AnimatedSection animation="fade-right" delay={200} className="flex items-center">
+                  <span className="font-semibold text-blue-600 hover:text-blue-700 transition-colors">Bloomberg</span>
+                  <span className="text-slate-400 ml-2">(1Data)</span>
+                </AnimatedSection>
+                <ArrowRight className="h-6 w-6 text-slate-400 hidden md:block animate-subtle-bounce" />
+                <div className="h-6 w-px bg-slate-300 md:hidden" />
+                <AnimatedSection animation="fade-up" delay={400} className="flex items-center">
+                  <span className="font-semibold text-emerald-600 hover:text-emerald-700 transition-colors">Amazon</span>
+                  <span className="text-slate-400 ml-2">(1Source)</span>
+                </AnimatedSection>
+                <ArrowRight className="h-6 w-6 text-slate-400 hidden md:block animate-subtle-bounce" style={{ animationDelay: '0.5s' }} />
+                <div className="h-6 w-px bg-slate-300 md:hidden" />
+                <AnimatedSection animation="fade-left" delay={600} className="flex items-center">
+                  <span className="font-semibold text-amber-600 hover:text-amber-700 transition-colors">eBay</span>
+                  <span className="text-slate-400 ml-2">(1Xcess)</span>
+                </AnimatedSection>
+              </div>
+              <AnimatedSection animation="fade-up" delay={800}>
+                <p className="text-slate-600 mt-6 text-lg">
+                  For electronic components
+                </p>
               </AnimatedSection>
             </div>
-            <AnimatedSection animation="fade-up" delay={800}>
-              <p className="text-slate-600 mt-6 text-lg">
-                For electronic components
-              </p>
-            </AnimatedSection>
           </AnimatedSection>
         </div>
       </section>
