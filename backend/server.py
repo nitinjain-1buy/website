@@ -1654,9 +1654,15 @@ async def delete_news_query(query_id: str):
 
 @api_router.post("/news/refresh")
 async def refresh_news():
-    """Manually trigger news fetch"""
+    """Manually trigger news fetch (SerpAPI + GDELT only)"""
     await fetch_and_store_all_news()
-    return {"success": True, "message": "News refresh triggered"}
+    return {"success": True, "message": "News refresh triggered (SerpAPI + GDELT)"}
+
+@api_router.post("/news/refresh-mediastack")
+async def refresh_mediastack_news():
+    """Manually trigger MediaStack news fetch (use sparingly - rate limited)"""
+    await fetch_mediastack_news()
+    return {"success": True, "message": "MediaStack news refresh triggered (weekly API)"}
 
 @api_router.patch("/news/{article_id}/hide")
 async def toggle_article_visibility(article_id: str, isHidden: bool):
