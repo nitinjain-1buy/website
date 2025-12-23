@@ -1540,9 +1540,13 @@ const NewsManager = ({ isLoading: parentLoading, onRefresh }) => {
   const [articles, setArticles] = useState([]);
   const [queries, setQueries] = useState([]);
   const [logs, setLogs] = useState([]);
+  const [totalLogsCount, setTotalLogsCount] = useState(0);
+  const [logsLimit, setLogsLimit] = useState(20);
   const [newQuery, setNewQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isLoadingMoreLogs, setIsLoadingMoreLogs] = useState(false);
+  const [activeNewsTab, setActiveNewsTab] = useState('queries');
 
   useEffect(() => {
     fetchNewsData();
@@ -1551,19 +1555,39 @@ const NewsManager = ({ isLoading: parentLoading, onRefresh }) => {
   const fetchNewsData = async () => {
     try {
       setIsLoading(true);
-      const [articlesRes, queriesRes, logsRes] = await Promise.all([
+      const [articlesRes, queriesRes, logsRes, logsCountRes] = await Promise.all([
         axios.get(`${API}/news?limit=100`),
         axios.get(`${API}/news/queries`),
-        axios.get(`${API}/news/logs`)
+        axios.get(`${API}/news/logs?limit=${logsLimit}`),
+        axios.get(`${API}/news/logs/count`)
       ]);
-      setArticles(articlesRes.data);
+      // Filter out articles without valid links
+      const validArticles = articlesRes.data.filter(
+        a => a.link && a.link.trim() !== '' && a.title && a.source?.name
+      );
+      setArticles(validArticles);
       setQueries(queriesRes.data);
       setLogs(logsRes.data);
+      setTotalLogsCount(logsCountRes.data.count);
     } catch (error) {
       console.error('Error fetching news data:', error);
       toast.error('Failed to fetch news data');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleLoadMoreLogs = async () => {
+    try {
+      setIsLoadingMoreLogs(true);
+      const newLimit = logsLimit + 20;
+      const logsRes = await axios.get(`${API}/news/logs?limit=${newLimit}`);
+      setLogs(logsRes.data);
+      setLogsLimit(newLimit);
+    } catch (error) {
+      toast.error('Failed to load more logs');
+    } finally {
+      setIsLoadingMoreLogs(false);
     }
   };
 
@@ -1637,118 +1661,192 @@ const NewsManager = ({ isLoading: parentLoading, onRefresh }) => {
         </Button>
       </div>
 
-      {/* Search Queries Management */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Search Queries</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-2 mb-4">
-            <Input
-              placeholder="Add new search query (e.g., semiconductor shortage)"
-              value={newQuery}
-              onChange={(e) => setNewQuery(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleAddQuery()}
-            />
-            <Button onClick={handleAddQuery}>
-              <Plus className="h-4 w-4 mr-2" />Add
-            </Button>
-          </div>
-          <div className="space-y-2">
-            {queries.length === 0 ? (
-              <p className="text-sm text-slate-500">No search queries configured. Default "electronics parts" will be used.</p>
+      {/* Tab Navigation */}
+      <div className="border-b border-slate-200">
+        <nav className="flex gap-4">
+          <button
+            onClick={() => setActiveNewsTab('queries')}
+            className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors ${
+              activeNewsTab === 'queries'
+                ? 'border-emerald-600 text-emerald-600'
+                : 'border-transparent text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <Search className="h-4 w-4" />
+              Queries & Articles
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveNewsTab('logs')}
+            className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors ${
+              activeNewsTab === 'logs'
+                ? 'border-emerald-600 text-emerald-600'
+                : 'border-transparent text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              Fetch Logs
+              <Badge variant="secondary" className="text-xs">{totalLogsCount}</Badge>
+            </div>
+          </button>
+        </nav>
+      </div>
+
+      {/* Tab Content */}
+      {activeNewsTab === 'queries' ? (
+        <>
+          {/* Search Queries Management */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Search Queries</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-2 mb-4">
+                <Input
+                  placeholder="Add new search query (e.g., semiconductor shortage)"
+                  value={newQuery}
+                  onChange={(e) => setNewQuery(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleAddQuery()}
+                />
+                <Button onClick={handleAddQuery}>
+                  <Plus className="h-4 w-4 mr-2" />Add
+                </Button>
+              </div>
+              <div className="space-y-2">
+                {queries.length === 0 ? (
+                  <p className="text-sm text-slate-500">No search queries configured. Default "electronics parts" will be used.</p>
+                ) : (
+                  queries.map((q) => (
+                    <div key={q.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <Search className="h-4 w-4 text-slate-400" />
+                        <span className="font-medium">{q.query}</span>
+                        <Badge variant={q.isActive ? 'default' : 'secondary'} className={q.isActive ? 'bg-emerald-100 text-emerald-700' : ''}>
+                          {q.isActive ? 'Active' : 'Paused'}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Switch checked={q.isActive} onCheckedChange={() => handleToggleQuery(q.id, q.isActive)} />
+                        <Button variant="ghost" size="sm" onClick={() => handleDeleteQuery(q.id)} className="text-red-600">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Articles List */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Fetched Articles ({articles.length})</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="text-center py-8">
+                  <RefreshCw className="h-8 w-8 animate-spin mx-auto text-slate-400" />
+                </div>
+              ) : articles.length === 0 ? (
+                <div className="text-center py-8">
+                  <Newspaper className="h-12 w-12 mx-auto text-slate-300" />
+                  <p className="text-slate-500 mt-2">No articles fetched yet</p>
+                </div>
+              ) : (
+                <div className="space-y-3 max-h-[500px] overflow-y-auto">
+                  {articles.map((article) => (
+                    <div key={article.id || article.link} className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                      {article.thumbnail_small && (
+                        <img src={article.thumbnail_small} alt="" className="w-16 h-12 object-cover rounded" />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <a href={article.link} target="_blank" rel="noopener noreferrer" className="font-medium text-slate-900 hover:text-emerald-600 line-clamp-2">
+                          {article.title}
+                        </a>
+                        <div className="flex items-center gap-2 mt-1 text-xs text-slate-500">
+                          <span>{article.source?.name}</span>
+                          <span>•</span>
+                          <span>{formatDate(article.iso_date)}</span>
+                          <Badge variant="outline" className="text-xs">{article.query}</Badge>
+                        </div>
+                      </div>
+                      <a href={article.link} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="h-4 w-4 text-slate-400 hover:text-emerald-600" />
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </>
+      ) : (
+        /* Fetch Logs Tab */
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base">All Fetch Logs</CardTitle>
+              <Badge variant="outline" className="text-slate-500">
+                Showing {logs.length} of {totalLogsCount} logs
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {logs.length === 0 ? (
+              <div className="text-center py-8">
+                <Clock className="h-12 w-12 mx-auto text-slate-300" />
+                <p className="text-slate-500 mt-2">No fetch logs yet</p>
+                <p className="text-slate-400 text-sm">Logs will appear here after the first news fetch</p>
+              </div>
             ) : (
-              queries.map((q) => (
-                <div key={q.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <Search className="h-4 w-4 text-slate-400" />
-                    <span className="font-medium">{q.query}</span>
-                    <Badge variant={q.isActive ? 'default' : 'secondary'} className={q.isActive ? 'bg-emerald-100 text-emerald-700' : ''}>
-                      {q.isActive ? 'Active' : 'Paused'}
-                    </Badge>
+              <div className="space-y-2">
+                {logs.map((log) => (
+                  <div key={log.id} className="flex items-center justify-between text-sm p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <Badge 
+                        variant={log.status === 'success' ? 'default' : 'secondary'} 
+                        className={log.status === 'success' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}
+                      >
+                        {log.status}
+                      </Badge>
+                      <span className="font-medium text-slate-700">"{log.query}"</span>
+                      <span className="text-slate-500">- {log.articlesCount} articles fetched</span>
+                    </div>
+                    <span className="text-slate-400 text-xs">{formatDate(log.fetchedAt)}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Switch checked={q.isActive} onCheckedChange={() => handleToggleQuery(q.id, q.isActive)} />
-                    <Button variant="ghost" size="sm" onClick={() => handleDeleteQuery(q.id)} className="text-red-600">
-                      <Trash2 className="h-4 w-4" />
+                ))}
+                
+                {/* View More Button */}
+                {logs.length < totalLogsCount && (
+                  <div className="pt-4 text-center">
+                    <Button
+                      variant="outline"
+                      onClick={handleLoadMoreLogs}
+                      disabled={isLoadingMoreLogs}
+                      className="w-full"
+                    >
+                      {isLoadingMoreLogs ? (
+                        <>
+                          <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                          Loading...
+                        </>
+                      ) : (
+                        <>
+                          View More Logs
+                          <span className="ml-2 text-slate-400">({totalLogsCount - logs.length} remaining)</span>
+                        </>
+                      )}
                     </Button>
                   </div>
-                </div>
-              ))
+                )}
+              </div>
             )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Fetch Logs */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Recent Fetch Logs</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {logs.length === 0 ? (
-            <p className="text-sm text-slate-500">No fetch logs yet</p>
-          ) : (
-            <div className="space-y-2">
-              {logs.slice(0, 5).map((log) => (
-                <div key={log.id} className="flex items-center justify-between text-sm p-2 bg-slate-50 rounded">
-                  <div className="flex items-center gap-2">
-                    <Badge variant={log.status === 'success' ? 'default' : 'secondary'} className={log.status === 'success' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}>
-                      {log.status}
-                    </Badge>
-                    <span className="text-slate-600">"{log.query}"</span>
-                    <span className="text-slate-400">- {log.articlesCount} articles</span>
-                  </div>
-                  <span className="text-slate-400">{formatDate(log.fetchedAt)}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Articles List */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Fetched Articles ({articles.length})</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="text-center py-8">
-              <RefreshCw className="h-8 w-8 animate-spin mx-auto text-slate-400" />
-            </div>
-          ) : articles.length === 0 ? (
-            <div className="text-center py-8">
-              <Newspaper className="h-12 w-12 mx-auto text-slate-300" />
-              <p className="text-slate-500 mt-2">No articles fetched yet</p>
-            </div>
-          ) : (
-            <div className="space-y-3 max-h-[500px] overflow-y-auto">
-              {articles.map((article) => (
-                <div key={article.id || article.link} className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
-                  {article.thumbnail_small && (
-                    <img src={article.thumbnail_small} alt="" className="w-16 h-12 object-cover rounded" />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <a href={article.link} target="_blank" rel="noopener noreferrer" className="font-medium text-slate-900 hover:text-emerald-600 line-clamp-2">
-                      {article.title}
-                    </a>
-                    <div className="flex items-center gap-2 mt-1 text-xs text-slate-500">
-                      <span>{article.source?.name}</span>
-                      <span>•</span>
-                      <span>{formatDate(article.iso_date)}</span>
-                      <Badge variant="outline" className="text-xs">{article.query}</Badge>
-                    </div>
-                  </div>
-                  <a href={article.link} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="h-4 w-4 text-slate-400 hover:text-emerald-600" />
-                  </a>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
