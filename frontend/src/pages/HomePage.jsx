@@ -493,13 +493,9 @@ const HomePage = () => {
       {/* Global Network Map */}
       <GlobalNetworkMap />
 
-      {/* Mental Model Section */}
-      <section className="py-24 relative overflow-hidden bg-slate-50">
-        {/* Electronic Components Watermark Background */}
-        <ElectronicComponentsPattern />
-        <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
-        
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Mental Model Section - Plain white background for contrast */}
+      <section className="py-24 bg-white overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimatedSection animation="zoom-in" className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-8">
               Think of it as
