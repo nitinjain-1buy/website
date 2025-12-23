@@ -120,6 +120,17 @@ const MarketIntelligencePage = () => {
     return ['unknown'];
   };
 
+  // Helper to get top risk categories by strength
+  const getTopRiskCategories = (article, limit = 3) => {
+    const categories = article.risk_categories || [];
+    const strength = article.category_strength || {};
+    
+    return categories
+      .map(cat => ({ category: cat, strength: strength[cat] || 0 }))
+      .sort((a, b) => b.strength - a.strength)
+      .slice(0, limit);
+  };
+
   // Get unique topics with counts (an article with multiple queries counts once per topic)
   const topicsWithCounts = useMemo(() => {
     const counts = {};
@@ -134,14 +145,78 @@ const MarketIntelligencePage = () => {
       .sort((a, b) => b.count - a.count);
   }, [articles]);
 
-  // Filter articles by selected topics
-  // Each article appears only ONCE even if it matches multiple selected topics
+  // Get risk category counts from current filtered articles (respects topic filter)
+  const filteredRiskCategoryCounts = useMemo(() => {
+    const baseArticles = selectedTopics.length === 0 ? articles : articles.filter(a => {
+      const queries = getArticleQueries(a);
+      return queries.some(q => selectedTopics.includes(q));
+    });
+    
+    const counts = {};
+    baseArticles.forEach(a => {
+      const categories = a.risk_categories || [];
+      categories.forEach(cat => {
+        counts[cat] = (counts[cat] || 0) + 1;
+      });
+    });
+    return counts;
+  }, [articles, selectedTopics]);
+
+  // Filter articles by selected topics AND/OR risk categories (OR logic)
+  const filteredArticles = useMemo(() => {
+    let filtered = articles;
+    
+    // Apply topic filter
+    if (selectedTopics.length > 0) {
+      filtered = filtered.filter(a => {
+        const queries = getArticleQueries(a);
+        return queries.some(q => selectedTopics.includes(q));
+      });
+    }
+    
+    // Apply risk category filter (OR logic)
+    if (selectedRiskCategories.length > 0) {
+      filtered = filtered.filter(a => {
+        const categories = a.risk_categories || [];
+        return selectedRiskCategories.some(cat => categories.includes(cat));
+      });
+    }
+    
+    return filtered;
+  }, [articles, selectedTopics, selectedRiskCategories]);
+
+  // Sort articles
+  const sortedArticles = useMemo(() => {
+    const sorted = [...filteredArticles];
+    
+    if (sortBy === 'risk') {
+      // Sort by risk_score desc, then by date desc
+      sorted.sort((a, b) => {
+        const riskDiff = (b.risk_score || 0) - (a.risk_score || 0);
+        if (riskDiff !== 0) return riskDiff;
+        const dateA = new Date(a.iso_date || a.fetchedAt || 0);
+        const dateB = new Date(b.iso_date || b.fetchedAt || 0);
+        return dateB - dateA;
+      });
+    } else {
+      // Sort by date desc (newest first)
+      sorted.sort((a, b) => {
+        const dateA = new Date(a.iso_date || a.fetchedAt || 0);
+        const dateB = new Date(b.iso_date || b.fetchedAt || 0);
+        return dateB - dateA;
+      });
+    }
+    
+    return sorted;
+  }, [filteredArticles, sortBy]);
+
+  // Filter articles by selected topics (for backward compatibility)
   const topicFilteredArticles = useMemo(() => {
     if (selectedTopics.length === 0) return articles;
     return articles.filter(a => {
       const queries = getArticleQueries(a);
-      // Check if any of the article's queries match any selected topic
       return queries.some(q => selectedTopics.includes(q));
+    });
     });
   }, [articles, selectedTopics]);
 
