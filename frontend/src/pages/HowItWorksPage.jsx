@@ -178,26 +178,28 @@ const HowItWorksPage = () => {
         </div>
       </section>
 
-      {/* Pilot Section */}
-      <section className="py-24 relative overflow-hidden bg-slate-50">
-        {/* Electronic Components Watermark Background */}
-        <ElectronicComponentsPattern />
-        <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
+      {/* Pilot Section - Dark background */}
+      <section className="py-24 bg-slate-900 relative overflow-hidden">
+        {/* Animated background effect */}
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        </div>
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section Heading */}
           <div className="text-center mb-12">
-            <Badge variant="outline" className="mb-4 text-emerald-700 border-emerald-200 bg-emerald-50">
+            <Badge variant="outline" className="mb-4 text-emerald-400 border-emerald-400/50 bg-emerald-400/10">
               Start Small
             </Badge>
-            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white">
               What a pilot looks like
             </h2>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-12 items-start">
             {/* White box with weeks content */}
-            <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8 md:p-10">
+            <div className="bg-white rounded-2xl shadow-xl p-8 md:p-10">
               <p className="text-lg text-slate-600 mb-8 leading-relaxed">
                 We don&apos;t ask for commitment upfront. Start with 10-30 parts, see measurable results, then decide to scale.
               </p>
@@ -247,25 +249,25 @@ const HowItWorksPage = () => {
 
             {/* Typical Pilot Results */}
             <div>
-              <Card className="border-2 border-emerald-200 bg-emerald-50">
+              <Card className="border-2 border-emerald-500/30 bg-slate-800/50 backdrop-blur">
                 <CardContent className="p-8">
-                  <h3 className="text-2xl font-bold text-slate-900 mb-6">Typical Pilot Results</h3>
+                  <h3 className="text-2xl font-bold text-white mb-6">Typical Pilot Results</h3>
                   <div className="space-y-6">
-                    <div className="bg-white rounded-lg p-4">
-                      <div className="text-3xl font-bold text-emerald-600 mb-1">$14.77M</div>
-                      <div className="text-slate-600">Potential savings identified</div>
+                    <div className="bg-slate-700/50 rounded-lg p-4">
+                      <div className="text-3xl font-bold text-emerald-400 mb-1">$14.77M</div>
+                      <div className="text-slate-300">Potential savings identified</div>
                     </div>
-                    <div className="bg-white rounded-lg p-4">
-                      <div className="text-3xl font-bold text-emerald-600 mb-1">15-20%</div>
-                      <div className="text-slate-600">Average savings on analyzed parts</div>
+                    <div className="bg-slate-700/50 rounded-lg p-4">
+                      <div className="text-3xl font-bold text-emerald-400 mb-1">15-20%</div>
+                      <div className="text-slate-300">Average savings on analyzed parts</div>
                     </div>
-                    <div className="bg-white rounded-lg p-4">
-                      <div className="text-3xl font-bold text-emerald-600 mb-1">100%</div>
-                      <div className="text-slate-600">MPN match rate</div>
+                    <div className="bg-slate-700/50 rounded-lg p-4">
+                      <div className="text-3xl font-bold text-emerald-400 mb-1">100%</div>
+                      <div className="text-slate-300">MPN match rate</div>
                     </div>
-                    <div className="bg-white rounded-lg p-4">
-                      <div className="text-3xl font-bold text-emerald-600 mb-1">2 Weeks</div>
-                      <div className="text-slate-600">Time to initial results</div>
+                    <div className="bg-slate-700/50 rounded-lg p-4">
+                      <div className="text-3xl font-bold text-emerald-400 mb-1">2 Weeks</div>
+                      <div className="text-slate-300">Time to initial results</div>
                     </div>
                   </div>
                 </CardContent>
