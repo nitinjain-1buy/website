@@ -22,6 +22,113 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
+# Configure logging early
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+# SerpAPI Key
+SERPAPI_KEY = os.environ.get("SERPAPI_KEY", "")
+
+# News fetching function
+async def fetch_news_from_serpapi(query: str) -> List[dict]:
+    """Fetch news from SerpAPI for a given query"""
+    if not SERPAPI_KEY:
+        logger.error("SERPAPI_KEY not configured")
+        return []
+    
+    url = f"https://serpapi.com/search?api_key={SERPAPI_KEY}&engine=google_news&gl=us&q={query.replace(' ', '+')}"
+    
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as http_client:
+            response = await http_client.get(url)
+            response.raise_for_status()
+            data = response.json()
+            
+            news_results = data.get("news_results", [])
+            logger.info(f"Fetched {len(news_results)} articles for query: {query}")
+            return news_results
+    except Exception as e:
+        logger.error(f"Error fetching news for query '{query}': {str(e)}")
+        return []
+
+async def fetch_and_store_all_news():
+    """Fetch news for all active queries and store in database"""
+    logger.info("Starting scheduled news fetch...")
+    
+    try:
+        # Get all active queries
+        queries = await db.news_queries.find({"isActive": True}, {"_id": 0}).to_list(100)
+        
+        # If no queries, use default
+        if not queries:
+            queries = [{"query": "electronics parts", "isActive": True}]
+        
+        total_articles = 0
+        for q in queries:
+            query_text = q["query"]
+            articles = await fetch_news_from_serpapi(query_text)
+            
+            # Store articles
+            for article in articles:
+                news_doc = {
+                    "id": str(uuid.uuid4()),
+                    "position": article.get("position", 0),
+                    "title": article.get("title", ""),
+                    "source": article.get("source", {}),
+                    "link": article.get("link", ""),
+                    "thumbnail": article.get("thumbnail"),
+                    "thumbnail_small": article.get("thumbnail_small"),
+                    "date": article.get("date"),
+                    "iso_date": article.get("iso_date"),
+                    "query": query_text,
+                    "fetchedAt": datetime.now(timezone.utc).isoformat(),
+                    "isHidden": False
+                }
+                
+                # Upsert by link to avoid duplicates
+                await db.news_articles.update_one(
+                    {"link": news_doc["link"]},
+                    {"$set": news_doc},
+                    upsert=True
+                )
+                total_articles += 1
+            
+            # Log the fetch
+            log_doc = {
+                "id": str(uuid.uuid4()),
+                "query": query_text,
+                "articlesCount": len(articles),
+                "status": "success" if articles else "no_results",
+                "fetchedAt": datetime.now(timezone.utc).isoformat()
+            }
+            await db.news_fetch_logs.insert_one(log_doc)
+        
+        logger.info(f"Scheduled news fetch complete. Stored/updated {total_articles} articles.")
+    except Exception as e:
+        logger.error(f"Error in scheduled news fetch: {str(e)}")
+
+# Scheduler setup
+scheduler = AsyncIOScheduler()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    scheduler.add_job(fetch_and_store_all_news, 'interval', hours=5, id='news_fetch_job')
+    scheduler.start()
+    logger.info("News scheduler started - will fetch every 5 hours")
+    
+    # Run initial fetch on startup
+    await fetch_and_store_all_news()
+    
+    yield
+    
+    # Shutdown
+    scheduler.shutdown()
+    client.close()
+
 # Create the main app with lifespan
 app = FastAPI(lifespan=lifespan)
 
