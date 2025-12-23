@@ -563,7 +563,7 @@ const MarketIntelligencePage = () => {
                     <button
                       key={category}
                       onClick={() => handleRiskCategoryToggle(category)}
-                      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 border ${
+                      className={`inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 border whitespace-nowrap flex-shrink-0 ${
                         isSelected
                           ? 'bg-orange-500 text-white border-orange-500 shadow-md'
                           : 'bg-white text-slate-700 border-slate-300 hover:border-orange-400 hover:bg-orange-50'
@@ -589,14 +589,14 @@ const MarketIntelligencePage = () => {
                 variant="outline"
                 size="sm"
                 onClick={handleClearAll}
-                className="text-slate-600 hover:text-red-600 hover:border-red-300"
+                className="text-slate-600 hover:text-red-600 hover:border-red-300 text-xs sm:text-sm"
               >
-                <X className="w-4 h-4 mr-1" />
-                Clear All Filters
+                <X className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                Clear Filters
               </Button>
             ) : (
-              <span className="text-sm text-slate-500">
-                Showing all {sortedArticles.length} articles • Click topics or risk categories to filter
+              <span className="text-xs sm:text-sm text-slate-500">
+                Showing {sortedArticles.length} articles • Swipe to filter
               </span>
             )}
           </div>
@@ -604,7 +604,7 @@ const MarketIntelligencePage = () => {
       </section>
 
       {/* News Content */}
-      <section className="py-10">
+      <section className="py-6 sm:py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20">
