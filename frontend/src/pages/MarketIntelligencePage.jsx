@@ -275,14 +275,42 @@ const MarketIntelligencePage = () => {
     setVisibleCount(10);
   };
 
+  const handleRiskCategoryToggle = (category) => {
+    setSelectedRiskCategories(prev => {
+      if (prev.includes(category)) {
+        return prev.filter(c => c !== category);
+      } else {
+        return [...prev, category];
+      }
+    });
+    setVisibleCount(10);
+  };
+
+  const handleClearRiskFilters = () => {
+    setSelectedRiskCategories([]);
+    setVisibleCount(10);
+  };
+
   const handleClearAll = () => {
     setSelectedTopics([]);
+    setSelectedRiskCategories([]);
     setVisibleCount(10);
   };
 
   const handleSelectAll = () => {
     setSelectedTopics(topicsWithCounts.map(t => t.topic));
     setVisibleCount(10);
+  };
+
+  // Format time horizon for display
+  const formatTimeHorizon = (horizon) => {
+    const map = {
+      'IMMEDIATE_0_2W': '0-2 weeks',
+      'NEAR_2_8W': '2-8 weeks',
+      'MEDIUM_2_6M': '2-6 months',
+      'LONG_6M_PLUS': '6+ months'
+    };
+    return map[horizon] || horizon;
   };
 
   return (
