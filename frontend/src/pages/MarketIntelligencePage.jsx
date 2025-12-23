@@ -217,15 +217,14 @@ const MarketIntelligencePage = () => {
       const queries = getArticleQueries(a);
       return queries.some(q => selectedTopics.includes(q));
     });
-    });
   }, [articles, selectedTopics]);
 
-  // Separate recent and archived articles
+  // Separate recent and archived articles (using sortedArticles)
   const { recentArticles, archivedArticles } = useMemo(() => {
     const recent = [];
     const archived = [];
     
-    topicFilteredArticles.forEach(article => {
+    sortedArticles.forEach(article => {
       const articleDate = new Date(article.iso_date || article.fetchedAt || 0);
       if (articleDate >= eightMonthsAgo) {
         recent.push(article);
@@ -235,7 +234,7 @@ const MarketIntelligencePage = () => {
     });
     
     return { recentArticles: recent, archivedArticles: archived };
-  }, [topicFilteredArticles, eightMonthsAgo]);
+  }, [sortedArticles, eightMonthsAgo]);
 
   // Get articles to display based on active tab
   const displayArticles = activeTab === 'recent' ? recentArticles : archivedArticles;
