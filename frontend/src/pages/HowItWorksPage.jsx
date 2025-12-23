@@ -17,6 +17,7 @@ import {
   BarChart3,
   RefreshCw
 } from 'lucide-react';
+import ElectronicComponentsPattern from '../components/ElectronicComponentsPattern';
 
 const iconMap = {
   Upload,
