@@ -1296,8 +1296,8 @@ async def get_news(limit: int = 50, query: Optional[str] = None):
     # Filter out articles without valid links or content
     filter_query = {
         "isHidden": False,
-        "link": {"$exists": True, "$ne": "", "$ne": None},
-        "title": {"$exists": True, "$ne": "", "$ne": None},
+        "link": {"$exists": True, "$nin": ["", None]},
+        "title": {"$exists": True, "$nin": ["", None]},
         "source.name": {"$exists": True, "$ne": None}
     }
     if query:
