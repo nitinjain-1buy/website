@@ -668,9 +668,42 @@ const MarketIntelligencePage = () => {
                         </div>
                       </div>
                       <CardContent className="p-5">
-                        <h3 className="font-semibold text-slate-900 mb-3 line-clamp-2 group-hover:text-emerald-600 transition-colors leading-snug">
-                          {article.title}
-                        </h3>
+                        {/* Title with Risk Badge */}
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <h3 className="font-semibold text-slate-900 line-clamp-2 group-hover:text-emerald-600 transition-colors leading-snug flex-1">
+                            {article.title}
+                          </h3>
+                          {article.risk_band && (
+                            <Badge className={`${RISK_BAND_CONFIG[article.risk_band]?.color || 'bg-slate-400 text-white'} text-xs font-bold px-2 py-0.5 whitespace-nowrap shrink-0`}>
+                              {article.risk_band} • {article.risk_score || 0}
+                            </Badge>
+                          )}
+                        </div>
+                        
+                        {/* Risk Categories (top 3 by strength) */}
+                        {article.risk_categories && article.risk_categories.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mb-2">
+                            {(() => {
+                              const categoryStrength = article.category_strength || {};
+                              const sortedCategories = [...article.risk_categories]
+                                .sort((a, b) => (categoryStrength[b] || 0) - (categoryStrength[a] || 0))
+                                .slice(0, 3);
+                              return sortedCategories.map((cat, idx) => (
+                                <span key={idx} className="text-xs px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded">
+                                  {RISK_CATEGORY_LABELS[cat] || cat}
+                                </span>
+                              ));
+                            })()}
+                          </div>
+                        )}
+                        
+                        {/* Horizon & Confidence Meta */}
+                        {article.risk_band && article.risk_band !== 'LOW' && (
+                          <div className="text-xs text-slate-400 mb-2">
+                            Horizon: {article.time_horizon?.replace(/_/g, ' ') || 'N/A'} • Confidence: {article.confidence || 0}
+                          </div>
+                        )}
+                        
                         <div className="flex items-center justify-between text-sm text-slate-500">
                           <div className="flex items-center gap-2">
                             {article.source?.icon && (
