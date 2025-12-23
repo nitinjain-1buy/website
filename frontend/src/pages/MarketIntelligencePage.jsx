@@ -65,12 +65,25 @@ const MarketIntelligencePage = () => {
     return date;
   }, []);
 
-  // Get unique topics with counts
+  // Helper to get all queries for an article (handles both old 'query' string and new 'queries' array)
+  const getArticleQueries = (article) => {
+    if (article.queries && Array.isArray(article.queries)) {
+      return article.queries;
+    }
+    if (article.query) {
+      return [article.query];
+    }
+    return ['unknown'];
+  };
+
+  // Get unique topics with counts (an article with multiple queries counts once per topic)
   const topicsWithCounts = useMemo(() => {
     const counts = {};
     articles.forEach(a => {
-      const topic = a.query || 'unknown';
-      counts[topic] = (counts[topic] || 0) + 1;
+      const queries = getArticleQueries(a);
+      queries.forEach(topic => {
+        counts[topic] = (counts[topic] || 0) + 1;
+      });
     });
     return Object.entries(counts)
       .map(([topic, count]) => ({ topic, count }))
@@ -78,9 +91,14 @@ const MarketIntelligencePage = () => {
   }, [articles]);
 
   // Filter articles by selected topics
+  // Each article appears only ONCE even if it matches multiple selected topics
   const topicFilteredArticles = useMemo(() => {
     if (selectedTopics.length === 0) return articles;
-    return articles.filter(a => selectedTopics.includes(a.query));
+    return articles.filter(a => {
+      const queries = getArticleQueries(a);
+      // Check if any of the article's queries match any selected topic
+      return queries.some(q => selectedTopics.includes(q));
+    });
   }, [articles, selectedTopics]);
 
   // Separate recent and archived articles
