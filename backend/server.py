@@ -1293,7 +1293,13 @@ class NewsFetchLog(BaseModel):
 @api_router.get("/news", response_model=List[dict])
 async def get_news(limit: int = 50, query: Optional[str] = None):
     """Get stored news articles"""
-    filter_query = {"isHidden": False}
+    # Filter out articles without valid links or content
+    filter_query = {
+        "isHidden": False,
+        "link": {"$exists": True, "$ne": "", "$ne": None},
+        "title": {"$exists": True, "$ne": "", "$ne": None},
+        "source.name": {"$exists": True, "$ne": None}
+    }
     if query:
         filter_query["query"] = query
     
@@ -1366,10 +1372,16 @@ async def toggle_article_visibility(article_id: str, isHidden: bool):
     return {"success": True}
 
 @api_router.get("/news/logs", response_model=List[dict])
-async def get_news_fetch_logs(limit: int = 20):
-    """Get news fetch logs"""
-    logs = await db.news_fetch_logs.find({}, {"_id": 0}).sort("fetchedAt", -1).limit(limit).to_list(limit)
+async def get_news_fetch_logs(limit: int = 20, skip: int = 0):
+    """Get news fetch logs with pagination"""
+    logs = await db.news_fetch_logs.find({}, {"_id": 0}).sort("fetchedAt", -1).skip(skip).limit(limit).to_list(limit)
     return logs
+
+@api_router.get("/news/logs/count", response_model=dict)
+async def get_news_fetch_logs_count():
+    """Get total count of news fetch logs"""
+    count = await db.news_fetch_logs.count_documents({})
+    return {"count": count}
 
 class AdminLoginRequest(BaseModel):
     password: str
