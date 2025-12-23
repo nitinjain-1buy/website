@@ -1,25 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Badge } from '../components/ui/badge';
 import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import {
   Newspaper,
   ExternalLink,
   Clock,
   TrendingUp,
   RefreshCw,
-  Search,
   Sparkles,
   Archive,
-  ChevronDown
+  ChevronDown,
+  X,
+  Filter,
+  Check
 } from 'lucide-react';
 import ElectronicComponentsPattern from '../components/ElectronicComponentsPattern';
 
 const MarketIntelligencePage = () => {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedQuery, setSelectedQuery] = useState('all');
+  const [selectedTopics, setSelectedTopics] = useState([]);
   const [visibleCount, setVisibleCount] = useState(10);
   const [activeTab, setActiveTab] = useState('recent');
 
@@ -37,8 +38,8 @@ const MarketIntelligencePage = () => {
       
       // Sort by date (most recent first)
       const sortedData = data.sort((a, b) => {
-        const dateA = new Date(a.iso_date || a.fetchedAt);
-        const dateB = new Date(b.iso_date || b.fetchedAt);
+        const dateA = new Date(a.iso_date || a.fetchedAt || 0);
+        const dateB = new Date(b.iso_date || b.fetchedAt || 0);
         return dateB - dateA;
       });
       
@@ -51,24 +52,46 @@ const MarketIntelligencePage = () => {
   };
 
   // Calculate 8 months ago
-  const eightMonthsAgo = new Date();
-  eightMonthsAgo.setMonth(eightMonthsAgo.getMonth() - 8);
+  const eightMonthsAgo = useMemo(() => {
+    const date = new Date();
+    date.setMonth(date.getMonth() - 8);
+    return date;
+  }, []);
 
-  // Filter articles by query
-  const queryFilteredArticles = selectedQuery === 'all' 
-    ? articles 
-    : articles.filter(a => a.query === selectedQuery);
+  // Get unique topics with counts
+  const topicsWithCounts = useMemo(() => {
+    const counts = {};
+    articles.forEach(a => {
+      const topic = a.query || 'unknown';
+      counts[topic] = (counts[topic] || 0) + 1;
+    });
+    return Object.entries(counts)
+      .map(([topic, count]) => ({ topic, count }))
+      .sort((a, b) => b.count - a.count);
+  }, [articles]);
+
+  // Filter articles by selected topics
+  const topicFilteredArticles = useMemo(() => {
+    if (selectedTopics.length === 0) return articles;
+    return articles.filter(a => selectedTopics.includes(a.query));
+  }, [articles, selectedTopics]);
 
   // Separate recent and archived articles
-  const recentArticles = queryFilteredArticles.filter(a => {
-    const articleDate = new Date(a.iso_date || a.fetchedAt);
-    return articleDate >= eightMonthsAgo;
-  });
-
-  const archivedArticles = queryFilteredArticles.filter(a => {
-    const articleDate = new Date(a.iso_date || a.fetchedAt);
-    return articleDate < eightMonthsAgo;
-  });
+  const { recentArticles, archivedArticles } = useMemo(() => {
+    const recent = [];
+    const archived = [];
+    
+    topicFilteredArticles.forEach(article => {
+      const articleDate = new Date(article.iso_date || article.fetchedAt || 0);
+      if (articleDate >= eightMonthsAgo) {
+        recent.push(article);
+      } else {
+        archived.push(article);
+      }
+    });
+    
+    return { recentArticles: recent, archivedArticles: archived };
+  }, [topicFilteredArticles, eightMonthsAgo]);
 
   // Get articles to display based on active tab
   const displayArticles = activeTab === 'recent' ? recentArticles : archivedArticles;
@@ -95,16 +118,34 @@ const MarketIntelligencePage = () => {
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
-    setVisibleCount(10); // Reset visible count when switching tabs
+    setVisibleCount(10);
   };
 
-  // Get unique queries from articles
-  const uniqueQueries = [...new Set(articles.map(a => a.query))];
+  const handleTopicToggle = (topic) => {
+    setSelectedTopics(prev => {
+      if (prev.includes(topic)) {
+        return prev.filter(t => t !== topic);
+      } else {
+        return [...prev, topic];
+      }
+    });
+    setVisibleCount(10);
+  };
+
+  const handleClearAll = () => {
+    setSelectedTopics([]);
+    setVisibleCount(10);
+  };
+
+  const handleSelectAll = () => {
+    setSelectedTopics(topicsWithCounts.map(t => t.topic));
+    setVisibleCount(10);
+  };
 
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Hero Section */}
-      <section className="relative py-20 bg-gradient-to-b from-slate-900 to-slate-800 overflow-hidden">
+      <section className="relative py-16 bg-gradient-to-b from-slate-900 to-slate-800 overflow-hidden">
         <ElectronicComponentsPattern opacity={0.03} />
         <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-blue-500/10" />
         
@@ -114,31 +155,36 @@ const MarketIntelligencePage = () => {
               <TrendingUp className="w-3 h-3 animate-pulse" />
               Market Intelligence
             </Badge>
-            <h1 className="text-4xl sm:text-5xl font-bold text-white mb-6">
+            <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
               Latest News & Insights
             </h1>
-            <p className="text-xl text-slate-300 max-w-3xl mx-auto">
-              Stay ahead with real-time news and market intelligence from the electronics and semiconductor industry
+            <p className="text-lg text-slate-300 max-w-2xl mx-auto">
+              Real-time market intelligence from the electronics and semiconductor industry
             </p>
           </div>
         </div>
       </section>
 
-      {/* Filters & Tabs Section */}
-      <section className="py-6 bg-white border-b">
+      {/* Filter Section */}
+      <section className="py-6 bg-white border-b shadow-sm sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Recent/Archived Tabs */}
+          {/* Top Row: Filter Label + Tabs */}
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2 text-slate-600">
-              <Search className="w-4 h-4" />
-              <span className="font-medium">Filter by topic:</span>
+            <div className="flex items-center gap-3">
+              <Filter className="w-5 h-5 text-slate-500" />
+              <span className="font-semibold text-slate-700">Filter by Topic</span>
+              {selectedTopics.length > 0 && (
+                <Badge className="bg-emerald-100 text-emerald-700">
+                  {selectedTopics.length} selected
+                </Badge>
+              )}
             </div>
             <div className="flex items-center gap-2">
               <Button
                 variant={activeTab === 'recent' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => handleTabChange('recent')}
-                className={activeTab === 'recent' ? 'bg-slate-800 hover:bg-slate-900' : ''}
+                className={activeTab === 'recent' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
               >
                 <Clock className="w-4 h-4 mr-2" />
                 Recent ({recentArticles.length})
@@ -147,7 +193,7 @@ const MarketIntelligencePage = () => {
                 variant={activeTab === 'archived' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => handleTabChange('archived')}
-                className={activeTab === 'archived' ? 'bg-slate-800 hover:bg-slate-900' : ''}
+                className={activeTab === 'archived' ? 'bg-slate-700 hover:bg-slate-800' : ''}
               >
                 <Archive className="w-4 h-4 mr-2" />
                 Archived ({archivedArticles.length})
@@ -155,156 +201,192 @@ const MarketIntelligencePage = () => {
             </div>
           </div>
 
-          {/* Query Filters - Scrollable */}
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant={selectedQuery === 'all' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => { setSelectedQuery('all'); setVisibleCount(10); }}
-              className={selectedQuery === 'all' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
-            >
-              All News ({articles.length})
-            </Button>
-            {uniqueQueries.sort().map((query) => {
-              const count = articles.filter(a => a.query === query).length;
+          {/* Topic Chips */}
+          <div className="flex flex-wrap gap-2 mb-3">
+            {topicsWithCounts.map(({ topic, count }) => {
+              const isSelected = selectedTopics.includes(topic);
               return (
-                <Button
-                  key={query}
-                  variant={selectedQuery === query ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => { setSelectedQuery(query); setVisibleCount(10); }}
-                  className={selectedQuery === query ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
+                <button
+                  key={topic}
+                  onClick={() => handleTopicToggle(topic)}
+                  className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 border ${
+                    isSelected
+                      ? 'bg-emerald-600 text-white border-emerald-600 shadow-md'
+                      : 'bg-white text-slate-700 border-slate-300 hover:border-emerald-400 hover:bg-emerald-50'
+                  }`}
                 >
-                  {query} ({count})
-                </Button>
+                  {isSelected && <Check className="w-3 h-3" />}
+                  <span>{topic}</span>
+                  <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                    isSelected ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-500'
+                  }`}>
+                    {count}
+                  </span>
+                </button>
               );
             })}
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center gap-3">
+            {selectedTopics.length > 0 ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleClearAll}
+                className="text-slate-600 hover:text-red-600 hover:border-red-300"
+              >
+                <X className="w-4 h-4 mr-1" />
+                Clear All Filters
+              </Button>
+            ) : (
+              <span className="text-sm text-slate-500">
+                Showing all {articles.length} articles • Click topics above to filter
+              </span>
+            )}
+            {selectedTopics.length > 0 && selectedTopics.length < topicsWithCounts.length && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleSelectAll}
+                className="text-slate-500"
+              >
+                Select All
+              </Button>
+            )}
           </div>
         </div>
       </section>
 
-      {/* News Grid */}
-      <section className="py-12">
+      {/* News Content */}
+      <section className="py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {loading ? (
-            <div className="flex items-center justify-center py-20">
-              <RefreshCw className="w-8 h-8 animate-spin text-emerald-600" />
-              <span className="ml-3 text-slate-600">Loading news...</span>
+            <div className="flex flex-col items-center justify-center py-20">
+              <RefreshCw className="w-10 h-10 animate-spin text-emerald-600 mb-4" />
+              <span className="text-slate-600">Loading latest news...</span>
             </div>
           ) : displayArticles.length === 0 ? (
-            <div className="text-center py-20">
+            <div className="text-center py-20 bg-white rounded-xl shadow-sm">
               {activeTab === 'archived' ? (
                 <>
                   <Archive className="w-16 h-16 mx-auto text-slate-300 mb-4" />
-                  <p className="text-slate-500">No archived articles (older than 8 months)</p>
+                  <h3 className="text-xl font-semibold text-slate-700 mb-2">No Archived Articles</h3>
+                  <p className="text-slate-500">No articles older than 8 months found for the selected topics</p>
                 </>
               ) : (
                 <>
                   <Newspaper className="w-16 h-16 mx-auto text-slate-300 mb-4" />
-                  <p className="text-slate-500">No recent news articles available</p>
+                  <h3 className="text-xl font-semibold text-slate-700 mb-2">No Recent Articles</h3>
+                  <p className="text-slate-500">No recent articles found for the selected topics</p>
                 </>
+              )}
+              {selectedTopics.length > 0 && (
+                <Button onClick={handleClearAll} className="mt-4 bg-emerald-600 hover:bg-emerald-700">
+                  Clear Filters
+                </Button>
               )}
             </div>
           ) : (
             <>
-              {/* Section Title */}
-              <div className="mb-8">
-                <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
-                  {activeTab === 'recent' ? (
-                    <>
-                      <Clock className="w-6 h-6 text-emerald-600" />
-                      Recent News
-                    </>
-                  ) : (
-                    <>
-                      <Archive className="w-6 h-6 text-slate-500" />
-                      Archived News
-                    </>
-                  )}
-                </h2>
-                <p className="text-slate-500 mt-1">
-                  {activeTab === 'recent' 
-                    ? 'Latest articles from the past 8 months'
-                    : 'Articles older than 8 months'
-                  }
-                </p>
+              {/* Results Summary */}
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-slate-900">
+                    {activeTab === 'recent' ? 'Recent News' : 'Archived News'}
+                  </h2>
+                  <p className="text-slate-500 text-sm mt-1">
+                    {activeTab === 'recent' 
+                      ? 'Latest articles from the past 8 months, sorted by date'
+                      : 'Articles older than 8 months'
+                    }
+                  </p>
+                </div>
+                <Badge variant="outline" className="text-slate-600">
+                  {displayArticles.length} articles
+                </Badge>
               </div>
 
-              {/* Featured Article (only for recent tab and first load) */}
-              {activeTab === 'recent' && visibleArticles[0] && (
-                <div className="mb-10">
-                  <a 
-                    href={visibleArticles[0].link} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="block group"
-                  >
-                    <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 border-0 shadow-lg">
-                      <div className="grid md:grid-cols-2 gap-0">
-                        <div className="relative h-64 md:h-80 bg-slate-100">
-                          {visibleArticles[0].thumbnail ? (
-                            <img 
-                              src={visibleArticles[0].thumbnail} 
-                              alt={visibleArticles[0].title}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-emerald-500 to-blue-600">
-                              <Newspaper className="w-20 h-20 text-white/30" />
-                            </div>
-                          )}
-                        </div>
-                        <CardContent className="p-8 flex flex-col justify-center">
-                          <Badge className="w-fit mb-4 bg-emerald-100 text-emerald-700 hover:bg-emerald-100">
+              {/* Featured Article (only for recent, first load, no topic filter) */}
+              {activeTab === 'recent' && visibleArticles[0] && selectedTopics.length === 0 && (
+                <a 
+                  href={visibleArticles[0].link} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="block group mb-8"
+                >
+                  <Card className="overflow-hidden hover:shadow-2xl transition-all duration-300 border-0 shadow-lg bg-gradient-to-r from-slate-900 to-slate-800">
+                    <div className="grid md:grid-cols-2 gap-0">
+                      <div className="relative h-64 md:h-80 bg-slate-700">
+                        {visibleArticles[0].thumbnail ? (
+                          <img 
+                            src={visibleArticles[0].thumbnail} 
+                            alt={visibleArticles[0].title}
+                            className="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-emerald-600 to-blue-600">
+                            <Newspaper className="w-20 h-20 text-white/30" />
+                          </div>
+                        )}
+                        <div className="absolute top-4 left-4">
+                          <Badge className="bg-emerald-500 text-white border-0">
+                            <Sparkles className="w-3 h-3 mr-1" />
                             Featured
                           </Badge>
-                          <h2 className="text-2xl font-bold text-slate-900 mb-4 group-hover:text-emerald-600 transition-colors line-clamp-3">
-                            {visibleArticles[0].title}
-                          </h2>
-                          <div className="flex items-center gap-4 text-sm text-slate-500">
-                            <div className="flex items-center gap-2">
-                              {visibleArticles[0].source?.icon && (
-                                <img 
-                                  src={visibleArticles[0].source.icon} 
-                                  alt={visibleArticles[0].source.name}
-                                  className="w-4 h-4 rounded"
-                                />
-                              )}
-                              <span>{visibleArticles[0].source?.name}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Clock className="w-4 h-4" />
-                              <span>{formatDate(visibleArticles[0].iso_date)}</span>
-                            </div>
-                          </div>
-                          <div className="mt-6 flex items-center text-emerald-600 font-medium">
-                            Read full article
-                            <ExternalLink className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                          </div>
-                        </CardContent>
+                        </div>
                       </div>
-                    </Card>
-                  </a>
-                </div>
+                      <CardContent className="p-8 flex flex-col justify-center bg-white">
+                        <Badge variant="outline" className="w-fit mb-3 text-emerald-600 border-emerald-200">
+                          {visibleArticles[0].query}
+                        </Badge>
+                        <h2 className="text-2xl font-bold text-slate-900 mb-4 group-hover:text-emerald-600 transition-colors line-clamp-3">
+                          {visibleArticles[0].title}
+                        </h2>
+                        <div className="flex items-center gap-4 text-sm text-slate-500 mb-4">
+                          <div className="flex items-center gap-2">
+                            {visibleArticles[0].source?.icon && (
+                              <img 
+                                src={visibleArticles[0].source.icon} 
+                                alt={visibleArticles[0].source.name}
+                                className="w-5 h-5 rounded"
+                              />
+                            )}
+                            <span className="font-medium">{visibleArticles[0].source?.name}</span>
+                          </div>
+                          <span>•</span>
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-4 h-4" />
+                            <span>{formatDate(visibleArticles[0].iso_date)}</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center text-emerald-600 font-semibold group-hover:gap-3 transition-all">
+                          Read full article
+                          <ExternalLink className="w-4 h-4 ml-2" />
+                        </div>
+                      </CardContent>
+                    </div>
+                  </Card>
+                </a>
               )}
 
               {/* News Grid */}
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {visibleArticles.slice(activeTab === 'recent' ? 1 : 0).map((article) => (
+                {visibleArticles.slice(activeTab === 'recent' && selectedTopics.length === 0 ? 1 : 0).map((article, index) => (
                   <a 
-                    key={article.id || article.link}
+                    key={article.id || article.link || index}
                     href={article.link} 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="block group"
                   >
-                    <Card className="h-full overflow-hidden hover:shadow-lg transition-all duration-300 border border-slate-200 hover:border-emerald-200">
-                      <div className="relative h-48 bg-slate-100">
+                    <Card className="h-full overflow-hidden hover:shadow-xl transition-all duration-300 border border-slate-200 hover:border-emerald-300 bg-white">
+                      <div className="relative h-44 bg-slate-100 overflow-hidden">
                         {article.thumbnail ? (
                           <img 
                             src={article.thumbnail} 
                             alt={article.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-200 to-slate-300">
@@ -312,13 +394,13 @@ const MarketIntelligencePage = () => {
                           </div>
                         )}
                         <div className="absolute top-3 left-3">
-                          <Badge variant="secondary" className="bg-white/90 text-slate-700 text-xs">
+                          <Badge className="bg-white/95 text-slate-700 text-xs font-medium shadow-sm">
                             {article.query}
                           </Badge>
                         </div>
                       </div>
                       <CardContent className="p-5">
-                        <h3 className="font-semibold text-slate-900 mb-3 line-clamp-2 group-hover:text-emerald-600 transition-colors">
+                        <h3 className="font-semibold text-slate-900 mb-3 line-clamp-2 group-hover:text-emerald-600 transition-colors leading-snug">
                           {article.title}
                         </h3>
                         <div className="flex items-center justify-between text-sm text-slate-500">
@@ -330,9 +412,12 @@ const MarketIntelligencePage = () => {
                                 className="w-4 h-4 rounded"
                               />
                             )}
-                            <span className="truncate max-w-[120px]">{article.source?.name}</span>
+                            <span className="truncate max-w-[100px]">{article.source?.name}</span>
                           </div>
-                          <span>{formatDate(article.iso_date)}</span>
+                          <span className="flex items-center gap-1 text-slate-400">
+                            <Clock className="w-3 h-3" />
+                            {formatDate(article.iso_date)}
+                          </span>
                         </div>
                       </CardContent>
                     </Card>
@@ -347,20 +432,23 @@ const MarketIntelligencePage = () => {
                     variant="outline" 
                     size="lg"
                     onClick={handleLoadMore}
-                    className="px-8"
+                    className="px-10 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700"
                   >
-                    <ChevronDown className="w-4 h-4 mr-2" />
-                    Load More ({displayArticles.length - visibleCount} remaining)
+                    <ChevronDown className="w-5 h-5 mr-2" />
+                    Load More Articles
+                    <span className="ml-2 text-slate-400">({displayArticles.length - visibleCount} remaining)</span>
                   </Button>
                 </div>
               )}
 
-              {/* End of articles indicator */}
+              {/* End indicator */}
               {!hasMore && visibleArticles.length > 0 && (
                 <div className="mt-10 text-center">
-                  <p className="text-slate-400 text-sm">
-                    — Showing all {displayArticles.length} {activeTab === 'archived' ? 'archived' : 'recent'} articles —
-                  </p>
+                  <div className="inline-flex items-center gap-2 text-slate-400 text-sm">
+                    <div className="w-12 h-px bg-slate-200"></div>
+                    <span>Showing all {displayArticles.length} articles</span>
+                    <div className="w-12 h-px bg-slate-200"></div>
+                  </div>
                 </div>
               )}
             </>
@@ -369,15 +457,16 @@ const MarketIntelligencePage = () => {
       </section>
 
       {/* Info Section */}
-      <section className="py-12 bg-slate-900">
+      <section className="py-12 bg-gradient-to-b from-slate-900 to-slate-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <Sparkles className="w-8 h-8 text-emerald-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">Powered by AI</h3>
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-emerald-500/20 mb-4">
+              <Sparkles className="w-7 h-7 text-emerald-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-white mb-2">Powered by AI Intelligence</h3>
             <p className="text-slate-400 max-w-2xl mx-auto">
               Our market intelligence is automatically curated from trusted industry sources, 
-              updated multiple times daily to keep you informed about the latest developments 
-              in electronics procurement and supply chain.
+              updated twice daily at 8:00 AM and 4:00 PM to keep you informed about the latest developments.
             </p>
           </div>
         </div>
