@@ -15,6 +15,7 @@ import TeamPage from "./pages/TeamPage";
 import AdminPage from "./pages/AdminPage";
 import LoginPage from "./pages/LoginPage";
 import PlatformPage from "./pages/PlatformPage";
+import MarketIntelligencePage from "./pages/MarketIntelligencePage";
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
                 <Route path="/team" element={<TeamPage />} />
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/contact" element={<ContactPage />} />
+                <Route path="/market-intelligence" element={<MarketIntelligencePage />} />
               </Routes>
             </Layout>
           } />
