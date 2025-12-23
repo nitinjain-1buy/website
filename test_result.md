@@ -482,15 +482,18 @@ frontend:
 
   - task: "Admin Demo Requests table with new columns"
     implemented: true
-    working: true
+    working: false
     file: "/app/frontend/src/pages/AdminPage.jsx"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: true
     status_history:
         - working: true
           agent: "main"
           comment: "Added Factory Locations and Head Office columns to Demo Requests table. Arrays display as colored badges (blue for factory, purple for head office). Interest also displays as badges now. Verified via screenshots."
+        - working: false
+          agent: "testing"
+          comment: "❌ CRITICAL ISSUE: Demo Requests table missing Factory Locations and Head Office columns. Admin panel shows only basic columns (Company, Contact, Products, Regions, Date, Status, Actions) but the new Factory Locations and Head Office columns are not visible. No blue or purple badges found. This means new form submissions are not displaying the multi-select data in admin panel. Backend may be receiving data but frontend table not showing new columns."
 
   - task: "Admin Suppliers table with Regions column"
     implemented: true
