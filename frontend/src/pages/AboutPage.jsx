@@ -14,6 +14,7 @@ import {
   Globe,
   Award
 } from 'lucide-react';
+import ElectronicComponentsPattern from '../components/ElectronicComponentsPattern';
 
 const iconMap = {
   'Data-First': Database,
