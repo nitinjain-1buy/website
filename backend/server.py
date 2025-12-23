@@ -227,42 +227,38 @@ async def fetch_and_store_all_news():
                     # Parse GDELT date format (YYYYMMDDTHHMMSSZ)
                     gdelt_date = article.get("seendate", "")
                     iso_date = None
-                if gdelt_date:
-                    try:
-                        # Convert GDELT date format to ISO
-                        iso_date = f"{gdelt_date[:4]}-{gdelt_date[4:6]}-{gdelt_date[6:8]}T{gdelt_date[9:11]}:{gdelt_date[11:13]}:{gdelt_date[13:15]}Z"
-                    except (IndexError, ValueError):
-                        iso_date = None
-                
-                news_doc = {
-                    "id": str(uuid.uuid4()),
-                    "position": 0,
-                    "title": article.get("title", ""),
-                    "source": {
-                        "name": article.get("domain", article.get("sourcecountry", "Unknown")),
-                        "icon": None
-                    },
-                    "link": link,
-                    "thumbnail": article.get("socialimage"),
-                    "thumbnail_small": article.get("socialimage"),
-                    "date": gdelt_date,
-                    "iso_date": iso_date,
-                    "query": query_text,
-                    "apiSource": "GDELT",
-                    "fetchedAt": datetime.now(timezone.utc).isoformat(),
-                    "isHidden": False
-                }
-                
-                # Upsert by link to avoid duplicates at DB level too
-                await db.news_articles.update_one(
-                    {"link": link},
-                    {"$set": news_doc},
-                    upsert=True
-                )
-                gdelt_new += 1
+                    if gdelt_date:
+                        try:
+                            # Convert GDELT date format to ISO
+                            iso_date = f"{gdelt_date[:4]}-{gdelt_date[4:6]}-{gdelt_date[6:8]}T{gdelt_date[9:11]}:{gdelt_date[11:13]}:{gdelt_date[13:15]}Z"
+                        except (IndexError, ValueError):
+                            iso_date = None
+                    
+                    # New article - create with queries array
+                    news_doc = {
+                        "id": str(uuid.uuid4()),
+                        "position": 0,
+                        "title": article.get("title", ""),
+                        "source": {
+                            "name": article.get("domain", article.get("sourcecountry", "Unknown")),
+                            "icon": None
+                        },
+                        "link": link,
+                        "thumbnail": article.get("socialimage"),
+                        "thumbnail_small": article.get("socialimage"),
+                        "date": gdelt_date,
+                        "iso_date": iso_date,
+                        "queries": [query_text],  # Array of queries this article belongs to
+                        "apiSource": "GDELT",
+                        "fetchedAt": datetime.now(timezone.utc).isoformat(),
+                        "isHidden": False
+                    }
+                    
+                    await db.news_articles.insert_one(news_doc)
+                    global_seen_urls.add(normalized_link)
+                    gdelt_new += 1
             
             total_new_articles += gdelt_new
-            total_duplicates_skipped += gdelt_duplicates
             
             # Log GDELT fetch
             gdelt_log = {
@@ -271,17 +267,16 @@ async def fetch_and_store_all_news():
                 "query": query_text,
                 "articlesFound": len(gdelt_articles),
                 "newArticles": gdelt_new,
-                "duplicatesSkipped": gdelt_duplicates,
+                "existingUpdated": gdelt_existing_updated,
                 "status": "success" if gdelt_articles else "no_results",
                 "fetchedAt": datetime.now(timezone.utc).isoformat()
             }
             await db.news_fetch_logs.insert_one(gdelt_log)
-            logger.info(f"[GDELT] Query '{query_text}': {len(gdelt_articles)} found, {gdelt_new} new, {gdelt_duplicates} duplicates skipped")
+            logger.info(f"[GDELT] Query '{query_text}': {len(gdelt_articles)} found, {gdelt_new} new, {gdelt_existing_updated} existing updated")
         
         logger.info("=" * 60)
         logger.info("Scheduled news fetch complete!")
         logger.info(f"Total new articles stored: {total_new_articles}")
-        logger.info(f"Total duplicates skipped: {total_duplicates_skipped}")
         logger.info("=" * 60)
         
     except Exception as e:
