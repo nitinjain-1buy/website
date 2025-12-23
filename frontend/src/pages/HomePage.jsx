@@ -354,9 +354,10 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* How It Works - Flow */}
-      <section className="py-24 bg-slate-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* How It Works - Flow - semi-transparent to show pattern */}
+      <section className="py-24 relative">
+        <div className="absolute inset-0 bg-slate-50/90" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <AnimatedSection animation="fade-up" className="text-center mb-16">
             <Badge variant="outline" className="mb-4 text-emerald-700 border-emerald-200 bg-emerald-50">
               How It Works
