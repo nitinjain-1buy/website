@@ -313,8 +313,12 @@ const HomePage = () => {
       </section>
 
       {/* Problems Section */}
-      <section className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-24 relative overflow-hidden bg-slate-50">
+        {/* Electronic Components Watermark Background - same as hero */}
+        <ElectronicComponentsPattern />
+        <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimatedSection animation="fade-up" className="text-center mb-16">
             <Badge variant="outline" className="mb-4 text-slate-600 border-slate-300">
               The Problem
@@ -335,7 +339,7 @@ const HomePage = () => {
                   key={problem.id} 
                   delay={index * 100}
                   hoverEffect="lift"
-                  className="border-slate-200"
+                  className="border-slate-200 bg-white"
                 >
                   <CardContent className="p-6">
                     <div className="w-12 h-12 rounded-lg bg-red-50 flex items-center justify-center mb-4 transition-transform group-hover:scale-110">
