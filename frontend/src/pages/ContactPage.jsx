@@ -237,7 +237,7 @@ const SupplierForm = () => {
     email: '',
     phone: '',
     website: '',
-    productCategories: '',
+    productCategories: [],
     regionsServed: '',
     inventoryDescription: ''
   });
