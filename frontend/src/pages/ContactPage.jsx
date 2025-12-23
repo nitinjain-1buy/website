@@ -252,6 +252,64 @@ const CustomerForm = () => {
       </div>
 
       <div className="space-y-2">
+        <Label>Factory Locations <span className="text-slate-500 font-normal">(Select all that apply)</span></Label>
+        <div className="grid grid-cols-2 gap-3 mt-2">
+          {[
+            { value: 'asia-pacific', label: 'Asia Pacific' },
+            { value: 'europe', label: 'Europe' },
+            { value: 'north-america', label: 'North America' },
+            { value: 'south-america', label: 'South America' }
+          ].map((item) => (
+            <label
+              key={item.value}
+              className={`flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                formData.factoryLocations.includes(item.value)
+                  ? 'border-emerald-500 bg-emerald-50'
+                  : 'border-slate-200 hover:border-slate-300'
+              }`}
+            >
+              <input
+                type="checkbox"
+                checked={formData.factoryLocations.includes(item.value)}
+                onChange={() => handleFactoryLocationToggle(item.value)}
+                className="w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500"
+              />
+              <span className="text-sm text-slate-700">{item.label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Head Office Location <span className="text-slate-500 font-normal">(Select all that apply)</span></Label>
+        <div className="grid grid-cols-2 gap-3 mt-2">
+          {[
+            { value: 'asia-pacific', label: 'Asia Pacific' },
+            { value: 'europe', label: 'Europe' },
+            { value: 'north-america', label: 'North America' },
+            { value: 'south-america', label: 'South America' }
+          ].map((item) => (
+            <label
+              key={item.value}
+              className={`flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                formData.headOfficeLocation.includes(item.value)
+                  ? 'border-emerald-500 bg-emerald-50'
+                  : 'border-slate-200 hover:border-slate-300'
+              }`}
+            >
+              <input
+                type="checkbox"
+                checked={formData.headOfficeLocation.includes(item.value)}
+                onChange={() => handleHeadOfficeToggle(item.value)}
+                className="w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500"
+              />
+              <span className="text-sm text-slate-700">{item.label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-2">
         <Label htmlFor="message">Message <span className="text-slate-500 font-normal">(Optional)</span></Label>
         <Textarea
           id="message"
