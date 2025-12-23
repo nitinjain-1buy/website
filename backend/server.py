@@ -103,6 +103,170 @@ async def fetch_news_from_mediastack(query: str) -> List[dict]:
         logger.error(f"[MediaStack] Error fetching news for query '{query}': {str(e)}")
         return []
 
+
+# ============== WEB SCRAPER ==============
+
+async def scrape_article_content(url: str) -> dict:
+    """Scrape full article content from URL"""
+    result = {
+        "scraped": False,
+        "scrapedAt": None,
+        "fullContent": None,
+        "summary": None,
+        "wordCount": 0,
+        "scrapeError": None
+    }
+    
+    if not url:
+        result["scrapeError"] = "No URL provided"
+        return result
+    
+    # User agent to avoid blocks
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+    }
+    
+    try:
+        async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as client:
+            response = await client.get(url, headers=headers)
+            response.raise_for_status()
+            
+            html = response.text
+            soup = BeautifulSoup(html, 'lxml')
+            
+            # Remove unwanted elements
+            for element in soup.find_all(['script', 'style', 'nav', 'header', 'footer', 'aside', 'advertisement', 'iframe', 'noscript']):
+                element.decompose()
+            
+            # Try to find article content using common selectors
+            article_content = None
+            
+            # Priority selectors for article content
+            selectors = [
+                'article',
+                '[role="article"]',
+                '.article-content',
+                '.article-body',
+                '.post-content',
+                '.entry-content',
+                '.story-body',
+                '.content-body',
+                '#article-body',
+                '.article__body',
+                'main article',
+                '.news-article',
+                '.story-content'
+            ]
+            
+            for selector in selectors:
+                content = soup.select_one(selector)
+                if content:
+                    article_content = content
+                    break
+            
+            # Fallback to main or body
+            if not article_content:
+                article_content = soup.find('main') or soup.find('body')
+            
+            if article_content:
+                # Extract paragraphs
+                paragraphs = article_content.find_all('p')
+                text_parts = []
+                
+                for p in paragraphs:
+                    text = p.get_text(strip=True)
+                    # Filter out very short paragraphs (likely navigation/ads)
+                    if len(text) > 50:
+                        text_parts.append(text)
+                
+                full_content = '\n\n'.join(text_parts)
+                
+                # Clean up the text
+                full_content = re.sub(r'\s+', ' ', full_content)  # Normalize whitespace
+                full_content = full_content.strip()
+                
+                if full_content:
+                    word_count = len(full_content.split())
+                    
+                    # Create a summary (first 500 chars)
+                    summary = full_content[:500] + '...' if len(full_content) > 500 else full_content
+                    
+                    result["scraped"] = True
+                    result["scrapedAt"] = datetime.now(timezone.utc).isoformat()
+                    result["fullContent"] = full_content
+                    result["summary"] = summary
+                    result["wordCount"] = word_count
+                    
+                    logger.info(f"[Scraper] Successfully scraped {word_count} words from {url[:50]}...")
+                else:
+                    result["scrapeError"] = "No meaningful content found"
+            else:
+                result["scrapeError"] = "Could not locate article content"
+                
+    except httpx.TimeoutException:
+        result["scrapeError"] = "Timeout while fetching URL"
+        logger.warning(f"[Scraper] Timeout: {url[:50]}...")
+    except httpx.HTTPStatusError as e:
+        result["scrapeError"] = f"HTTP {e.response.status_code}"
+        logger.warning(f"[Scraper] HTTP Error {e.response.status_code}: {url[:50]}...")
+    except Exception as e:
+        result["scrapeError"] = str(e)[:100]
+        logger.warning(f"[Scraper] Error scraping {url[:50]}...: {str(e)[:50]}")
+    
+    return result
+
+
+async def scrape_unscraped_articles(limit: int = 50):
+    """Background task to scrape articles that haven't been scraped yet"""
+    logger.info("=" * 60)
+    logger.info("[Scraper] Starting background article scraping...")
+    logger.info("=" * 60)
+    
+    try:
+        # Find articles that haven't been scraped yet
+        unscraped = await db.news_articles.find(
+            {"scraped": {"$ne": True}, "link": {"$exists": True, "$ne": ""}},
+            {"_id": 0, "id": 1, "link": 1, "title": 1}
+        ).limit(limit).to_list(limit)
+        
+        logger.info(f"[Scraper] Found {len(unscraped)} unscraped articles")
+        
+        scraped_count = 0
+        failed_count = 0
+        
+        for article in unscraped:
+            url = article.get("link")
+            article_id = article.get("id")
+            
+            if not url or not article_id:
+                continue
+            
+            # Scrape the article
+            scrape_result = await scrape_article_content(url)
+            
+            # Update the article in database
+            await db.news_articles.update_one(
+                {"id": article_id},
+                {"$set": scrape_result}
+            )
+            
+            if scrape_result["scraped"]:
+                scraped_count += 1
+            else:
+                failed_count += 1
+            
+            # Rate limiting - wait 1 second between requests
+            await asyncio.sleep(1)
+        
+        logger.info(f"[Scraper] Completed: {scraped_count} scraped, {failed_count} failed")
+        logger.info("=" * 60)
+        
+    except Exception as e:
+        logger.error(f"[Scraper] Error in background scraping: {str(e)}")
+
+
 def normalize_url(url: str) -> str:
     """Normalize URL for duplicate detection - remove trailing slashes, www, etc."""
     if not url:
