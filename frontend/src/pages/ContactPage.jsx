@@ -274,6 +274,17 @@ const SupplierForm = () => {
     });
   };
 
+  const handleInterestToggle = (interest) => {
+    setFormData(prev => {
+      const currentInterests = prev.interest;
+      if (currentInterests.includes(interest)) {
+        return { ...prev, interest: currentInterests.filter(i => i !== interest) };
+      } else {
+        return { ...prev, interest: [...currentInterests, interest] };
+      }
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
