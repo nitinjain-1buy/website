@@ -1121,7 +1121,10 @@ async def seed_flow_lines():
     return {"message": f"Seeded {len(default_lines)} flow lines", "seeded": True}
 
 # Admin Authentication
-ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin@123")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
+if not ADMIN_PASSWORD:
+    logger.warning("ADMIN_PASSWORD not set in environment variables. Using default for development only.")
+    ADMIN_PASSWORD = "admin@123"  # Only used if env var not set
 
 class AdminLoginRequest(BaseModel):
     password: str
