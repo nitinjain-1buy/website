@@ -48,15 +48,49 @@ async def fetch_news_from_serpapi(query: str) -> List[dict]:
             data = response.json()
             
             news_results = data.get("news_results", [])
-            logger.info(f"Fetched {len(news_results)} articles for query: {query}")
+            logger.info(f"[SerpAPI] Fetched {len(news_results)} articles for query: {query}")
             return news_results
     except Exception as e:
-        logger.error(f"Error fetching news for query '{query}': {str(e)}")
+        logger.error(f"[SerpAPI] Error fetching news for query '{query}': {str(e)}")
         return []
 
+async def fetch_news_from_gdelt(query: str) -> List[dict]:
+    """Fetch news from GDELT Project API for a given query"""
+    encoded_query = query.replace(' ', '%20')
+    url = f"https://api.gdeltproject.org/api/v2/doc/doc?query={encoded_query}&mode=ArtList&format=json&maxrecords=50"
+    
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as http_client:
+            response = await http_client.get(url)
+            response.raise_for_status()
+            data = response.json()
+            
+            # GDELT returns articles in "articles" array
+            articles = data.get("articles", [])
+            logger.info(f"[GDELT] Fetched {len(articles)} articles for query: {query}")
+            return articles
+    except Exception as e:
+        logger.error(f"[GDELT] Error fetching news for query '{query}': {str(e)}")
+        return []
+
+def normalize_url(url: str) -> str:
+    """Normalize URL for duplicate detection - remove trailing slashes, www, etc."""
+    if not url:
+        return ""
+    url = url.lower().strip()
+    # Remove trailing slash
+    url = url.rstrip('/')
+    # Remove www. prefix
+    if '://www.' in url:
+        url = url.replace('://www.', '://')
+    # Remove query parameters for comparison (optional - be careful with this)
+    return url
+
 async def fetch_and_store_all_news():
-    """Fetch news for all active queries and store in database"""
-    logger.info("Starting scheduled news fetch...")
+    """Fetch news for all active queries from all APIs and store in database"""
+    logger.info("=" * 60)
+    logger.info("Starting scheduled news fetch from all sources...")
+    logger.info("=" * 60)
     
     try:
         # Get all active queries
@@ -74,49 +108,171 @@ async def fetch_and_store_all_news():
             queries = [default_query]
             logger.info("Created default search query: electronics parts")
         
-        total_articles = 0
+        # Track all seen URLs across all queries and APIs for global deduplication
+        global_seen_urls = set()
+        
+        # Get existing URLs from database for duplicate detection
+        existing_articles = await db.news_articles.find({}, {"link": 1, "_id": 0}).to_list(10000)
+        for article in existing_articles:
+            if article.get("link"):
+                global_seen_urls.add(normalize_url(article["link"]))
+        
+        logger.info(f"Found {len(global_seen_urls)} existing articles in database")
+        
+        total_new_articles = 0
+        total_duplicates_skipped = 0
+        
         for q in queries:
             query_text = q["query"]
-            articles = await fetch_news_from_serpapi(query_text)
+            logger.info(f"\n--- Processing query: '{query_text}' ---")
             
-            # Store articles
-            for article in articles:
+            # Track URLs seen for this query (to avoid duplicates between APIs for same query)
+            query_seen_urls = set()
+            
+            # ========== SERPAPI ==========
+            serpapi_articles = await fetch_news_from_serpapi(query_text)
+            serpapi_new = 0
+            serpapi_duplicates = 0
+            
+            for article in serpapi_articles:
+                link = article.get("link", "")
+                if not link:
+                    continue
+                    
+                normalized_link = normalize_url(link)
+                
+                # Check for duplicates
+                if normalized_link in global_seen_urls or normalized_link in query_seen_urls:
+                    serpapi_duplicates += 1
+                    continue
+                
+                query_seen_urls.add(normalized_link)
+                global_seen_urls.add(normalized_link)
+                
                 news_doc = {
                     "id": str(uuid.uuid4()),
                     "position": article.get("position", 0),
                     "title": article.get("title", ""),
                     "source": article.get("source", {}),
-                    "link": article.get("link", ""),
+                    "link": link,
                     "thumbnail": article.get("thumbnail"),
                     "thumbnail_small": article.get("thumbnail_small"),
                     "date": article.get("date"),
                     "iso_date": article.get("iso_date"),
                     "query": query_text,
+                    "apiSource": "SerpAPI",
                     "fetchedAt": datetime.now(timezone.utc).isoformat(),
                     "isHidden": False
                 }
                 
-                # Upsert by link to avoid duplicates
+                # Upsert by link to avoid duplicates at DB level too
                 await db.news_articles.update_one(
-                    {"link": news_doc["link"]},
+                    {"link": link},
                     {"$set": news_doc},
                     upsert=True
                 )
-                total_articles += 1
+                serpapi_new += 1
             
-            # Log the fetch
-            log_doc = {
+            total_new_articles += serpapi_new
+            total_duplicates_skipped += serpapi_duplicates
+            
+            # Log SerpAPI fetch
+            serpapi_log = {
                 "id": str(uuid.uuid4()),
+                "api": "SerpAPI",
                 "query": query_text,
-                "articlesCount": len(articles),
-                "status": "success" if articles else "no_results",
+                "articlesFound": len(serpapi_articles),
+                "newArticles": serpapi_new,
+                "duplicatesSkipped": serpapi_duplicates,
+                "status": "success" if serpapi_articles else "no_results",
                 "fetchedAt": datetime.now(timezone.utc).isoformat()
             }
-            await db.news_fetch_logs.insert_one(log_doc)
+            await db.news_fetch_logs.insert_one(serpapi_log)
+            logger.info(f"[SerpAPI] Query '{query_text}': {len(serpapi_articles)} found, {serpapi_new} new, {serpapi_duplicates} duplicates skipped")
+            
+            # ========== GDELT ==========
+            gdelt_articles = await fetch_news_from_gdelt(query_text)
+            gdelt_new = 0
+            gdelt_duplicates = 0
+            
+            for article in gdelt_articles:
+                link = article.get("url", "")
+                if not link:
+                    continue
+                    
+                normalized_link = normalize_url(link)
+                
+                # Check for duplicates
+                if normalized_link in global_seen_urls or normalized_link in query_seen_urls:
+                    gdelt_duplicates += 1
+                    continue
+                
+                query_seen_urls.add(normalized_link)
+                global_seen_urls.add(normalized_link)
+                
+                # Parse GDELT date format (YYYYMMDDTHHMMSSZ)
+                gdelt_date = article.get("seendate", "")
+                iso_date = None
+                if gdelt_date:
+                    try:
+                        # Convert GDELT date format to ISO
+                        iso_date = f"{gdelt_date[:4]}-{gdelt_date[4:6]}-{gdelt_date[6:8]}T{gdelt_date[9:11]}:{gdelt_date[11:13]}:{gdelt_date[13:15]}Z"
+                    except:
+                        iso_date = None
+                
+                news_doc = {
+                    "id": str(uuid.uuid4()),
+                    "position": 0,
+                    "title": article.get("title", ""),
+                    "source": {
+                        "name": article.get("domain", article.get("sourcecountry", "Unknown")),
+                        "icon": None
+                    },
+                    "link": link,
+                    "thumbnail": article.get("socialimage"),
+                    "thumbnail_small": article.get("socialimage"),
+                    "date": gdelt_date,
+                    "iso_date": iso_date,
+                    "query": query_text,
+                    "apiSource": "GDELT",
+                    "fetchedAt": datetime.now(timezone.utc).isoformat(),
+                    "isHidden": False
+                }
+                
+                # Upsert by link to avoid duplicates at DB level too
+                await db.news_articles.update_one(
+                    {"link": link},
+                    {"$set": news_doc},
+                    upsert=True
+                )
+                gdelt_new += 1
+            
+            total_new_articles += gdelt_new
+            total_duplicates_skipped += gdelt_duplicates
+            
+            # Log GDELT fetch
+            gdelt_log = {
+                "id": str(uuid.uuid4()),
+                "api": "GDELT",
+                "query": query_text,
+                "articlesFound": len(gdelt_articles),
+                "newArticles": gdelt_new,
+                "duplicatesSkipped": gdelt_duplicates,
+                "status": "success" if gdelt_articles else "no_results",
+                "fetchedAt": datetime.now(timezone.utc).isoformat()
+            }
+            await db.news_fetch_logs.insert_one(gdelt_log)
+            logger.info(f"[GDELT] Query '{query_text}': {len(gdelt_articles)} found, {gdelt_new} new, {gdelt_duplicates} duplicates skipped")
         
-        logger.info(f"Scheduled news fetch complete. Stored/updated {total_articles} articles.")
+        logger.info("=" * 60)
+        logger.info(f"Scheduled news fetch complete!")
+        logger.info(f"Total new articles stored: {total_new_articles}")
+        logger.info(f"Total duplicates skipped: {total_duplicates_skipped}")
+        logger.info("=" * 60)
+        
     except Exception as e:
         logger.error(f"Error in scheduled news fetch: {str(e)}")
+
 
 # Scheduler setup
 scheduler = AsyncIOScheduler()
