@@ -308,18 +308,126 @@ async def fetch_and_store_all_news():
         logger.error(f"Error in scheduled news fetch: {str(e)}")
 
 
+async def fetch_mediastack_news():
+    """Fetch news from MediaStack API for all active queries (runs weekly due to rate limits)"""
+    logger.info("=" * 60)
+    logger.info("[MediaStack] Starting WEEKLY news fetch...")
+    logger.info("=" * 60)
+    
+    try:
+        # Get all active queries
+        queries = await db.news_queries.find({"isActive": True}, {"_id": 0}).to_list(100)
+        
+        if not queries:
+            logger.info("[MediaStack] No active queries found")
+            return
+        
+        # Get existing URLs for duplicate detection
+        global_seen_urls = set()
+        existing_articles = await db.news_articles.find({}, {"link": 1, "_id": 0}).to_list(10000)
+        for article in existing_articles:
+            if article.get("link"):
+                global_seen_urls.add(normalize_url(article["link"]))
+        
+        total_new_articles = 0
+        
+        for q in queries:
+            query_text = q["query"]
+            logger.info(f"[MediaStack] Processing query: '{query_text}'")
+            
+            mediastack_articles = await fetch_news_from_mediastack(query_text)
+            mediastack_new = 0
+            mediastack_existing_updated = 0
+            
+            for article in mediastack_articles:
+                link = article.get("url", "")
+                if not link:
+                    continue
+                
+                normalized_link = normalize_url(link)
+                
+                # Check if article already exists
+                existing = await db.news_articles.find_one({"link": link})
+                
+                if existing:
+                    # Add this query to existing article
+                    await db.news_articles.update_one(
+                        {"link": link},
+                        {"$addToSet": {"queries": query_text}}
+                    )
+                    mediastack_existing_updated += 1
+                else:
+                    # Parse MediaStack date format
+                    published_at = article.get("published_at", "")
+                    iso_date = published_at if published_at else None
+                    
+                    news_doc = {
+                        "id": str(uuid.uuid4()),
+                        "position": 0,
+                        "title": article.get("title", ""),
+                        "source": {
+                            "name": article.get("source", "Unknown"),
+                            "icon": None
+                        },
+                        "link": link,
+                        "thumbnail": article.get("image"),
+                        "thumbnail_small": article.get("image"),
+                        "date": published_at,
+                        "iso_date": iso_date,
+                        "queries": [query_text],
+                        "apiSource": "MediaStack",
+                        "fetchedAt": datetime.now(timezone.utc).isoformat(),
+                        "isHidden": False
+                    }
+                    
+                    await db.news_articles.insert_one(news_doc)
+                    global_seen_urls.add(normalized_link)
+                    mediastack_new += 1
+            
+            total_new_articles += mediastack_new
+            
+            # Log MediaStack fetch
+            mediastack_log = {
+                "id": str(uuid.uuid4()),
+                "api": "MediaStack",
+                "query": query_text,
+                "articlesFound": len(mediastack_articles),
+                "newArticles": mediastack_new,
+                "existingUpdated": mediastack_existing_updated,
+                "status": "success" if mediastack_articles else "no_results",
+                "fetchedAt": datetime.now(timezone.utc).isoformat()
+            }
+            await db.news_fetch_logs.insert_one(mediastack_log)
+            logger.info(f"[MediaStack] Query '{query_text}': {len(mediastack_articles)} found, {mediastack_new} new, {mediastack_existing_updated} existing updated")
+        
+        logger.info("=" * 60)
+        logger.info("[MediaStack] Weekly news fetch complete!")
+        logger.info(f"[MediaStack] Total new articles stored: {total_new_articles}")
+        logger.info("=" * 60)
+        
+    except Exception as e:
+        logger.error(f"[MediaStack] Error in weekly news fetch: {str(e)}")
+
+
 # Scheduler setup
 scheduler = AsyncIOScheduler()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup - Schedule jobs at 8 AM and 4 PM daily
+    # Startup - Schedule jobs
+    # SerpAPI + GDELT: Daily at 8 AM and 4 PM UTC
     scheduler.add_job(fetch_and_store_all_news, 'cron', hour=8, minute=0, id='news_fetch_8am')
     scheduler.add_job(fetch_and_store_all_news, 'cron', hour=16, minute=0, id='news_fetch_4pm')
-    scheduler.start()
-    logger.info("News scheduler started - will fetch daily at 8:00 AM and 4:00 PM")
     
-    # Run initial fetch on startup
+    # MediaStack: Weekly on Monday at 2:30 AM UTC (8:00 AM IST)
+    scheduler.add_job(fetch_mediastack_news, 'cron', day_of_week='mon', hour=2, minute=30, id='mediastack_weekly')
+    
+    scheduler.start()
+    logger.info("News scheduler started:")
+    logger.info("  - SerpAPI + GDELT: Daily at 8:00 AM and 4:00 PM UTC")
+    logger.info("  - MediaStack: Weekly on Monday at 8:00 AM IST (2:30 AM UTC)")
+    
+    # Run initial fetch on startup (only SerpAPI + GDELT, not MediaStack due to rate limits)
     await fetch_and_store_all_news()
     
     yield
