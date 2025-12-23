@@ -517,7 +517,7 @@ const MarketIntelligencePage = () => {
             <h3 className="text-xl font-semibold text-white mb-2">Powered by AI Intelligence</h3>
             <p className="text-slate-400 max-w-2xl mx-auto">
               Our market intelligence is automatically curated from trusted industry sources, 
-              updated twice daily at 8:00 AM and 4:00 PM to keep you informed about the latest developments.
+              keeping you informed about the latest developments.
             </p>
           </div>
         </div>
