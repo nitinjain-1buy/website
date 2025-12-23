@@ -219,19 +219,32 @@ async def scrape_article_content(url: str) -> dict:
 
 
 async def scrape_unscraped_articles(limit: int = 50):
-    """Background task to scrape articles that haven't been scraped yet"""
+    """Background task to scrape articles that haven't been scraped yet.
+    
+    IMPORTANT: This function ONLY scrapes articles where scraped != True.
+    Articles that already have fullContent will be skipped to avoid duplication.
+    """
     logger.info("=" * 60)
     logger.info("[Scraper] Starting background article scraping...")
+    logger.info("[Scraper] Note: Already scraped articles will be skipped")
     logger.info("=" * 60)
     
     try:
-        # Find articles that haven't been scraped yet
+        # Find articles that haven't been scraped yet (scraped != True)
+        # This ensures we never re-scrape articles that already have content
         unscraped = await db.news_articles.find(
-            {"scraped": {"$ne": True}, "link": {"$exists": True, "$ne": ""}},
+            {
+                "scraped": {"$ne": True},  # Skip already scraped articles
+                "link": {"$exists": True, "$ne": ""}
+            },
             {"_id": 0, "id": 1, "link": 1, "title": 1}
         ).limit(limit).to_list(limit)
         
-        logger.info(f"[Scraper] Found {len(unscraped)} unscraped articles")
+        if len(unscraped) == 0:
+            logger.info("[Scraper] No unscraped articles found - all articles already have content")
+            return
+        
+        logger.info(f"[Scraper] Found {len(unscraped)} articles to scrape (skipping already scraped)")
         
         scraped_count = 0
         failed_count = 0
