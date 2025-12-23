@@ -1689,8 +1689,6 @@ const NewsManager = ({ isLoading: parentLoading, onRefresh }) => {
           </Button>
         </div>
       </div>
-        </Button>
-      </div>
 
       {/* Tab Navigation */}
       <div className="border-b border-slate-200">
