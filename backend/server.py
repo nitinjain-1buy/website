@@ -60,12 +60,21 @@ class DemoRequest(BaseModel):
     company: str
     title: Optional[str] = None
     companySize: Optional[str] = None
-    interest: Optional[List[str]] = None
+    interest: Optional[Union[List[str], str]] = None
     factoryLocations: Optional[List[str]] = None
     headOfficeLocation: Optional[List[str]] = None
     message: Optional[str] = None
     status: str = "new"  # new, contacted, converted, closed
     createdAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    
+    @field_validator('interest', mode='before')
+    @classmethod
+    def normalize_interest(cls, v):
+        if v is None or v == '':
+            return []
+        if isinstance(v, str):
+            return [v] if v else []
+        return v
 
 # Supplier Request Models
 class SupplierRequestCreate(BaseModel):
