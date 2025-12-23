@@ -1313,9 +1313,16 @@ async def get_news_queries():
 @api_router.post("/news/queries", response_model=dict)
 async def create_news_query(query_data: NewsQueryCreate):
     """Create a new news search query"""
+    # Check for duplicate (case-insensitive)
+    existing = await db.news_queries.find_one(
+        {"query": {"$regex": f"^{query_data.query}$", "$options": "i"}}
+    )
+    if existing:
+        raise HTTPException(status_code=400, detail="Query already exists")
+    
     query_doc = {
         "id": str(uuid.uuid4()),
-        "query": query_data.query,
+        "query": query_data.query.strip(),
         "isActive": query_data.isActive,
         "createdAt": datetime.now(timezone.utc).isoformat()
     }
