@@ -217,7 +217,7 @@ async def fetch_and_store_all_news():
                     try:
                         # Convert GDELT date format to ISO
                         iso_date = f"{gdelt_date[:4]}-{gdelt_date[4:6]}-{gdelt_date[6:8]}T{gdelt_date[9:11]}:{gdelt_date[11:13]}:{gdelt_date[13:15]}Z"
-                    except:
+                    except (IndexError, ValueError):
                         iso_date = None
                 
                 news_doc = {
@@ -265,7 +265,7 @@ async def fetch_and_store_all_news():
             logger.info(f"[GDELT] Query '{query_text}': {len(gdelt_articles)} found, {gdelt_new} new, {gdelt_duplicates} duplicates skipped")
         
         logger.info("=" * 60)
-        logger.info(f"Scheduled news fetch complete!")
+        logger.info("Scheduled news fetch complete!")
         logger.info(f"Total new articles stored: {total_new_articles}")
         logger.info(f"Total duplicates skipped: {total_duplicates_skipped}")
         logger.info("=" * 60)
