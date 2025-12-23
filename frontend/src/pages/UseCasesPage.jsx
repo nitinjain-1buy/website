@@ -246,20 +246,35 @@ const UseCasesPage = () => {
       </section>
 
       {/* CTA */}
-      <section className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
+      <section className="py-24 relative overflow-hidden bg-slate-50">
+        {/* Electronic Components Watermark Background */}
+        <ElectronicComponentsPattern />
+        <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-8">
             See what 1Buy.AI can do for you
           </h2>
-          <p className="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
-            Whether you're a billion-dollar OEM or an emerging EMS player, we can help.
-          </p>
-          <Link to="/contact">
-            <Button size="lg" className="bg-slate-900 hover:bg-slate-800 px-8 h-12">
-              Talk to Our Team
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </Link>
+          
+          {/* White box container */}
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-300 p-8 md:p-12 max-w-3xl mx-auto">
+            <p className="text-xl text-slate-600 mb-8">
+              Whether you&apos;re a billion-dollar OEM or an emerging EMS player, we can help.
+            </p>
+            <div className="flex justify-center">
+              <Link to="/contact">
+                <Button 
+                  size="lg" 
+                  className="bg-slate-900 hover:bg-slate-800 text-white px-8 h-12 relative overflow-hidden group transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-slate-900/30"
+                >
+                  <span className="relative z-10 flex items-center">
+                    Talk to Our Team
+                    <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                  </span>
+                </Button>
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
     </div>
