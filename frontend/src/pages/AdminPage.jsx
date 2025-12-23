@@ -908,6 +908,8 @@ const CustomerRequestsTable = ({ requests, isLoading, onStatusUpdate, updatingId
                 <TableHead>Contact</TableHead>
                 <TableHead>Company</TableHead>
                 <TableHead>Interest</TableHead>
+                <TableHead>Factory Locations</TableHead>
+                <TableHead>Head Office</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Actions</TableHead>
@@ -923,7 +925,36 @@ const CustomerRequestsTable = ({ requests, isLoading, onStatusUpdate, updatingId
                     </div>
                   </TableCell>
                   <TableCell><div className="flex items-center"><Building2 className="h-4 w-4 mr-2 text-slate-400" /><span>{request.company}</span></div></TableCell>
-                  <TableCell><p className="capitalize">{request.interest || '-'}</p></TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {Array.isArray(request.interest) && request.interest.length > 0
+                        ? request.interest.map((item, idx) => (
+                            <Badge key={idx} variant="outline" className="text-xs capitalize">{item}</Badge>
+                          ))
+                        : <span className="text-slate-400">-</span>
+                      }
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {Array.isArray(request.factoryLocations) && request.factoryLocations.length > 0
+                        ? request.factoryLocations.map((loc, idx) => (
+                            <Badge key={idx} variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">{loc.replace('-', ' ')}</Badge>
+                          ))
+                        : <span className="text-slate-400">-</span>
+                      }
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {Array.isArray(request.headOfficeLocation) && request.headOfficeLocation.length > 0
+                        ? request.headOfficeLocation.map((loc, idx) => (
+                            <Badge key={idx} variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">{loc.replace('-', ' ')}</Badge>
+                          ))
+                        : <span className="text-slate-400">-</span>
+                      }
+                    </div>
+                  </TableCell>
                   <TableCell><p className="text-sm">{formatDate(request.createdAt)}</p></TableCell>
                   <TableCell>{getStatusBadge(request.status)}</TableCell>
                   <TableCell>
