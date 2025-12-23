@@ -132,7 +132,7 @@ async def fetch_and_store_all_news():
             # ========== SERPAPI ==========
             serpapi_articles = await fetch_news_from_serpapi(query_text)
             serpapi_new = 0
-            serpapi_duplicates = 0
+            serpapi_existing_updated = 0
             
             for article in serpapi_articles:
                 link = article.get("link", "")
@@ -141,40 +141,45 @@ async def fetch_and_store_all_news():
                     
                 normalized_link = normalize_url(link)
                 
-                # Check for duplicates
-                if normalized_link in global_seen_urls or normalized_link in query_seen_urls:
-                    serpapi_duplicates += 1
+                # Skip if we've already processed this URL in this query batch
+                if normalized_link in query_seen_urls:
                     continue
                 
                 query_seen_urls.add(normalized_link)
-                global_seen_urls.add(normalized_link)
                 
-                news_doc = {
-                    "id": str(uuid.uuid4()),
-                    "position": article.get("position", 0),
-                    "title": article.get("title", ""),
-                    "source": article.get("source", {}),
-                    "link": link,
-                    "thumbnail": article.get("thumbnail"),
-                    "thumbnail_small": article.get("thumbnail_small"),
-                    "date": article.get("date"),
-                    "iso_date": article.get("iso_date"),
-                    "query": query_text,
-                    "apiSource": "SerpAPI",
-                    "fetchedAt": datetime.now(timezone.utc).isoformat(),
-                    "isHidden": False
-                }
+                # Check if article already exists in database
+                existing = await db.news_articles.find_one({"link": link})
                 
-                # Upsert by link to avoid duplicates at DB level too
-                await db.news_articles.update_one(
-                    {"link": link},
-                    {"$set": news_doc},
-                    upsert=True
-                )
-                serpapi_new += 1
+                if existing:
+                    # Article exists - just add this query to its queries array
+                    await db.news_articles.update_one(
+                        {"link": link},
+                        {"$addToSet": {"queries": query_text}}
+                    )
+                    serpapi_existing_updated += 1
+                else:
+                    # New article - create with queries array
+                    news_doc = {
+                        "id": str(uuid.uuid4()),
+                        "position": article.get("position", 0),
+                        "title": article.get("title", ""),
+                        "source": article.get("source", {}),
+                        "link": link,
+                        "thumbnail": article.get("thumbnail"),
+                        "thumbnail_small": article.get("thumbnail_small"),
+                        "date": article.get("date"),
+                        "iso_date": article.get("iso_date"),
+                        "queries": [query_text],  # Array of queries this article belongs to
+                        "apiSource": "SerpAPI",
+                        "fetchedAt": datetime.now(timezone.utc).isoformat(),
+                        "isHidden": False
+                    }
+                    
+                    await db.news_articles.insert_one(news_doc)
+                    global_seen_urls.add(normalized_link)
+                    serpapi_new += 1
             
             total_new_articles += serpapi_new
-            total_duplicates_skipped += serpapi_duplicates
             
             # Log SerpAPI fetch
             serpapi_log = {
