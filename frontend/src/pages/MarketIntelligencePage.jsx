@@ -13,22 +13,66 @@ import {
   ChevronDown,
   X,
   Filter,
-  Check
+  Check,
+  AlertTriangle,
+  Shield,
+  ArrowUpDown
 } from 'lucide-react';
 import ElectronicComponentsPattern from '../components/ElectronicComponentsPattern';
+
+// Risk band colors and labels
+const RISK_BAND_CONFIG = {
+  CRITICAL: { color: 'bg-red-600 text-white', textColor: 'text-red-600', borderColor: 'border-red-500' },
+  HIGH: { color: 'bg-orange-500 text-white', textColor: 'text-orange-600', borderColor: 'border-orange-400' },
+  WATCH: { color: 'bg-yellow-500 text-white', textColor: 'text-yellow-600', borderColor: 'border-yellow-400' },
+  LOW: { color: 'bg-slate-400 text-white', textColor: 'text-slate-500', borderColor: 'border-slate-300' }
+};
+
+// Risk category display names (shortened for chips)
+const RISK_CATEGORY_LABELS = {
+  SUPPLY_SHORTAGE: 'Supply Shortage',
+  LEAD_TIME_VOLATILITY: 'Lead Time',
+  PRICE_VOLATILITY: 'Price Risk',
+  EOL_LIFECYCLE: 'EOL/Lifecycle',
+  BOM_CHANGE_COMPATIBILITY: 'BOM Change',
+  TARIFF_TRADE_POLICY: 'Tariff/Trade',
+  EXPORT_CONTROLS_SANCTIONS: 'Export Controls',
+  GEOPOLITICAL_CONFLICT: 'Geopolitical',
+  LOGISTICS_SHIPPING_DISRUPTION: 'Logistics',
+  FACTORY_FAB_OUTAGE: 'Factory Outage',
+  QUALITY_COUNTERFEIT: 'Quality/Counterfeit',
+  SUPPLIER_FINANCIAL_RISK: 'Supplier Risk',
+  REGULATORY_COMPLIANCE: 'Regulatory',
+  CYBER_SECURITY_OPERATIONAL: 'Cyber Security',
+  DEMAND_SHOCK: 'Demand Shock'
+};
 
 const MarketIntelligencePage = () => {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedTopics, setSelectedTopics] = useState([]);
+  const [selectedRiskCategories, setSelectedRiskCategories] = useState([]);
+  const [sortBy, setSortBy] = useState('newest'); // 'newest' or 'risk'
   const [visibleCount, setVisibleCount] = useState(10);
   const [activeTab, setActiveTab] = useState('recent');
+  const [riskCategoryCounts, setRiskCategoryCounts] = useState({});
 
   const API_URL = process.env.REACT_APP_BACKEND_URL;
 
   useEffect(() => {
     fetchNews();
+    fetchRiskCategories();
   }, []);
+
+  const fetchRiskCategories = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/news/risk-categories`);
+      const data = await response.json();
+      setRiskCategoryCounts(data.categories || {});
+    } catch (error) {
+      console.error('Error fetching risk categories:', error);
+    }
+  };
 
   const fetchNews = async () => {
     try {
