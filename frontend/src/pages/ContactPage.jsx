@@ -415,23 +415,31 @@ const SupplierForm = () => {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="regionsServed">Regions Served</Label>
-        <Select
-          value={formData.regionsServed}
-          onValueChange={(value) => handleSelectChange('regionsServed', value)}
-        >
-          <SelectTrigger className="h-12">
-            <SelectValue placeholder="Select regions" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="global">Global</SelectItem>
-            <SelectItem value="asia">Asia Pacific</SelectItem>
-            <SelectItem value="americas">Americas</SelectItem>
-            <SelectItem value="europe">Europe</SelectItem>
-            <SelectItem value="asia-americas">Asia + Americas</SelectItem>
-            <SelectItem value="asia-europe">Asia + Europe</SelectItem>
-          </SelectContent>
-        </Select>
+        <Label>Regions Served * <span className="text-slate-500 font-normal">(Select all that apply)</span></Label>
+        <div className="grid grid-cols-3 gap-3 mt-2">
+          {[
+            { value: 'asia-pacific', label: 'Asia Pacific' },
+            { value: 'americas', label: 'Americas' },
+            { value: 'europe', label: 'Europe' }
+          ].map((region) => (
+            <label
+              key={region.value}
+              className={`flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                formData.regionsServed.includes(region.value)
+                  ? 'border-emerald-500 bg-emerald-50'
+                  : 'border-slate-200 hover:border-slate-300'
+              }`}
+            >
+              <input
+                type="checkbox"
+                checked={formData.regionsServed.includes(region.value)}
+                onChange={() => handleRegionToggle(region.value)}
+                className="w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500"
+              />
+              <span className="text-sm text-slate-700">{region.label}</span>
+            </label>
+          ))}
+        </div>
       </div>
 
       <div className="space-y-2">
