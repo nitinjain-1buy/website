@@ -72,8 +72,8 @@ class SupplierRequestCreate(BaseModel):
     email: EmailStr
     phone: Optional[str] = None
     website: Optional[str] = None
-    productCategories: Optional[str] = None
-    regionsServed: Optional[str] = None
+    productCategories: Optional[List[str]] = None
+    regionsServed: Optional[List[str]] = None
     inventoryDescription: Optional[str] = None
 
 class SupplierRequest(BaseModel):
@@ -85,8 +85,8 @@ class SupplierRequest(BaseModel):
     email: str
     phone: Optional[str] = None
     website: Optional[str] = None
-    productCategories: Optional[str] = None
-    regionsServed: Optional[str] = None
+    productCategories: Optional[List[str]] = None
+    regionsServed: Optional[List[str]] = None
     inventoryDescription: Optional[str] = None
     status: str = "new"  # new, contacted, approved, rejected
     createdAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
