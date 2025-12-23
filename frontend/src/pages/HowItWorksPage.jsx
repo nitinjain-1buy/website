@@ -178,95 +178,81 @@ const HowItWorksPage = () => {
         </div>
       </section>
 
-      {/* Pilot Section - Dark background */}
-      <section className="py-24 bg-slate-900 relative overflow-hidden">
-        {/* Animated background effect */}
-        <div className="absolute inset-0">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-        </div>
-        
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Section Heading */}
-          <div className="text-center mb-12">
-            <Badge variant="outline" className="mb-4 text-emerald-400 border-emerald-400/50 bg-emerald-400/10">
-              Start Small
-            </Badge>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white">
-              What a pilot looks like
-            </h2>
-          </div>
-
-          <div className="grid lg:grid-cols-2 gap-12 items-start">
-            {/* White box with weeks content */}
-            <div className="bg-white rounded-2xl shadow-xl p-8 md:p-10">
+      {/* Pilot Section - Similar to Leadership section on About page */}
+      <section className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div>
+              <Badge variant="outline" className="mb-4 text-emerald-700 border-emerald-200 bg-emerald-50">
+                Start Small
+              </Badge>
+              <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-6">
+                What a pilot looks like
+              </h2>
               <p className="text-lg text-slate-600 mb-8 leading-relaxed">
                 We don&apos;t ask for commitment upfront. Start with 10-30 parts, see measurable results, then decide to scale.
               </p>
 
-              <div className="space-y-6">
-                <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                    <Upload className="h-6 w-6 text-emerald-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-slate-900">Week 1: Data Onboarding</h4>
-                    <p className="text-slate-600">Upload sample BOM data (10-30 parts)</p>
-                  </div>
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3">
+                  <Upload className="h-6 w-6 text-emerald-600" />
+                  <span className="text-slate-700"><strong>Week 1:</strong> Data Onboarding — Upload sample BOM data (10-30 parts)</span>
                 </div>
-
-                <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                    <BarChart3 className="h-6 w-6 text-emerald-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-slate-900">Week 2: Analysis</h4>
-                    <p className="text-slate-600">Receive detailed savings and risk report</p>
-                  </div>
+                <div className="flex items-center space-x-3">
+                  <BarChart3 className="h-6 w-6 text-emerald-600" />
+                  <span className="text-slate-700"><strong>Week 2:</strong> Analysis — Receive detailed savings and risk report</span>
                 </div>
-
-                <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                    <Monitor className="h-6 w-6 text-emerald-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-slate-900">Week 3: Review</h4>
-                    <p className="text-slate-600">Walk through findings with our team</p>
-                  </div>
+                <div className="flex items-center space-x-3">
+                  <Monitor className="h-6 w-6 text-emerald-600" />
+                  <span className="text-slate-700"><strong>Week 3:</strong> Review — Walk through findings with our team</span>
                 </div>
-
-                <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                    <RefreshCw className="h-6 w-6 text-emerald-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-slate-900">Week 4+: Decide</h4>
-                    <p className="text-slate-600">Scale up based on proven ROI</p>
-                  </div>
+                <div className="flex items-center space-x-3">
+                  <RefreshCw className="h-6 w-6 text-emerald-600" />
+                  <span className="text-slate-700"><strong>Week 4+:</strong> Decide — Scale up based on proven ROI</span>
                 </div>
               </div>
             </div>
 
-            {/* Typical Pilot Results */}
-            <div>
-              <div className="bg-white rounded-2xl shadow-xl p-8 md:p-10">
-                <h3 className="text-2xl font-bold text-slate-900 mb-6">Typical Pilot Results</h3>
-                <div className="space-y-6">
-                  <div className="bg-slate-50 rounded-lg p-4">
-                    <div className="text-3xl font-bold text-emerald-600 mb-1">$14.77M</div>
-                    <div className="text-slate-600">Potential savings identified</div>
+            <div className="bg-slate-900 rounded-2xl p-8 lg:p-12">
+              <h3 className="text-2xl font-bold text-white mb-6">Typical Pilot Results</h3>
+              <div className="space-y-6">
+                <div className="flex items-start space-x-4">
+                  <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center flex-shrink-0 text-sm font-bold">
+                    1
                   </div>
-                  <div className="bg-slate-50 rounded-lg p-4">
-                    <div className="text-3xl font-bold text-emerald-600 mb-1">15-20%</div>
-                    <div className="text-slate-600">Average savings on analyzed parts</div>
+                  <div>
+                    <h4 className="font-semibold text-white text-2xl">$14.77M</h4>
+                    <p className="text-slate-400">Potential savings identified</p>
                   </div>
-                  <div className="bg-slate-50 rounded-lg p-4">
-                    <div className="text-3xl font-bold text-emerald-600 mb-1">100%</div>
-                    <div className="text-slate-600">MPN match rate</div>
+                </div>
+
+                <div className="flex items-start space-x-4">
+                  <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center flex-shrink-0 text-sm font-bold">
+                    2
                   </div>
-                  <div className="bg-slate-50 rounded-lg p-4">
-                    <div className="text-3xl font-bold text-emerald-600 mb-1">2 Weeks</div>
-                    <div className="text-slate-600">Time to initial results</div>
+                  <div>
+                    <h4 className="font-semibold text-white text-2xl">15-20%</h4>
+                    <p className="text-slate-400">Average savings on analyzed parts</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4">
+                  <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center flex-shrink-0 text-sm font-bold">
+                    3
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-white text-2xl">100%</h4>
+                    <p className="text-slate-400">MPN match rate</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4">
+                  <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center flex-shrink-0 text-sm font-bold">
+                    4
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-white text-2xl">2 Weeks</h4>
+                    <p className="text-slate-400">Time to initial results</p>
                   </div>
                 </div>
               </div>
