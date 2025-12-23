@@ -204,13 +204,17 @@ const ProductsPage = () => {
       })}
 
       {/* Integration Section */}
-      <section className="py-24 bg-slate-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-24 relative overflow-hidden bg-slate-50">
+        {/* Electronic Components Watermark Background */}
+        <ElectronicComponentsPattern />
+        <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
               Seamless integration with your workflows
             </h2>
-            <p className="text-xl text-slate-300 max-w-2xl mx-auto">
+            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
               Connect 1Buy.AI to your existing ERP, PLM, and procurement systems.
             </p>
           </div>
@@ -221,10 +225,10 @@ const ProductsPage = () => {
               { title: 'PLM Connectivity', description: 'Altium, Cadence, and design tool integration' },
               { title: 'API Access', description: 'RESTful APIs for custom workflows' }
             ].map((item, index) => (
-              <Card key={index} className="bg-slate-800 border-slate-700">
+              <Card key={index} className="bg-white border-slate-200 shadow-lg">
                 <CardContent className="p-6 text-center">
-                  <h3 className="text-xl font-semibold text-white mb-2">{item.title}</h3>
-                  <p className="text-slate-400">{item.description}</p>
+                  <h3 className="text-xl font-semibold text-slate-900 mb-2">{item.title}</h3>
+                  <p className="text-slate-600">{item.description}</p>
                 </CardContent>
               </Card>
             ))}
