@@ -1129,6 +1129,225 @@ if not ADMIN_PASSWORD:
     logger.warning("ADMIN_PASSWORD not set in environment variables. Using default for development only.")
     ADMIN_PASSWORD = "admin@123"  # Only used if env var not set
 
+# SerpAPI Key
+SERPAPI_KEY = os.environ.get("SERPAPI_KEY", "")
+
+# News Models
+class NewsSource(BaseModel):
+    name: str
+    icon: Optional[str] = None
+    authors: Optional[List[str]] = None
+
+class NewsArticle(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    position: int
+    title: str
+    source: NewsSource
+    link: str
+    thumbnail: Optional[str] = None
+    thumbnail_small: Optional[str] = None
+    date: Optional[str] = None
+    iso_date: Optional[str] = None
+    query: str  # Which search query this came from
+    fetchedAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    isHidden: bool = False
+
+class NewsQuery(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    query: str
+    isActive: bool = True
+    createdAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class NewsQueryCreate(BaseModel):
+    query: str
+    isActive: bool = True
+
+class NewsFetchLog(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    query: str
+    articlesCount: int
+    status: str  # success, error
+    errorMessage: Optional[str] = None
+    fetchedAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+# News fetching function
+async def fetch_news_from_serpapi(query: str) -> List[dict]:
+    """Fetch news from SerpAPI for a given query"""
+    if not SERPAPI_KEY:
+        logger.error("SERPAPI_KEY not configured")
+        return []
+    
+    url = f"https://serpapi.com/search?api_key={SERPAPI_KEY}&engine=google_news&gl=us&q={query.replace(' ', '+')}"
+    
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.get(url)
+            response.raise_for_status()
+            data = response.json()
+            
+            news_results = data.get("news_results", [])
+            logger.info(f"Fetched {len(news_results)} articles for query: {query}")
+            return news_results
+    except Exception as e:
+        logger.error(f"Error fetching news for query '{query}': {str(e)}")
+        return []
+
+async def fetch_and_store_all_news():
+    """Fetch news for all active queries and store in database"""
+    logger.info("Starting scheduled news fetch...")
+    
+    try:
+        # Get all active queries
+        queries = await db.news_queries.find({"isActive": True}, {"_id": 0}).to_list(100)
+        
+        # If no queries, use default
+        if not queries:
+            queries = [{"query": "electronics parts", "isActive": True}]
+        
+        total_articles = 0
+        for q in queries:
+            query_text = q["query"]
+            articles = await fetch_news_from_serpapi(query_text)
+            
+            # Store articles
+            for article in articles:
+                news_doc = {
+                    "id": str(uuid.uuid4()),
+                    "position": article.get("position", 0),
+                    "title": article.get("title", ""),
+                    "source": article.get("source", {}),
+                    "link": article.get("link", ""),
+                    "thumbnail": article.get("thumbnail"),
+                    "thumbnail_small": article.get("thumbnail_small"),
+                    "date": article.get("date"),
+                    "iso_date": article.get("iso_date"),
+                    "query": query_text,
+                    "fetchedAt": datetime.now(timezone.utc).isoformat(),
+                    "isHidden": False
+                }
+                
+                # Upsert by link to avoid duplicates
+                await db.news_articles.update_one(
+                    {"link": news_doc["link"]},
+                    {"$set": news_doc},
+                    upsert=True
+                )
+                total_articles += 1
+            
+            # Log the fetch
+            log_doc = {
+                "id": str(uuid.uuid4()),
+                "query": query_text,
+                "articlesCount": len(articles),
+                "status": "success" if articles else "no_results",
+                "fetchedAt": datetime.now(timezone.utc).isoformat()
+            }
+            await db.news_fetch_logs.insert_one(log_doc)
+        
+        logger.info(f"Scheduled news fetch complete. Stored/updated {total_articles} articles.")
+    except Exception as e:
+        logger.error(f"Error in scheduled news fetch: {str(e)}")
+
+# Scheduler setup
+scheduler = AsyncIOScheduler()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    scheduler.add_job(fetch_and_store_all_news, 'interval', hours=5, id='news_fetch_job')
+    scheduler.start()
+    logger.info("News scheduler started - will fetch every 5 hours")
+    
+    # Run initial fetch on startup
+    await fetch_and_store_all_news()
+    
+    yield
+    
+    # Shutdown
+    scheduler.shutdown()
+    client.close()
+
+# News API Endpoints
+@api_router.get("/news", response_model=List[dict])
+async def get_news(limit: int = 50, query: Optional[str] = None):
+    """Get stored news articles"""
+    filter_query = {"isHidden": False}
+    if query:
+        filter_query["query"] = query
+    
+    articles = await db.news_articles.find(
+        filter_query, 
+        {"_id": 0}
+    ).sort("fetchedAt", -1).limit(limit).to_list(limit)
+    
+    return articles
+
+@api_router.get("/news/queries", response_model=List[dict])
+async def get_news_queries():
+    """Get all news search queries"""
+    queries = await db.news_queries.find({}, {"_id": 0}).to_list(100)
+    return queries
+
+@api_router.post("/news/queries", response_model=dict)
+async def create_news_query(query_data: NewsQueryCreate):
+    """Create a new news search query"""
+    query_doc = {
+        "id": str(uuid.uuid4()),
+        "query": query_data.query,
+        "isActive": query_data.isActive,
+        "createdAt": datetime.now(timezone.utc).isoformat()
+    }
+    await db.news_queries.insert_one(query_doc)
+    return {k: v for k, v in query_doc.items() if k != "_id"}
+
+@api_router.patch("/news/queries/{query_id}")
+async def update_news_query(query_id: str, isActive: bool):
+    """Toggle news query active status"""
+    result = await db.news_queries.update_one(
+        {"id": query_id},
+        {"$set": {"isActive": isActive}}
+    )
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Query not found")
+    return {"success": True}
+
+@api_router.delete("/news/queries/{query_id}")
+async def delete_news_query(query_id: str):
+    """Delete a news search query"""
+    result = await db.news_queries.delete_one({"id": query_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Query not found")
+    return {"success": True}
+
+@api_router.post("/news/refresh")
+async def refresh_news():
+    """Manually trigger news fetch"""
+    await fetch_and_store_all_news()
+    return {"success": True, "message": "News refresh triggered"}
+
+@api_router.patch("/news/{article_id}/hide")
+async def toggle_article_visibility(article_id: str, isHidden: bool):
+    """Hide or unhide a news article"""
+    result = await db.news_articles.update_one(
+        {"id": article_id},
+        {"$set": {"isHidden": isHidden}}
+    )
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Article not found")
+    return {"success": True}
+
+@api_router.get("/news/logs", response_model=List[dict])
+async def get_news_fetch_logs(limit: int = 20):
+    """Get news fetch logs"""
+    logs = await db.news_fetch_logs.find({}, {"_id": 0}).sort("fetchedAt", -1).limit(limit).to_list(limit)
+    return logs
+
 class AdminLoginRequest(BaseModel):
     password: str
 
