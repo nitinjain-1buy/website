@@ -578,6 +578,11 @@ async def fetch_mediastack_news():
         logger.info(f"[MediaStack] Total new articles stored: {total_new_articles}")
         logger.info("=" * 60)
         
+        # Trigger background scraping for new articles
+        if total_new_articles > 0:
+            logger.info("[Scraper] Starting background scraping for MediaStack articles...")
+            asyncio.create_task(scrape_unscraped_articles(limit=total_new_articles + 10))
+        
     except Exception as e:
         logger.error(f"[MediaStack] Error in weekly news fetch: {str(e)}")
 
