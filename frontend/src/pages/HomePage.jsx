@@ -330,7 +330,7 @@ const HomePage = () => {
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimatedSection animation="fade-up" className="text-center mb-16">
-            <Badge variant="outline" className="mb-4 text-slate-600 border-slate-300">
+            <Badge variant="outline" className="mb-4 text-emerald-700 border-emerald-200 bg-emerald-50">
               The Problem
             </Badge>
             <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
