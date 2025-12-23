@@ -472,6 +472,11 @@ async def fetch_and_store_all_news():
         logger.info(f"Total new articles stored: {total_new_articles}")
         logger.info("=" * 60)
         
+        # Trigger background scraping for new articles
+        if total_new_articles > 0:
+            logger.info("[Scraper] Starting background scraping for new articles...")
+            asyncio.create_task(scrape_unscraped_articles(limit=total_new_articles + 20))
+        
     except Exception as e:
         logger.error(f"Error in scheduled news fetch: {str(e)}")
 
