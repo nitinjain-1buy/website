@@ -1739,18 +1739,26 @@ const NewsManager = ({ isLoading: parentLoading, onRefresh }) => {
                 <p className="text-xs text-indigo-600 font-medium">CONTENT SCRAPING</p>
                 <p className="text-lg font-bold text-indigo-900">{scrapeStats.scrapeRate}% Complete</p>
               </div>
-              <div className="flex gap-6 text-sm">
+              <div className="flex gap-4 text-sm flex-wrap">
                 <div>
-                  <span className="text-indigo-600">Scraped:</span>
-                  <span className="ml-1 font-semibold text-indigo-900">{scrapeStats.scraped}</span>
+                  <span className="text-emerald-600">Scraped:</span>
+                  <span className="ml-1 font-semibold text-emerald-700">{scrapeStats.scraped}</span>
                 </div>
                 <div>
                   <span className="text-indigo-600">Pending:</span>
-                  <span className="ml-1 font-semibold text-indigo-900">{scrapeStats.unscraped}</span>
+                  <span className="ml-1 font-semibold text-indigo-900">{scrapeStats.pending}</span>
                 </div>
                 <div>
-                  <span className="text-indigo-600">Failed:</span>
-                  <span className="ml-1 font-semibold text-amber-600">{scrapeStats.failed}</span>
+                  <span className="text-slate-500">Paywall:</span>
+                  <span className="ml-1 font-semibold text-slate-600">{scrapeStats.permanentFailures || 0}</span>
+                </div>
+                <div>
+                  <span className="text-amber-600">Retryable:</span>
+                  <span className="ml-1 font-semibold text-amber-600">{scrapeStats.retryableFailures || 0}</span>
+                </div>
+                <div>
+                  <span className="text-red-500">Other Errors:</span>
+                  <span className="ml-1 font-semibold text-red-600">{scrapeStats.otherFailures || 0}</span>
                 </div>
               </div>
             </div>
