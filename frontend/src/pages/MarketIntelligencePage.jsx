@@ -598,10 +598,10 @@ const MarketIntelligencePage = () => {
                 </Badge>
               </div>
 
-              {/* Featured Article (only for recent, first load, no topic filter) */}
-              {activeTab === 'recent' && visibleArticles[0] && selectedTopics.length === 0 && (
+              {/* Featured Article (highest risk from last week, only for recent tab with no filters) */}
+              {activeTab === 'recent' && featuredArticle && selectedTopics.length === 0 && selectedRiskCategories.length === 0 && (
                 <a 
-                  href={visibleArticles[0].link} 
+                  href={featuredArticle.link} 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="block group mb-8"
@@ -609,10 +609,10 @@ const MarketIntelligencePage = () => {
                   <Card className="overflow-hidden hover:shadow-2xl transition-all duration-300 border-0 shadow-lg bg-gradient-to-r from-slate-900 to-slate-800">
                     <div className="grid md:grid-cols-2 gap-0">
                       <div className="relative h-64 md:h-80 bg-slate-700">
-                        {visibleArticles[0].thumbnail ? (
+                        {featuredArticle.thumbnail ? (
                           <img 
-                            src={visibleArticles[0].thumbnail} 
-                            alt={visibleArticles[0].title}
+                            src={featuredArticle.thumbnail} 
+                            alt={featuredArticle.title}
                             className="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
                           />
                         ) : (
@@ -620,34 +620,38 @@ const MarketIntelligencePage = () => {
                             <Newspaper className="w-20 h-20 text-white/30" />
                           </div>
                         )}
-                        <div className="absolute top-4 left-4">
+                        <div className="absolute top-4 left-4 flex gap-2">
                           <Badge className="bg-emerald-500 text-white border-0">
                             <Sparkles className="w-3 h-3 mr-1" />
                             Featured
+                          </Badge>
+                          <Badge className="bg-red-500/90 text-white border-0">
+                            <AlertTriangle className="w-3 h-3 mr-1" />
+                            Highest Risk This Week
                           </Badge>
                         </div>
                       </div>
                       <CardContent className="p-8 flex flex-col justify-center bg-white">
                         <div className="flex items-start justify-between gap-3 mb-3">
                           <Badge variant="outline" className="w-fit text-emerald-600 border-emerald-200">
-                            {getArticleQueries(visibleArticles[0])[0]}
+                            {getArticleQueries(featuredArticle)[0]}
                           </Badge>
-                          {visibleArticles[0].risk_band && (
-                            <Badge className={`${RISK_BAND_CONFIG[visibleArticles[0].risk_band]?.color || 'bg-slate-400 text-white'} text-sm font-bold px-3 py-1`}>
-                              {visibleArticles[0].risk_band} • {visibleArticles[0].risk_score || 0}
+                          {featuredArticle.risk_band && (
+                            <Badge className={`${RISK_BAND_CONFIG[featuredArticle.risk_band]?.color || 'bg-slate-400 text-white'} text-sm font-bold px-3 py-1`}>
+                              {featuredArticle.risk_band} • {featuredArticle.risk_score || 0}
                             </Badge>
                           )}
                         </div>
                         <h2 className="text-2xl font-bold text-slate-900 mb-3 group-hover:text-emerald-600 transition-colors line-clamp-3">
-                          {visibleArticles[0].title}
+                          {featuredArticle.title}
                         </h2>
                         
                         {/* Risk Categories for Featured */}
-                        {visibleArticles[0].risk_categories && visibleArticles[0].risk_categories.length > 0 && (
+                        {featuredArticle.risk_categories && featuredArticle.risk_categories.length > 0 && (
                           <div className="flex flex-wrap gap-1.5 mb-3">
                             {(() => {
-                              const categoryStrength = visibleArticles[0].category_strength || {};
-                              const sortedCategories = [...visibleArticles[0].risk_categories]
+                              const categoryStrength = featuredArticle.category_strength || {};
+                              const sortedCategories = [...featuredArticle.risk_categories]
                                 .sort((a, b) => (categoryStrength[b] || 0) - (categoryStrength[a] || 0))
                                 .slice(0, 3);
                               return sortedCategories.map((cat, idx) => (
@@ -660,28 +664,28 @@ const MarketIntelligencePage = () => {
                         )}
                         
                         {/* Horizon & Confidence for Featured */}
-                        {visibleArticles[0].risk_band && visibleArticles[0].risk_band !== 'LOW' && (
+                        {featuredArticle.risk_band && featuredArticle.risk_band !== 'LOW' && (
                           <div className="text-sm text-slate-500 mb-3">
-                            <span className="font-medium">Horizon:</span> {visibleArticles[0].time_horizon?.replace(/_/g, ' ') || 'N/A'} • 
-                            <span className="font-medium ml-1">Confidence:</span> {visibleArticles[0].confidence || 0}
+                            <span className="font-medium">Horizon:</span> {featuredArticle.time_horizon?.replace(/_/g, ' ') || 'N/A'} • 
+                            <span className="font-medium ml-1">Confidence:</span> {featuredArticle.confidence || 0}
                           </div>
                         )}
                         
                         <div className="flex items-center gap-4 text-sm text-slate-500 mb-4">
                           <div className="flex items-center gap-2">
-                            {visibleArticles[0].source?.icon && (
+                            {featuredArticle.source?.icon && (
                               <img 
-                                src={visibleArticles[0].source.icon} 
-                                alt={visibleArticles[0].source.name}
+                                src={featuredArticle.source.icon} 
+                                alt={featuredArticle.source.name}
                                 className="w-5 h-5 rounded"
                               />
                             )}
-                            <span className="font-medium">{visibleArticles[0].source?.name}</span>
+                            <span className="font-medium">{featuredArticle.source?.name}</span>
                           </div>
                           <span>•</span>
                           <div className="flex items-center gap-1">
                             <Clock className="w-4 h-4" />
-                            <span>{formatDate(visibleArticles[0].iso_date)}</span>
+                            <span>{formatDate(featuredArticle.iso_date)}</span>
                           </div>
                         </div>
                         <div className="flex items-center text-emerald-600 font-semibold group-hover:gap-3 transition-all">
@@ -696,7 +700,7 @@ const MarketIntelligencePage = () => {
 
               {/* News Grid */}
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {visibleArticles.slice(activeTab === 'recent' && selectedTopics.length === 0 ? 1 : 0).map((article, index) => (
+                {gridArticles.map((article, index) => (
                   <a 
                     key={article.id || article.link || index}
                     href={article.link} 
