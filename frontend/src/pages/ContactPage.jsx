@@ -263,6 +263,17 @@ const SupplierForm = () => {
     });
   };
 
+  const handleRegionToggle = (region) => {
+    setFormData(prev => {
+      const currentRegions = prev.regionsServed;
+      if (currentRegions.includes(region)) {
+        return { ...prev, regionsServed: currentRegions.filter(r => r !== region) };
+      } else {
+        return { ...prev, regionsServed: [...currentRegions, region] };
+      }
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
