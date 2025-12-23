@@ -203,18 +203,14 @@ const ProductsPage = () => {
         );
       })}
 
-      {/* Integration Section */}
-      <section className="py-24 relative overflow-hidden bg-slate-50">
-        {/* Electronic Components Watermark Background */}
-        <ElectronicComponentsPattern />
-        <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
-        
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Integration Section - Dark background */}
+      <section className="py-24 bg-slate-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
               Seamless integration with your workflows
             </h2>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+            <p className="text-xl text-slate-300 max-w-2xl mx-auto">
               Connect 1Buy.AI to your existing ERP, PLM, and procurement systems.
             </p>
           </div>
@@ -225,10 +221,10 @@ const ProductsPage = () => {
               { title: 'PLM Connectivity', description: 'Altium, Cadence, and design tool integration' },
               { title: 'API Access', description: 'RESTful APIs for custom workflows' }
             ].map((item, index) => (
-              <Card key={index} className="bg-white border-slate-200 shadow-lg">
+              <Card key={index} className="bg-slate-800 border-slate-700">
                 <CardContent className="p-6 text-center">
-                  <h3 className="text-xl font-semibold text-slate-900 mb-2">{item.title}</h3>
-                  <p className="text-slate-600">{item.description}</p>
+                  <h3 className="text-xl font-semibold text-white mb-2">{item.title}</h3>
+                  <p className="text-slate-400">{item.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -236,21 +232,36 @@ const ProductsPage = () => {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
+      {/* CTA - Electronic components background with white box */}
+      <section className="py-24 relative overflow-hidden bg-slate-50">
+        {/* Electronic Components Watermark Background */}
+        <ElectronicComponentsPattern />
+        <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-8">
             Start with your BOM
           </h2>
-          <p className="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
-            See how 1Buy.AI can identify savings and reduce risk for your organization.
-          </p>
-          <Link to="/contact">
-            <Button size="lg" className="bg-slate-900 hover:bg-slate-800 px-8 h-12">
-              Request a Demo
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </Link>
+          
+          {/* White box container */}
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-300 p-8 md:p-12 max-w-3xl mx-auto">
+            <p className="text-xl text-slate-600 mb-8">
+              See how 1Buy.AI can identify savings and reduce risk for your organization.
+            </p>
+            <div className="flex justify-center">
+              <Link to="/contact">
+                <Button 
+                  size="lg" 
+                  className="bg-slate-900 hover:bg-slate-800 text-white px-8 h-12 relative overflow-hidden group transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-slate-900/30"
+                >
+                  <span className="relative z-10 flex items-center">
+                    Request a Demo
+                    <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                  </span>
+                </Button>
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
     </div>
