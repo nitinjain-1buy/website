@@ -621,6 +621,152 @@ async def fetch_and_store_all_news():
         logger.error(f"Error in scheduled news fetch: {str(e)}")
 
 
+async def fetch_news_for_single_query(query_text: str):
+    """Fetch news for a single query from SerpAPI and GDELT (used when new query is added)"""
+    logger.info("=" * 60)
+    logger.info(f"[SingleQuery] Fetching news for new query: '{query_text}'")
+    logger.info("=" * 60)
+    
+    try:
+        # Get existing URLs for duplicate detection
+        global_seen_urls = set()
+        existing_articles = await db.news_articles.find({}, {"link": 1, "_id": 0}).to_list(10000)
+        for article in existing_articles:
+            if article.get("link"):
+                global_seen_urls.add(normalize_url(article["link"]))
+        
+        total_new_articles = 0
+        query_seen_urls = set()
+        
+        # ========== SERPAPI ==========
+        serpapi_articles = await fetch_news_from_serpapi(query_text)
+        serpapi_new = 0
+        serpapi_existing_updated = 0
+        
+        for article in serpapi_articles:
+            link = article.get("link", "")
+            if not link:
+                continue
+            
+            normalized_link = normalize_url(link)
+            
+            if normalized_link in query_seen_urls:
+                continue
+            
+            query_seen_urls.add(normalized_link)
+            
+            if normalized_link in global_seen_urls:
+                # Article exists - add query to its queries array
+                await db.news_articles.update_one(
+                    {"link": {"$regex": f"^{re.escape(link[:50])}", "$options": "i"}},
+                    {"$addToSet": {"queries": query_text}}
+                )
+                serpapi_existing_updated += 1
+            else:
+                # New article
+                article_doc = {
+                    "id": str(uuid.uuid4()),
+                    "position": article.get("position", 0),
+                    "title": article.get("title", ""),
+                    "source": article.get("source", {}),
+                    "link": link,
+                    "thumbnail": article.get("thumbnail"),
+                    "thumbnail_small": article.get("thumbnail_small"),
+                    "date": article.get("date"),
+                    "iso_date": article.get("iso_date"),
+                    "queries": [query_text],
+                    "apiSource": "SerpAPI",
+                    "fetchedAt": datetime.now(timezone.utc).isoformat(),
+                    "isHidden": False
+                }
+                await db.news_articles.insert_one(article_doc)
+                global_seen_urls.add(normalized_link)
+                serpapi_new += 1
+                total_new_articles += 1
+        
+        logger.info(f"[SerpAPI] Query '{query_text}': {len(serpapi_articles)} found, {serpapi_new} new, {serpapi_existing_updated} existing updated")
+        
+        # ========== GDELT ==========
+        gdelt_articles = await fetch_news_from_gdelt(query_text)
+        gdelt_new = 0
+        gdelt_existing_updated = 0
+        
+        for article in gdelt_articles:
+            link = article.get("url", "")
+            if not link:
+                continue
+            
+            normalized_link = normalize_url(link)
+            
+            if normalized_link in query_seen_urls:
+                continue
+            
+            query_seen_urls.add(normalized_link)
+            
+            if normalized_link in global_seen_urls:
+                await db.news_articles.update_one(
+                    {"link": {"$regex": f"^{re.escape(link[:50])}", "$options": "i"}},
+                    {"$addToSet": {"queries": query_text}}
+                )
+                gdelt_existing_updated += 1
+            else:
+                # Parse GDELT date format
+                iso_date = None
+                gdelt_date = article.get("seendate", "")
+                if gdelt_date:
+                    try:
+                        dt = datetime.strptime(gdelt_date, "%Y%m%dT%H%M%SZ")
+                        iso_date = dt.replace(tzinfo=timezone.utc).isoformat()
+                    except:
+                        pass
+                
+                article_doc = {
+                    "id": str(uuid.uuid4()),
+                    "position": 0,
+                    "title": article.get("title", ""),
+                    "source": {"name": article.get("domain", ""), "icon": None},
+                    "link": link,
+                    "thumbnail": article.get("socialimage"),
+                    "thumbnail_small": article.get("socialimage"),
+                    "date": gdelt_date,
+                    "iso_date": iso_date,
+                    "queries": [query_text],
+                    "apiSource": "GDELT",
+                    "fetchedAt": datetime.now(timezone.utc).isoformat(),
+                    "isHidden": False
+                }
+                await db.news_articles.insert_one(article_doc)
+                global_seen_urls.add(normalized_link)
+                gdelt_new += 1
+                total_new_articles += 1
+        
+        logger.info(f"[GDELT] Query '{query_text}': {len(gdelt_articles)} found, {gdelt_new} new, {gdelt_existing_updated} existing updated")
+        
+        # Log fetch to news_fetch_logs
+        log_entry = {
+            "id": str(uuid.uuid4()),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "queriesProcessed": 1,
+            "articlesFound": len(serpapi_articles) + len(gdelt_articles),
+            "newArticlesStored": total_new_articles,
+            "api": "SerpAPI+GDELT (New Query)",
+            "status": "success"
+        }
+        await db.news_fetch_logs.insert_one(log_entry)
+        
+        logger.info("=" * 60)
+        logger.info(f"[SingleQuery] Complete! New articles stored: {total_new_articles}")
+        logger.info("=" * 60)
+        
+        # Trigger scraping for new articles
+        if total_new_articles > 0:
+            logger.info("[Scraper] Starting background scraping for new articles...")
+            asyncio.create_task(scrape_unscraped_articles(limit=total_new_articles + 10))
+        
+    except Exception as e:
+        logger.error(f"[SingleQuery] Error fetching news for query '{query_text}': {str(e)}")
+
+
 async def fetch_mediastack_news():
     """Fetch news from MediaStack API for all active queries (runs weekly due to rate limits)"""
     logger.info("=" * 60)
