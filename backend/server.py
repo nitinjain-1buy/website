@@ -2018,6 +2018,62 @@ async def get_scrape_stats():
         "scrapeRate": round((scraped / total * 100), 1) if total > 0 else 0
     }
 
+
+# ============== RISK ANALYSIS ENDPOINTS ==============
+
+@api_router.post("/news/compute-risk")
+async def trigger_risk_computation(limit: int = 500):
+    """Manually trigger risk computation for unanalyzed articles"""
+    asyncio.create_task(compute_risk_for_unanalyzed_articles(limit=limit))
+    return {"success": True, "message": f"Risk computation started for up to {limit} articles"}
+
+@api_router.get("/news/risk-stats", response_model=dict)
+async def get_risk_stats():
+    """Get risk analysis statistics"""
+    total = await db.news_articles.count_documents({})
+    analyzed = await db.news_articles.count_documents({"risk_score": {"$exists": True}})
+    unanalyzed = total - analyzed
+    
+    # Count by risk band
+    low = await db.news_articles.count_documents({"risk_band": "LOW"})
+    watch = await db.news_articles.count_documents({"risk_band": "WATCH"})
+    high = await db.news_articles.count_documents({"risk_band": "HIGH"})
+    critical = await db.news_articles.count_documents({"risk_band": "CRITICAL"})
+    
+    return {
+        "total": total,
+        "analyzed": analyzed,
+        "unanalyzed": unanalyzed,
+        "analysisRate": round((analyzed / total * 100), 1) if total > 0 else 0,
+        "byBand": {
+            "LOW": low,
+            "WATCH": watch,
+            "HIGH": high,
+            "CRITICAL": critical
+        }
+    }
+
+@api_router.get("/news/risk-categories", response_model=dict)
+async def get_risk_category_counts():
+    """Get counts of articles per risk category"""
+    category_counts = {}
+    
+    for category in RISK_CATEGORIES:
+        count = await db.news_articles.count_documents({
+            "risk_categories": category
+        })
+        category_counts[category] = count
+    
+    # Also get total with any risk category
+    with_risk = await db.news_articles.count_documents({
+        "risk_categories": {"$exists": True, "$ne": []}
+    })
+    
+    return {
+        "categories": category_counts,
+        "totalWithRisk": with_risk
+    }
+
 @api_router.get("/news/{article_id}/content", response_model=dict)
 async def get_article_content(article_id: str):
     """Get full scraped content for an article"""
