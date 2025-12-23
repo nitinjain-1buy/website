@@ -58,7 +58,9 @@ class DemoRequest(BaseModel):
     company: str
     title: Optional[str] = None
     companySize: Optional[str] = None
-    interest: Optional[str] = None
+    interest: Optional[List[str]] = None
+    factoryLocations: Optional[List[str]] = None
+    headOfficeLocation: Optional[List[str]] = None
     message: Optional[str] = None
     status: str = "new"  # new, contacted, converted, closed
     createdAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
