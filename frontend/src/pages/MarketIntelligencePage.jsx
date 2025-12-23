@@ -32,7 +32,7 @@ const MarketIntelligencePage = () => {
   const fetchNews = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/api/news?limit=200`);
+      const response = await fetch(`${API_URL}/api/news?limit=2000`);
       const data = await response.json();
       
       // Sort by date (most recent first)
