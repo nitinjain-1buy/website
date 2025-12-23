@@ -60,7 +60,8 @@ import {
   GitBranch,
   Newspaper,
   Search,
-  ExternalLink
+  ExternalLink,
+  FileText
 } from 'lucide-react';
 import { logoUrl } from '../data/mock';
 import MapLocationEditor from '../components/MapLocationEditor';
