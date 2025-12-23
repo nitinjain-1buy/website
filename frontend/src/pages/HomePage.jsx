@@ -486,9 +486,10 @@ const HomePage = () => {
       {/* Global Network Map */}
       <GlobalNetworkMap />
 
-      {/* Mental Model Section */}
-      <section className="py-24 bg-white overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Mental Model Section - semi-transparent to show pattern */}
+      <section className="py-24 overflow-hidden relative">
+        <div className="absolute inset-0 bg-white/90" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <AnimatedSection animation="zoom-in" className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-8">
               Think of it as
