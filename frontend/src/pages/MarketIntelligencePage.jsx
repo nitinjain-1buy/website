@@ -241,13 +241,15 @@ const MarketIntelligencePage = () => {
   const visibleArticles = displayArticles.slice(0, visibleCount);
   const hasMore = visibleCount < displayArticles.length;
 
-  // Priority risk categories for featured article selection
-  const PRIORITY_RISK_CATEGORIES = [
-    'SUPPLY_SHORTAGE',
-    'GEOPOLITICAL_CONFLICT', 
-    'TARIFF_TRADE_POLICY',
-    'FACTORY_FAB_OUTAGE'
-  ];
+  // Priority risk categories for featured article selection (in order of importance)
+  // Higher weight = higher priority
+  const PRIORITY_RISK_CATEGORIES = {
+    'SUPPLY_SHORTAGE': 100,        // Highest priority
+    'TARIFF_TRADE_POLICY': 80,     // 2nd priority
+    'PRICE_VOLATILITY': 60,        // 3rd priority (Price Risk)
+    'FACTORY_FAB_OUTAGE': 40,      // 4th priority
+    'GEOPOLITICAL_CONFLICT': 20    // 5th priority
+  };
 
   // Get featured article: highest risk from the last 7 days, prioritizing key risk categories
   const featuredArticle = useMemo(() => {
@@ -265,23 +267,35 @@ const MarketIntelligencePage = () => {
       return recentArticles[0] || null;
     }
     
-    // First, try to find articles with priority risk categories
+    // Calculate priority score for an article based on which priority categories it has
+    const calculatePriorityScore = (article) => {
+      const categories = article.risk_categories || [];
+      let score = 0;
+      categories.forEach(cat => {
+        if (PRIORITY_RISK_CATEGORIES[cat]) {
+          score += PRIORITY_RISK_CATEGORIES[cat];
+        }
+      });
+      return score;
+    };
+    
+    // First, try to find articles with any priority risk categories
     const priorityArticles = lastWeekArticles.filter(article => {
       const categories = article.risk_categories || [];
-      return categories.some(cat => PRIORITY_RISK_CATEGORIES.includes(cat));
+      return categories.some(cat => PRIORITY_RISK_CATEGORIES[cat]);
     });
     
     // If we have priority articles, sort them by:
-    // 1. Number of priority categories (more is better)
+    // 1. Priority score (weighted sum of priority categories)
     // 2. Risk score (higher is better)
     // 3. Date (more recent is better)
     if (priorityArticles.length > 0) {
       const sorted = [...priorityArticles].sort((a, b) => {
-        const aCats = (a.risk_categories || []).filter(c => PRIORITY_RISK_CATEGORIES.includes(c)).length;
-        const bCats = (b.risk_categories || []).filter(c => PRIORITY_RISK_CATEGORIES.includes(c)).length;
+        const aPriorityScore = calculatePriorityScore(a);
+        const bPriorityScore = calculatePriorityScore(b);
         
-        // First: more priority categories wins
-        if (bCats !== aCats) return bCats - aCats;
+        // First: higher priority score wins
+        if (bPriorityScore !== aPriorityScore) return bPriorityScore - aPriorityScore;
         
         // Second: higher risk score wins
         const scoreDiff = (b.risk_score || 0) - (a.risk_score || 0);
