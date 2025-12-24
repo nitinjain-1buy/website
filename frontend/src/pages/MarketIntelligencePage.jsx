@@ -291,7 +291,8 @@ const MarketIntelligencePage = () => {
   // Get articles to display based on active tab
   const displayArticles = activeTab === 'recent' ? recentArticles : archivedArticles;
   const visibleArticles = displayArticles.slice(0, visibleCount);
-  const hasMore = visibleCount < displayArticles.length;
+  const hasMoreVisible = visibleCount < displayArticles.length;
+  const canLoadMore = hasMore || hasMoreVisible;
 
   // Priority risk categories for featured article selection (in order of importance)
   // Higher weight = higher priority
