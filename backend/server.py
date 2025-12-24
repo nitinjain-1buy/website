@@ -2098,8 +2098,9 @@ async def get_team_members():
 async def create_team_member(request: Request):
     """Create a new team member"""
     body = await request.json()
+    member_id = str(uuid.uuid4())
     member = {
-        "id": str(uuid.uuid4()),
+        "id": member_id,
         "name": body.get("name", ""),
         "role": body.get("role", ""),
         "bio": body.get("bio", ""),
@@ -2111,7 +2112,7 @@ async def create_team_member(request: Request):
         "order": body.get("order", 0)
     }
     await db.team_members.insert_one(member)
-    return member
+    return await db.team_members.find_one({"id": member_id}, {"_id": 0})
 
 @api_router.put("/team-members/{member_id}")
 async def update_team_member(member_id: str, request: Request):
