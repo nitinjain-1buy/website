@@ -525,7 +525,7 @@ const MarketIntelligencePage = () => {
                 className={`text-xs h-7 sm:h-8 px-2 sm:px-3 ${activeTab === 'recent' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}`}
               >
                 <Clock className="w-3 h-3 mr-1" />
-                ({recentArticles.length})
+                ({stats.recent || recentArticles.length})
               </Button>
               <Button
                 variant={activeTab === 'archived' ? 'default' : 'outline'}
@@ -534,7 +534,7 @@ const MarketIntelligencePage = () => {
                 className={`text-xs h-7 sm:h-8 px-2 sm:px-3 ${activeTab === 'archived' ? 'bg-slate-700 hover:bg-slate-800' : ''}`}
               >
                 <Archive className="w-3 h-3 mr-1" />
-                ({archivedArticles.length})
+                ({stats.archived || archivedArticles.length})
               </Button>
             </div>
           </div>
@@ -555,7 +555,7 @@ const MarketIntelligencePage = () => {
               <span className={`text-xs px-1 py-0.5 rounded-full ${
                 selectedTopics.length === 0 ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-500'
               }`}>
-                {articles.length}
+                {stats.total || articles.length}
               </span>
             </button>
 
