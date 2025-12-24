@@ -418,46 +418,44 @@ const MarketIntelligencePage = () => {
         </div>
       </section>
 
-      {/* Filter Section */}
-      <section className="py-4 md:py-6 bg-white border-b shadow-sm md:sticky md:top-0 z-10">
+      {/* Filter Section - Compact, not sticky */}
+      <section className="py-3 md:py-4 bg-white border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Top Row: Filter Label + Sort + Tabs */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-            <div className="flex items-center gap-3">
-              <Filter className="w-5 h-5 text-slate-500" />
-              <span className="font-semibold text-slate-700">Filter by Topic</span>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 mb-3">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Filter className="w-4 h-4 sm:w-5 sm:h-5 text-slate-500" />
+              <span className="font-semibold text-slate-700 text-sm sm:text-base">Filter by Topic</span>
               {selectedTopics.length > 0 && (
-                <Badge className="bg-emerald-100 text-emerald-700">
+                <Badge className="bg-emerald-100 text-emerald-700 text-xs">
                   {selectedTopics.length} selected
                 </Badge>
               )}
             </div>
-            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap">
               {/* Sort Toggle */}
-              <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
+              <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-0.5 sm:p-1">
                 <button
                   onClick={() => setSortBy('newest')}
-                  className={`flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-all ${
+                  className={`flex items-center gap-1 px-2 py-1 sm:py-1.5 rounded-md text-xs font-medium transition-all ${
                     sortBy === 'newest' 
                       ? 'bg-white shadow-sm text-slate-900' 
                       : 'text-slate-500 hover:text-slate-700'
                   }`}
                 >
-                  <Clock className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Newest</span>
-                  <span className="sm:hidden">New</span>
+                  <Clock className="w-3 h-3" />
+                  <span>New</span>
                 </button>
                 <button
                   onClick={() => setSortBy('risk')}
-                  className={`flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-all ${
+                  className={`flex items-center gap-1 px-2 py-1 sm:py-1.5 rounded-md text-xs font-medium transition-all ${
                     sortBy === 'risk' 
                       ? 'bg-white shadow-sm text-slate-900' 
                       : 'text-slate-500 hover:text-slate-700'
                   }`}
                 >
-                  <AlertTriangle className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Highest Risk</span>
-                  <span className="sm:hidden">Risk</span>
+                  <AlertTriangle className="w-3 h-3" />
+                  <span>Risk</span>
                 </button>
               </div>
 
@@ -466,59 +464,59 @@ const MarketIntelligencePage = () => {
                 variant={activeTab === 'recent' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => handleTabChange('recent')}
-                className={`text-xs sm:text-sm ${activeTab === 'recent' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}`}
+                className={`text-xs h-7 sm:h-8 px-2 sm:px-3 ${activeTab === 'recent' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}`}
               >
-                <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                <span className="hidden sm:inline">Recent</span> ({recentArticles.length})
+                <Clock className="w-3 h-3 mr-1" />
+                ({recentArticles.length})
               </Button>
               <Button
                 variant={activeTab === 'archived' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => handleTabChange('archived')}
-                className={`text-xs sm:text-sm ${activeTab === 'archived' ? 'bg-slate-700 hover:bg-slate-800' : ''}`}
+                className={`text-xs h-7 sm:h-8 px-2 sm:px-3 ${activeTab === 'archived' ? 'bg-slate-700 hover:bg-slate-800' : ''}`}
               >
-                <Archive className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                <span className="hidden sm:inline">Archived</span> ({archivedArticles.length})
+                <Archive className="w-3 h-3 mr-1" />
+                ({archivedArticles.length})
               </Button>
             </div>
           </div>
 
           {/* Topic Chips - Scrollable on mobile */}
-          <div className="flex gap-2 mb-3 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible scrollbar-hide">
+          <div className="flex gap-1.5 sm:gap-2 mb-2 overflow-x-auto pb-1.5 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible scrollbar-hide">
             {/* All News Chip */}
             <button
               onClick={() => { setSelectedTopics([]); }}
-              className={`inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 border whitespace-nowrap flex-shrink-0 ${
+              className={`inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 border whitespace-nowrap flex-shrink-0 ${
                 selectedTopics.length === 0
                   ? 'bg-emerald-600 text-white border-emerald-600 shadow-md'
                   : 'bg-white text-slate-700 border-slate-300 hover:border-emerald-400 hover:bg-emerald-50'
               }`}
             >
               {selectedTopics.length === 0 && <Check className="w-3 h-3" />}
-              <span>All News</span>
-              <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+              <span>All</span>
+              <span className={`text-xs px-1 py-0.5 rounded-full ${
                 selectedTopics.length === 0 ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-500'
               }`}>
                 {articles.length}
               </span>
             </button>
 
-            {/* Individual Topic Chips - Show only top 5 on mobile inline, rest via scroll */}
+            {/* Individual Topic Chips */}
             {topicsWithCounts.map(({ topic, count }) => {
               const isSelected = selectedTopics.includes(topic);
               return (
                 <button
                   key={topic}
                   onClick={() => handleTopicToggle(topic)}
-                  className={`inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 border whitespace-nowrap flex-shrink-0 ${
+                  className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-all duration-200 border whitespace-nowrap flex-shrink-0 ${
                     isSelected
                       ? 'bg-emerald-600 text-white border-emerald-600 shadow-md'
                       : 'bg-white text-slate-700 border-slate-300 hover:border-emerald-400 hover:bg-emerald-50'
                   }`}
                 >
-                  {isSelected && <Check className="w-3 h-3" />}
-                  <span className="max-w-[120px] sm:max-w-none truncate">{topic}</span>
-                  <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                  {isSelected && <Check className="w-2.5 h-2.5" />}
+                  <span className="max-w-[100px] truncate">{topic}</span>
+                  <span className={`text-xs px-1 py-0.5 rounded-full ${
                     isSelected ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-500'
                   }`}>
                     {count}
@@ -529,28 +527,28 @@ const MarketIntelligencePage = () => {
           </div>
 
           {/* Risk Category Filter Chips - Scrollable on mobile */}
-          <div className="mb-2 sm:mb-4">
-            <div className="flex items-center gap-2 sm:gap-3 mb-2">
-              <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" />
-              <span className="font-semibold text-slate-700 text-sm sm:text-base">Filter by Risk</span>
+          <div className="mb-1 sm:mb-2">
+            <div className="flex items-center gap-2 mb-1.5">
+              <AlertTriangle className="w-4 h-4 text-orange-500" />
+              <span className="font-semibold text-slate-700 text-xs sm:text-sm">Filter by Risk</span>
               {selectedRiskCategories.length > 0 && (
                 <Badge className="bg-orange-100 text-orange-700 text-xs">
-                  {selectedRiskCategories.length} selected
+                  {selectedRiskCategories.length}
                 </Badge>
               )}
             </div>
-            <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible scrollbar-hide">
+            <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-1.5 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible scrollbar-hide">
               {/* All Risks Chip */}
               <button
                 onClick={handleClearRiskFilters}
-                className={`inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 border whitespace-nowrap flex-shrink-0 ${
+                className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-all duration-200 border whitespace-nowrap flex-shrink-0 ${
                   selectedRiskCategories.length === 0
                     ? 'bg-orange-500 text-white border-orange-500 shadow-md'
                     : 'bg-white text-slate-700 border-slate-300 hover:border-orange-400 hover:bg-orange-50'
                 }`}
               >
                 {selectedRiskCategories.length === 0 && <Check className="w-3 h-3" />}
-                <span>All Risks</span>
+                <span>All</span>
               </button>
 
               {/* Individual Risk Category Chips */}
@@ -563,15 +561,15 @@ const MarketIntelligencePage = () => {
                     <button
                       key={category}
                       onClick={() => handleRiskCategoryToggle(category)}
-                      className={`inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 border whitespace-nowrap flex-shrink-0 ${
+                      className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-all duration-200 border whitespace-nowrap flex-shrink-0 ${
                         isSelected
                           ? 'bg-orange-500 text-white border-orange-500 shadow-md'
                           : 'bg-white text-slate-700 border-slate-300 hover:border-orange-400 hover:bg-orange-50'
                       }`}
                     >
-                      {isSelected && <Check className="w-3 h-3" />}
+                      {isSelected && <Check className="w-2.5 h-2.5" />}
                       <span>{RISK_CATEGORY_LABELS[category] || category}</span>
-                      <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                      <span className={`text-xs px-1 py-0.5 rounded-full ${
                         isSelected ? 'bg-orange-400 text-white' : 'bg-slate-100 text-slate-500'
                       }`}>
                         {count}
