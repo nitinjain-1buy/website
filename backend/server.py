@@ -1858,6 +1858,45 @@ async def update_career_application(app_id: str, status: str, notes: Optional[st
     
     return {"success": True}
 
+class AddReviewInput(BaseModel):
+    interviewerEmail: EmailStr
+    comments: str = Field(..., min_length=1, max_length=5000)
+    interviewDate: str
+    nextSteps: Optional[str] = Field(None, max_length=1000)
+
+@api_router.post("/careers/applications/{app_id}/reviews")
+async def add_interview_review(app_id: str, input: AddReviewInput):
+    """Add an interview review to a career application"""
+    review = InterviewReview(
+        interviewerEmail=input.interviewerEmail,
+        comments=input.comments,
+        interviewDate=input.interviewDate,
+        nextSteps=input.nextSteps
+    )
+    
+    result = await db.career_applications.update_one(
+        {"id": app_id},
+        {"$push": {"reviews": review.model_dump()}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Application not found")
+    
+    return {"success": True, "review": review.model_dump()}
+
+@api_router.delete("/careers/applications/{app_id}/reviews/{review_id}")
+async def delete_interview_review(app_id: str, review_id: str):
+    """Delete an interview review from a career application"""
+    result = await db.career_applications.update_one(
+        {"id": app_id},
+        {"$pull": {"reviews": {"id": review_id}}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Application not found")
+    
+    return {"success": True}
+
 @api_router.delete("/careers/applications/{app_id}")
 async def delete_career_application(app_id: str):
     """Delete a career application (admin)"""
