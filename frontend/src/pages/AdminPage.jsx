@@ -2941,7 +2941,9 @@ const AdminDashboard = ({ onLogout }) => {
 
   const sidebarItems = [
     { id: 'site-settings', label: 'Site Settings', icon: Settings, count: null },
+    { id: 'content', label: 'Page Content', icon: FileText, count: null },
     { id: 'careers', label: 'Careers', icon: Briefcase, count: careerApplications.length },
+    { id: 'team', label: 'Team', icon: Users, count: teamMembers.length },
     { id: 'news', label: 'News & Intelligence', icon: Newspaper, count: null },
     { id: 'stats', label: 'Stats', icon: BarChart3, count: siteStats.length },
     { id: 'customers-list', label: 'Customers', icon: Building2, count: customerLogos.length },
@@ -2950,7 +2952,7 @@ const AdminDashboard = ({ onLogout }) => {
     { id: 'flow-lines', label: 'Flows', icon: GitBranch, count: flowLines.length },
     { id: 'region-cards', label: 'Regions', icon: Globe, count: regionCards.length },
     { id: 'testimonials', label: 'Testimonials', icon: Quote, count: testimonials.length },
-    { id: 'demo-requests', label: 'Demo Requests', icon: Users, count: customerRequests.length },
+    { id: 'demo-requests', label: 'Demo Requests', icon: Clock, count: customerRequests.length },
     { id: 'suppliers', label: 'Suppliers', icon: Package, count: supplierRequests.length },
   ];
 
