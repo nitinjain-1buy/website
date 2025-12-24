@@ -2923,6 +2923,7 @@ const AdminDashboard = ({ onLogout }) => {
 
   const sidebarItems = [
     { id: 'site-settings', label: 'Site Settings', icon: Settings, count: null },
+    { id: 'careers', label: 'Careers', icon: Briefcase, count: careerApplications.length },
     { id: 'news', label: 'News & Intelligence', icon: Newspaper, count: null },
     { id: 'stats', label: 'Stats', icon: BarChart3, count: siteStats.length },
     { id: 'customers-list', label: 'Customers', icon: Building2, count: customerLogos.length },
