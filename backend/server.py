@@ -1343,6 +1343,17 @@ class CustomerLogo(BaseModel):
     logoUrl: Optional[str] = None
     order: int = 0
 
+# Site Settings Model
+class SiteSettingsUpdate(BaseModel):
+    showClientNames: Optional[bool] = None
+    clientSectionTitle: Optional[str] = None
+
+class SiteSettings(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = "site_settings"
+    showClientNames: bool = True
+    clientSectionTitle: str = "Trusted by leading OEMs and EMSs of the world"
+
 # Product Model
 class ProductFeature(BaseModel):
     text: str
