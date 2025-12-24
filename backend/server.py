@@ -3474,6 +3474,29 @@ async def trigger_alternative_scraping(limit: int = 100):
         "resetCount": result.modified_count
     }
 
+@api_router.post("/news/analyze-risk")
+async def trigger_risk_analysis(limit: int = 100, force: bool = False):
+    """Manually trigger risk analysis for articles missing risk data"""
+    try:
+        if force:
+            # Reset risk data for all articles to re-analyze
+            result = await db.news_articles.update_many(
+                {},
+                {"$unset": {"risk_score": "", "risk_band": "", "risk_categories": "", "confidence": "", "time_horizon": "", "category_strength": "", "riskAnalyzedAt": ""}}
+            )
+            logger.info(f"[RiskEngine] Force mode: Reset risk data for {result.modified_count} articles")
+        
+        # Run risk analysis
+        analyzed_count = await run_risk_analysis(limit=limit)
+        return {
+            "success": True,
+            "message": f"Risk analysis completed for {analyzed_count} articles",
+            "analyzedCount": analyzed_count
+        }
+    except Exception as e:
+        logger.error(f"[RiskEngine] Error triggering analysis: {str(e)}")
+        return {"success": False, "error": str(e)}
+
 @api_router.post("/news/scrape-retry-failed")
 async def retry_failed_scraping(limit: int = 200):
     """Retry scraping permanently failed articles to extract metadata"""
