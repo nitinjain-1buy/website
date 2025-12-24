@@ -925,27 +925,44 @@ const MarketIntelligencePage = () => {
               </div>
 
               {/* Load More Button */}
-              {hasMore && (
+              {canLoadMore && (
                 <div className="mt-10 text-center">
                   <Button 
                     variant="outline" 
                     size="lg"
                     onClick={handleLoadMore}
+                    disabled={loadingMore}
                     className="px-10 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700"
                   >
-                    <ChevronDown className="w-5 h-5 mr-2" />
-                    Load More Articles
-                    <span className="ml-2 text-slate-400">({displayArticles.length - visibleCount} remaining)</span>
+                    {loadingMore ? (
+                      <>
+                        <RefreshCw className="w-5 h-5 mr-2 animate-spin" />
+                        Loading...
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown className="w-5 h-5 mr-2" />
+                        Load More Articles
+                        <span className="ml-2 text-slate-400">
+                          ({hasMoreVisible 
+                            ? `${displayArticles.length - visibleCount} hidden` 
+                            : hasMore 
+                              ? `${stats.total - articles.length} more available`
+                              : ''
+                          })
+                        </span>
+                      </>
+                    )}
                   </Button>
                 </div>
               )}
 
               {/* End indicator */}
-              {!hasMore && visibleArticles.length > 0 && (
+              {!canLoadMore && visibleArticles.length > 0 && (
                 <div className="mt-10 text-center">
                   <div className="inline-flex items-center gap-2 text-slate-400 text-sm">
                     <div className="w-12 h-px bg-slate-200"></div>
-                    <span>Showing all {displayArticles.length} articles</span>
+                    <span>Showing all {articles.length} articles</span>
                     <div className="w-12 h-px bg-slate-200"></div>
                   </div>
                 </div>
