@@ -77,7 +77,7 @@ const MarketIntelligencePage = () => {
   const fetchNews = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/api/news?limit=2000`);
+      const response = await fetch(`${API_URL}/api/news?limit=500`);
       const data = await response.json();
       
       // Filter out articles without valid links or content
