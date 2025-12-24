@@ -1755,7 +1755,7 @@ CAREER_ROLES = [
 class CareerApplicationCreate(BaseModel):
     name: str = Field(..., min_length=2, max_length=100)
     email: EmailStr
-    phone: Optional[str] = Field(None, max_length=20)
+    phone: Optional[str] = Field(None, max_length=30)
     role: str = Field(..., min_length=1, max_length=100)
     linkedinUrl: Optional[str] = Field(None, max_length=500)
     resumeUrl: Optional[str] = Field(None, max_length=500)
@@ -1764,6 +1764,21 @@ class CareerApplicationCreate(BaseModel):
     coverLetter: Optional[str] = Field(None, max_length=5000)
     experience: Optional[str] = Field(None, max_length=500)
     whyJoin: Optional[str] = Field(None, max_length=2000)
+    
+    @field_validator('phone')
+    @classmethod
+    def validate_phone(cls, v):
+        if not v:
+            return v
+        # Remove spaces, dashes, parentheses for validation
+        cleaned = v.replace(' ', '').replace('-', '').replace('(', '').replace(')', '').replace('.', '')
+        # Allow + at the start and digits only after that
+        if cleaned.startswith('+'):
+            cleaned = cleaned[1:]
+        # Check if remaining characters are digits
+        if not cleaned.isdigit():
+            raise ValueError('Phone number should contain only digits, +, spaces, dashes, or parentheses')
+        return v
     
     @field_validator('linkedinUrl', 'resumeUrl')
     @classmethod
