@@ -2580,6 +2580,14 @@ const CareersManager = ({ benefits, roles, applications, isLoading, onRefresh })
   const [formData, setFormData] = useState({});
   const [isSaving, setIsSaving] = useState(false);
   const [filterStatus, setFilterStatus] = useState('all');
+  const [expandedApp, setExpandedApp] = useState(null);
+  const [reviewForm, setReviewForm] = useState({
+    interviewerEmail: '',
+    comments: '',
+    interviewDate: '',
+    nextSteps: ''
+  });
+  const [isAddingReview, setIsAddingReview] = useState(false);
 
   const iconOptions = ['Rocket', 'Users', 'Zap', 'Globe', 'Briefcase', 'Sparkles', 'CheckCircle'];
 
