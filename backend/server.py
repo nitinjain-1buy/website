@@ -115,7 +115,9 @@ async def scrape_article_content(url: str) -> dict:
         "fullContent": None,
         "summary": None,
         "wordCount": 0,
-        "scrapeError": None
+        "scrapeError": None,
+        "metaDescription": None,
+        "ogDescription": None
     }
     
     if not url:
@@ -129,7 +131,7 @@ async def scrape_article_content(url: str) -> dict:
         "Accept-Language": "en-US,en;q=0.5",
     }
     
-    # Known paywall/blocked domains - mark as permanent failures
+    # Known paywall/blocked domains - try to get metadata anyway
     PAYWALL_DOMAINS = [
         'reuters.com',
         'bloomberg.com', 
@@ -140,20 +142,39 @@ async def scrape_article_content(url: str) -> dict:
         'economist.com'
     ]
     
-    # Check if URL is from a known paywall site
-    for domain in PAYWALL_DOMAINS:
-        if domain in url.lower():
-            result["scrapeError"] = f"Paywall site ({domain})"
-            result["permanentFailure"] = True
-            return result
+    is_paywall_site = any(domain in url.lower() for domain in PAYWALL_DOMAINS)
     
     try:
         async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as client:
             response = await client.get(url, headers=headers)
-            response.raise_for_status()
             
+            # Even if we get a 403, try to parse the response for metadata
             html = response.text
             soup = BeautifulSoup(html, 'lxml')
+            
+            # Always try to extract metadata first
+            metadata = extract_metadata(soup, url)
+            result["metaDescription"] = metadata.get("description")
+            result["ogDescription"] = metadata.get("og_description")
+            
+            # If paywall or 403, use metadata as content
+            if response.status_code == 403 or is_paywall_site:
+                meta_content = metadata.get("og_description") or metadata.get("description") or metadata.get("twitter_description")
+                if meta_content and len(meta_content) > 50:
+                    result["scraped"] = True
+                    result["scrapedAt"] = datetime.now(timezone.utc).isoformat()
+                    result["fullContent"] = meta_content
+                    result["summary"] = meta_content[:500] if len(meta_content) > 500 else meta_content
+                    result["wordCount"] = len(meta_content.split())
+                    result["scrapeError"] = "Paywall - metadata only"
+                    logger.info(f"[Scraper] Extracted metadata ({result['wordCount']} words) from paywall: {url[:50]}...")
+                    return result
+                else:
+                    result["scrapeError"] = f"Paywall site - no metadata available"
+                    result["permanentFailure"] = True
+                    return result
+            
+            response.raise_for_status()
             
             # Remove unwanted elements
             for element in soup.find_all(['script', 'style', 'nav', 'header', 'footer', 'aside', 'advertisement', 'iframe', 'noscript', 'form', 'button']):
@@ -218,10 +239,16 @@ async def scrape_article_content(url: str) -> dict:
                 if full_content:
                     word_count = len(full_content.split())
                     
-                    # Require minimum content (at least 30 words)
+                    # If content too short, try to use metadata
                     if word_count < 30:
-                        result["scrapeError"] = f"Content too short ({word_count} words)"
-                        return result
+                        meta_content = metadata.get("og_description") or metadata.get("description")
+                        if meta_content and len(meta_content.split()) >= 10:
+                            full_content = meta_content
+                            word_count = len(meta_content.split())
+                            result["scrapeError"] = "Short content - using metadata"
+                        else:
+                            result["scrapeError"] = f"Content too short ({word_count} words)"
+                            return result
                     
                     # Create a summary (first 500 chars)
                     summary = full_content[:500] + '...' if len(full_content) > 500 else full_content
@@ -234,7 +261,18 @@ async def scrape_article_content(url: str) -> dict:
                     
                     logger.info(f"[Scraper] Successfully scraped {word_count} words from {url[:50]}...")
                 else:
-                    result["scrapeError"] = "No meaningful content found (empty)"
+                    # Try metadata as fallback
+                    meta_content = metadata.get("og_description") or metadata.get("description")
+                    if meta_content and len(meta_content.split()) >= 10:
+                        result["scraped"] = True
+                        result["scrapedAt"] = datetime.now(timezone.utc).isoformat()
+                        result["fullContent"] = meta_content
+                        result["summary"] = meta_content
+                        result["wordCount"] = len(meta_content.split())
+                        result["scrapeError"] = "No article content - using metadata"
+                        logger.info(f"[Scraper] Using metadata ({result['wordCount']} words) from {url[:50]}...")
+                    else:
+                        result["scrapeError"] = "No meaningful content found (empty)"
             else:
                 result["scrapeError"] = "Could not locate article content"
                 
@@ -244,6 +282,28 @@ async def scrape_article_content(url: str) -> dict:
         logger.warning(f"[Scraper] Timeout: {url[:50]}...")
     except httpx.HTTPStatusError as e:
         status = e.response.status_code
+        
+        # Try to extract metadata from the error response
+        try:
+            html = e.response.text
+            soup = BeautifulSoup(html, 'lxml')
+            metadata = extract_metadata(soup, url)
+            meta_content = metadata.get("og_description") or metadata.get("description")
+            
+            if meta_content and len(meta_content.split()) >= 10:
+                result["scraped"] = True
+                result["scrapedAt"] = datetime.now(timezone.utc).isoformat()
+                result["fullContent"] = meta_content
+                result["summary"] = meta_content
+                result["wordCount"] = len(meta_content.split())
+                result["scrapeError"] = f"HTTP {status} - metadata only"
+                result["metaDescription"] = metadata.get("description")
+                result["ogDescription"] = metadata.get("og_description")
+                logger.info(f"[Scraper] Extracted metadata from {status} response ({result['wordCount']} words): {url[:50]}...")
+                return result
+        except:
+            pass
+        
         if status == 429:
             result["scrapeError"] = "Rate limited (429) - can retry later"
             result["retryable"] = True
@@ -261,6 +321,69 @@ async def scrape_article_content(url: str) -> dict:
         logger.warning(f"[Scraper] Error scraping {url[:50]}...: {str(e)[:50]}")
     
     return result
+
+
+def extract_metadata(soup: BeautifulSoup, url: str) -> dict:
+    """Extract metadata from HTML page"""
+    metadata = {}
+    
+    # Meta description
+    meta_desc = soup.find('meta', attrs={'name': 'description'})
+    if meta_desc and meta_desc.get('content'):
+        metadata['description'] = meta_desc.get('content').strip()
+    
+    # Open Graph description
+    og_desc = soup.find('meta', attrs={'property': 'og:description'})
+    if og_desc and og_desc.get('content'):
+        metadata['og_description'] = og_desc.get('content').strip()
+    
+    # Twitter description
+    twitter_desc = soup.find('meta', attrs={'name': 'twitter:description'})
+    if twitter_desc and twitter_desc.get('content'):
+        metadata['twitter_description'] = twitter_desc.get('content').strip()
+    
+    # Open Graph title (sometimes more descriptive)
+    og_title = soup.find('meta', attrs={'property': 'og:title'})
+    if og_title and og_title.get('content'):
+        metadata['og_title'] = og_title.get('content').strip()
+    
+    # Article excerpt/summary
+    article_excerpt = soup.find('meta', attrs={'name': 'article:excerpt'})
+    if article_excerpt and article_excerpt.get('content'):
+        metadata['excerpt'] = article_excerpt.get('content').strip()
+    
+    # Schema.org JSON-LD
+    for script in soup.find_all('script', type='application/ld+json'):
+        try:
+            import json
+            data = json.loads(script.string)
+            if isinstance(data, dict):
+                if data.get('@type') in ['NewsArticle', 'Article', 'WebPage']:
+                    if data.get('description'):
+                        metadata['schema_description'] = data.get('description')
+                    if data.get('articleBody'):
+                        metadata['article_body'] = data.get('articleBody')[:2000]
+            elif isinstance(data, list):
+                for item in data:
+                    if isinstance(item, dict) and item.get('@type') in ['NewsArticle', 'Article']:
+                        if item.get('description'):
+                            metadata['schema_description'] = item.get('description')
+                        if item.get('articleBody'):
+                            metadata['article_body'] = item.get('articleBody')[:2000]
+        except:
+            pass
+    
+    # Combine best available description
+    if metadata.get('article_body'):
+        metadata['best_content'] = metadata['article_body']
+    elif metadata.get('schema_description'):
+        metadata['best_content'] = metadata['schema_description']
+    elif metadata.get('og_description'):
+        metadata['best_content'] = metadata['og_description']
+    elif metadata.get('description'):
+        metadata['best_content'] = metadata['description']
+    
+    return metadata
 
 
 async def scrape_unscraped_articles(limit: int = 50, retry_failed: bool = False):
