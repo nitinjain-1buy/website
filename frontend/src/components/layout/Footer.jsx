@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { footerData } from '../../data/mock';
-import { Linkedin, Twitter } from 'lucide-react';
+import { Linkedin } from 'lucide-react';
+
+// X (formerly Twitter) icon component
+const XIcon = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+  </svg>
+);
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -41,38 +48,33 @@ const Footer = () => {
             <p className="text-slate-400 text-sm leading-relaxed mb-6">
               {footerData.tagline}
             </p>
-            <div className="flex space-x-4">
-              {socialLinks.linkedinUrl && (
-                <a 
-                  href={socialLinks.linkedinUrl.startsWith('http') ? socialLinks.linkedinUrl : `https://${socialLinks.linkedinUrl}`} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-slate-400 hover:text-white transition-colors"
-                >
-                  <Linkedin className="h-5 w-5" />
-                </a>
-              )}
-              {socialLinks.twitterUrl && (
-                <a 
-                  href={socialLinks.twitterUrl.startsWith('http') ? socialLinks.twitterUrl : `https://${socialLinks.twitterUrl}`} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-slate-400 hover:text-white transition-colors"
-                >
-                  <Twitter className="h-5 w-5" />
-                </a>
-              )}
-              {!socialLinks.linkedinUrl && !socialLinks.twitterUrl && (
-                <>
-                  <span className="text-slate-600">
+            {/* Social Links - Only show if URLs are configured */}
+            {(socialLinks.linkedinUrl || socialLinks.twitterUrl) && (
+              <div className="flex space-x-4">
+                {socialLinks.linkedinUrl && (
+                  <a 
+                    href={socialLinks.linkedinUrl.startsWith('http') ? socialLinks.linkedinUrl : `https://${socialLinks.linkedinUrl}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-slate-400 hover:text-white transition-colors"
+                    aria-label="LinkedIn"
+                  >
                     <Linkedin className="h-5 w-5" />
-                  </span>
-                  <span className="text-slate-600">
-                    <Twitter className="h-5 w-5" />
-                  </span>
-                </>
-              )}
-            </div>
+                  </a>
+                )}
+                {socialLinks.twitterUrl && (
+                  <a 
+                    href={socialLinks.twitterUrl.startsWith('http') ? socialLinks.twitterUrl : `https://${socialLinks.twitterUrl}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-slate-400 hover:text-white transition-colors"
+                    aria-label="X (Twitter)"
+                  >
+                    <XIcon className="h-5 w-5" />
+                  </a>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Products */}
