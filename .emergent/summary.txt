@@ -1,122 +1,102 @@
 <analysis>**original_problem_statement:**
-The user's initial request to fix broken news links evolved into a comprehensive feature build-out for a Market Intelligence platform. Key requirements implemented include:
-1.  **News Aggregation:** Integrating SerpApi, GDELT, and MediaStack for news fetching.
-2.  **Web Scraping & Metadata Extraction:** Building a scraper to fetch full article content and, for paywalled sites, extract key metadata (title, description, OG tags).
-3.  **Article Risk Engine:** Implementing a sophisticated, rule-based engine () to analyze articles and assign a , , and multiple .
-4.  **Risk Engine UI:** Enhancing the  page with UI for filtering by risk category, sorting by highest risk, and displaying detailed risk information on each article card.
-5.  **Mobile UI Fix:** Correcting the layout of the  page for mobile devices, where filter sections were previously obscuring content.
-6.  **Configurable Admin Panel:**
-    *   Adding a toggle on the homepage's Trusted By section to show/hide client logos.
-    *   Creating a UI to display risk category counts.
-    *   Implementing a full CRUD interface for managing the Risk Engine's categories and keyword triggers.
-7.  **Data Integrity:** Ensuring that when a topic query is deleted from the admin panel, the corresponding tag is removed from all associated news articles to prevent orphan tags.
-8.  **Homepage Enhancements:** Updating the company logo and key statistics displayed on the homepage.
-9.  **Careers Page:** A new request to create a Careers page with a job application form that submits to the backend.
+The user's initial request to fix broken news links evolved into a comprehensive feature build-out for a Market Intelligence platform. Key requirements implemented include: news aggregation, web scraping, a rule-based risk engine, a UI for the risk engine, and mobile UI fixes. The scope expanded to include a highly configurable admin panel for managing homepage content, risk engine rules, and data integrity. Most recently, the user requested a new Careers page and then asked for all static content across the website (e.g., Why Join Us, Team, How It Works) to be made configurable via the admin panel. The user has reported critical issues with the application not loading data on the preview URL.
 
 **User's preferred language**: English
 
 **what currently exists?**
-The application is a full-stack React/FastAPI platform. The Market Intelligence feature is the core of the application, featuring a multi-source news pipeline, a web scraper with metadata extraction capabilities, and a rule-based risk engine. The frontend UI for displaying, filtering, and sorting by risk is complete and functional on both desktop and mobile. The admin panel has been significantly enhanced with configurable settings for the homepage's client logo section and a full management interface for the Risk Engine's rules (categories and triggers). Backend logic for data integrity (e.g., orphan tag cleanup) has been implemented. The scraper is actively processing a large backlog of articles. The initial backend setup and frontend file for a new Careers page have been created.
+The application is a full-stack React/FastAPI platform. A Market Intelligence feature provides news with risk analysis. A Careers page allows users to apply for jobs. A comprehensive admin panel at  (password: ) has been built to manage nearly all content on the site, including homepage stats, career roles/benefits, team members, use cases, and more. All this content is now stored in MongoDB and served via APIs. However, a critical issue prevents the frontend from communicating with the backend when viewed from the external preview URL, rendering the application unusable for the user.
 
 **Last working item**:
-    - Last item agent was working: Building a new **Careers Page**. The agent successfully created the Pydantic model () and the backend API endpoints (, ) to handle job applications. It also created the initial placeholder file for the frontend at . The next logical step was to integrate this page into the application's routing and navigation.
-    - Status: IN PROGRESS
+    - Last item agent was working: The agent was trying to resolve a critical bug where the Market Intelligence page (and likely the entire app) fails to load data when accessed from the external preview URL. The agent correctly identified that the frontend was trying to call , which is inaccessible from the user's device.
+    - Status: BLOCKED
     - Agent Testing Done: N
-    - Which testing method agent to use? Frontend testing agent to test the new page and form submission, and  to test the backend endpoint.
+    - Which testing method agent to use? Manual verification by the user on the preview URL is required after the fix. Standard testing tools within the environment cannot replicate this external access issue.
     - User Testing Done: N
 
 **All Pending/In progress Issue list**:
-There are no pending bugs or issues. The current work is focused on feature development and data processing.
+  - **Issue 1: Critical - Frontend API calls fail on external preview URL (P0)**
+  - **Issue 2: Market Intelligence Page Performance (P1)**
+
+  **Issues Detail:**
+  - **Issue 1: Critical - Frontend API calls fail on external preview URL (P0)**
+     - **Attempted fixes:** The agent tried changing  to an empty string and then attempted to set up a proxy with  and . Both approaches failed, likely because  requires proxy configuration within , not a separate file.
+     - **Next debug checklist:**
+        1. Delete the incorrect .
+        2. Modify  to add a  configuration to forward  requests to .
+        3. Set  to an empty string () in .
+        4. Restart the  service.
+     - **Why fix this issue and what will be achieved with the fix?** This is a critical blocker. The user cannot view or test any of the implemented features until the application is accessible on the preview link.
+     - **Status**: BLOCKED
+     - **Is recurring issue?** Y
+     - **Should Test frontend/backend/both after fix?** Frontend (user verification on preview is mandatory).
+     - **Blocked on other issue:** None
+
+  - **Issue 2: Market Intelligence Page Performance (P1)**
+     - **Attempted fixes:** The agent reduced the initial article load to 500 and removed the  property from the filter bar to fix scrolling.
+     - **Next debug checklist:** The current fix is a temporary patch. Proper server-side pagination should be implemented. This involves updating the  endpoint to support  and  parameters and implementing infinite scroll or a Load More button on the frontend.
+     - **Why fix this issue and what will be achieved with the fix?** To provide a smooth and responsive user experience on the application's core feature page.
+     - **Status**: IN PROGRESS
+     - **Is recurring issue?** N
+     - **Should Test frontend/backend/both after fix?** Both
+     - **Blocked on other issue:** Blocked by **Issue 1**, as performance cannot be verified by the user.
 
 **In progress Task List**:
-  - **Task 1: Complete the Careers Page Implementation (P0)**
-     - **Where to resume:** 
-        1. Add the new route for  in .
-        2. Add a Careers link to the main navigation in .
-        3. Build the UI in , including a form with the specified roles and fields (Name, Email, Resume, etc.).
-        4. Implement the form submission logic to  to the  endpoint.
-     - **What will be achieved with this?** A fully functional Careers page where users can apply for jobs, with submissions stored in the database.
+  - **Task 1: Complete Full Article Scraping (P2)**
+     - **Where to resume:** The scraping process is about 51% complete. The agent needs to continue monitoring  and triggering new batches () until the pending count is near zero.
+     - **What will be achieved with this?** The database will have complete data (full text or metadata) for all articles, improving the quality of the risk analysis.
      - **Status**: IN PROGRESS
-     - **Should Test frontend/backend/both after fix?** Both
-     - **Blocked on something:** None
-
-  - **Task 2: Complete Full Article Scraping (P1)**
-     - **Where to resume:** The scraper is running in the background. The user wants all ~2000 articles processed. The agent needs to continue monitoring progress via the  endpoint and triggering new batches () until the pending count is near zero.
-     - **What will be achieved with this?** The entire database of news articles will have full text or metadata, which is critical for the accuracy and completeness of the Risk Engine analysis.
-     - **Status**: IN PROGRESS
-     - **Should Test frontend/backend/both after fix?** N/A (Verification via API stats)
-     - **Blocked on something:** None
+     - **Should Test frontend/backend/both after fix?** Backend (via API stats).
+     - **Blocked on something:** None.
 
 **Upcoming and Future Tasks**
     **Upcoming Tasks:**
-    - **Connect Risk Engine to DB Configuration (P1):** The admin panel now allows editing risk engine rules, but the engine itself () still uses hardcoded rules. The next step is to modify  to fetch its configuration from the  database collection at startup or per-request.
-    - **User Verification (P2):** After the Careers page is done, ask the user to verify all the recently completed features (Risk Engine UI, mobile fixes, Admin Panel configurations, tag management, etc.).
+    - **Connect Risk Engine to DB Configuration (P1):** Modify  to fetch its rules from the  collection in the database, making the admin panel changes effective.
+    - **Refactor  (P2):** The  file has become excessively large (4500+ lines). The manager components (, , ) should be extracted into separate files under .
+    - **User Verification (P3):** After the preview URL is fixed, guide the user to verify all recent features, especially the comprehensive admin panel.
 
     **Future Tasks:**
-    - **ML/LLM Risk Engine (P3):** Upgrade the  from the current rule-based system to an ML/LLM-based one.
+    - **ML/LLM Risk Engine (P3):** Upgrade the rule-based  to an ML/LLM-based system.
     - **BOM Risk Score Calculation (P3):** A long-term goal to build risk scores for Bill of Materials.
     - **Supplier Product Catalog Upload (P3):** A previously mentioned feature request for suppliers.
 
 **Completed work in this session**
-- **Risk Engine UI Fixed & Completed:** Fixed a critical syntax error on  and implemented the full UI for displaying risk badges, category chips, and metadata on article cards.
-- **Featured Article Logic Enhanced:** Implemented a sophisticated priority system for the homepage's featured article based on user-defined risk categories and recency.
-- **Mobile UI for Market Intelligence Fixed:** Made the filter chip sections horizontally scrollable, making the page usable on mobile devices.
-- **Trusted By Section Made Configurable:** Implemented a toggle in the admin panel to show or hide the scrolling client logos on the homepage.
-- **Scraper Enhanced for Paywalled Sites:** Modified the web scraper to extract metadata (description, OG tags) when full content access is denied, significantly reducing permanent failures.
-- **Robust Tag Management Implemented:** Fixed query deletion logic to remove associated tags from articles, preventing orphan tags, and added admin endpoints for cleanup.
-- **Risk Engine Rules Made Configurable:** Created a full CRUD interface in the admin panel for managing risk categories and their keyword triggers, storing them in the database.
-- **Homepage Stats Updated:** Modified the key statistics on the homepage as per the user's request.
-- **Company Logo Updated:** Replaced the logo in the header and reverted the footer to a stylized text logo.
-- **Careers Page Started:** Created the backend model, API endpoints, and initial frontend file.
+- **Careers Page Fully Implemented:** Created the UI, form, navigation, and backend endpoints.
+- **Homepage Stats Fixed & Made Dynamic:** Updated stats content and fixed the layout to display 5 items.
+- **Market Intelligence Page UI/UX Improved:** Addressed slow loading by reducing initial fetch size and fixed the broken scroll layout.
+- **Risk Data Display Fixed:** Diagnosed and fixed an issue where risk scores were not appearing by running the risk analysis on newly fetched articles.
+- **Massive Admin Panel Expansion:** Made almost all site content (Careers benefits/roles, Homepage problems/workflow, Team members, Use Cases, etc.) configurable via a new Page Content section in the admin panel.
+- **Backend PUT Endpoints Standardized:** Corrected several backend endpoints to handle updates from the admin panel correctly.
+- **Homepage Hero Text Fixed:** Resolved an issue where hardcoded frontend data was overriding dynamic data from the backend.
+
+**Earlier issues found/mentioned but not fixed**
+- None.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **Backend:** FastAPI, , ,  & .
-- **Frontend:** React, React Hooks, Tailwind CSS.
-- **Architecture Pattern:**
-    - **Dynamic Frontend Configuration:** Using API-driven settings to control UI rendering (e.g., showing/hiding client logos).
-    - **Database-Driven Configuration:** Storing core business logic rules (Risk Engine triggers) in the database to be managed via a UI, decoupling the logic from the code.
-    - **Data Integrity Management:** Proactively implementing cleanup logic (e.g., on-delete hooks) and providing admin tools for data maintenance (orphan tag removal).
+- **Database-Driven Frontend:** The architecture has shifted significantly to make nearly all frontend content dynamic and configurable from a backend database via an admin panel.
+- **Environment-Specific Configuration:** The current blocker highlights the critical difference between local development () and external preview environments, and the need for a robust solution like dev server proxying.
+- **Large-Scale Admin UI:** The  now serves as a central hub for content management, demonstrating patterns for creating reusable forms and tables for various data models.
 
 **key DB schema**
-- : The main collection of news items.
-- : Manages the topic tags/filters.
-- : **New**. Singleton collection for global UI settings like .
-- : **New**. Stores the user-configurable rules for the risk engine.
-- : **New**. Stores submissions from the careers page form.
-- : **New**. Stores homepage statistics.
+- **Existing:** , , , , .
+- **New in this session:** , , , , , , , .
 
 **All files of reference**
-- : **Next file to edit.** Needs UI and form logic.
-- : Needs a route for .
-- : Needs a nav link to .
-- : Contains all backend logic, including the newly created endpoints for career applications.
-- : Contains the UI for all the new admin features.
-- : The core feature page, now stable.
-- : **Important for future task.** Needs to be updated to use the new database configuration.
+- : **Key file to fix the blocker.** Needs proxy configuration.
+- : **Key file to fix the blocker.**  needs to be set to .
+- : The oversized component that needs refactoring.
+- : Needs to be updated for the Connect Risk Engine to DB task.
+- : Page with performance issues that needs server-side pagination.
 
 **Areas that need refactoring**:
--  has grown very large. The sub-components for managing news, site settings, and risk configurations are defined within this single file and could be extracted into their own separate component files under  for better maintainability.
-
-**key api endpoints**
-- **Career Applications (New):**
-    - : Submits a new job application.
-    - : Retrieves all applications (for admin).
-- **Risk Configuration (New):**
-    - : Get all or create a new risk category rule.
-    - : Update or delete a specific risk category rule.
-- **Tag Management (Enhanced):**
-    - : Now also removes the corresponding tag from all articles.
-    - : Find and remove tags from articles that no longer have a corresponding query.
-- **Scraping (Enhanced):**
-    - : Resets permanently failed articles to be re-scraped for metadata.
+-  is over 4500 lines. The manager components within it must be extracted into their own files under  to maintain sanity.
 
 **Critical Info for New Agent**
-- **Primary Goal:** Your immediate task is to complete the **Careers Page**. This involves adding the route in , the link in , and building out the form UI and submission logic in .
-- **Secondary Goal:** The user wants the article scraping to be completed. Periodically check the status with  and trigger new batches with  to process the remaining articles.
-- **Future Implication:** A major piece of groundwork has been laid: the Risk Engine's rules are now configurable via the admin panel and stored in the DB. However, the engine itself () **is not yet using this data**. It still uses its internal hardcoded dictionary. A key upcoming task will be to connect the engine to the database configuration.
+- **Your absolute first priority is to fix the preview URL bug.** The user cannot see or test anything until this is resolved.
+- **The Solution:** The previous agent's attempts were incorrect. The correct approach is to configure a proxy in , set  to , and remove the faulty  file. This allows relative API paths to work in both local and preview environments.
+- After fixing the blocker and getting user verification, your next priorities should be addressing the Market Intelligence page performance with pagination and then connecting the live risk engine to the database configuration.
 
 **Last 10 User Messages and any pending HUMAN messages**
 - 
@@ -129,32 +109,29 @@ There are no pending bugs or issues. The current work is focused on feature deve
 - 
 - 
 - 
-- 
-- 
 
 **Project Health Check:**
-- **Broken:** None.
-- **Mocked:**  page still contains mock data.
-- **In-progress:**
-    - Careers Page implementation.
-    - Full scraping of all news articles.
+- **Broken:** The application is critically broken for the user on the preview URL, as no data can be fetched from the backend.
+- **Mocked:** The  page still contains mock data.
+- **In-progress:** Article scraping is ongoing (~51% complete).
 
 **3rd Party Integrations**
-- **SerpApi:** News aggregation.
-- **GDELT:** News aggregation.
-- **MediaStack:** News aggregation.
-- **BeautifulSoup4 / lxml:** Web content and metadata scraping.
+- SerpApi, GDELT, MediaStack (News Aggregation)
+- BeautifulSoup4 / lxml (Web Scraping)
+-  (Added but misconfigured)
 
 **Testing status**
-- Testing agent used after significant changes: NO (A frontend testing agent call failed due to a command error, and subsequent feature completion was verified manually with screenshots).
-- Troubleshoot agent used after agent stuck in loop: NO
-- Test files created: []
-- Known regressions: None. The previous regression on  was fixed.
+- **Testing agent used after significant changes:** NO
+- **Troubleshoot agent used after agent stuck in loop:** NO
+- **Test files created:** []
+- **Known regressions:** The entire application is non-functional on the external preview link.
 
 **Credentials to test flow:**
 - **Admin Dashboard URL:** 
 - **Password:** 
 
 **What agent forgot to execute**
-- The agent built the admin UI to manage Risk Engine rules but **did not update the actual  to use these rules from the database**. The engine is still using its hardcoded configuration, meaning the admin UI has no effect on the actual risk calculations yet.
-- After creating the backend and the  file for the **Careers Page**, the agent did not proceed to add the necessary routing in  or the navigation link in  to make the page accessible.</analysis>
+- The agent failed to correctly configure the frontend environment for external preview access, leading to a critical blocker.
+- The agent got stuck in a loop trying to fix the preview issue and did not call the .
+- The task to connect  to the database configuration is still pending.
+- The task to refactor the enormous  has not been started.</analysis>
