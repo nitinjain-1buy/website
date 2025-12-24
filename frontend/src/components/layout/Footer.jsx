@@ -1,9 +1,34 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { footerData } from '../../data/mock';
 import { Linkedin, Twitter } from 'lucide-react';
 
+const API_URL = process.env.REACT_APP_BACKEND_URL;
+
 const Footer = () => {
+  const [socialLinks, setSocialLinks] = useState({
+    twitterUrl: '',
+    linkedinUrl: ''
+  });
+
+  useEffect(() => {
+    const fetchSocialLinks = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/site-settings`);
+        if (response.ok) {
+          const data = await response.json();
+          setSocialLinks({
+            twitterUrl: data.twitterUrl || '',
+            linkedinUrl: data.linkedinUrl || ''
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching social links:', error);
+      }
+    };
+    fetchSocialLinks();
+  }, []);
+
   return (
     <footer className="bg-slate-900 text-slate-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -17,12 +42,36 @@ const Footer = () => {
               {footerData.tagline}
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-slate-400 hover:text-white transition-colors">
-                <Linkedin className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-slate-400 hover:text-white transition-colors">
-                <Twitter className="h-5 w-5" />
-              </a>
+              {socialLinks.linkedinUrl && (
+                <a 
+                  href={socialLinks.linkedinUrl.startsWith('http') ? socialLinks.linkedinUrl : `https://${socialLinks.linkedinUrl}`} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-slate-400 hover:text-white transition-colors"
+                >
+                  <Linkedin className="h-5 w-5" />
+                </a>
+              )}
+              {socialLinks.twitterUrl && (
+                <a 
+                  href={socialLinks.twitterUrl.startsWith('http') ? socialLinks.twitterUrl : `https://${socialLinks.twitterUrl}`} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-slate-400 hover:text-white transition-colors"
+                >
+                  <Twitter className="h-5 w-5" />
+                </a>
+              )}
+              {!socialLinks.linkedinUrl && !socialLinks.twitterUrl && (
+                <>
+                  <span className="text-slate-600">
+                    <Linkedin className="h-5 w-5" />
+                  </span>
+                  <span className="text-slate-600">
+                    <Twitter className="h-5 w-5" />
+                  </span>
+                </>
+              )}
             </div>
           </div>
 
