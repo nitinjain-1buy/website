@@ -133,16 +133,21 @@ const HomePage = () => {
   const [products, setProducts] = useState(defaultProducts);
   const [isLoading, setIsLoading] = useState(true);
   const [headlineComplete, setHeadlineComplete] = useState(false);
+  const [siteSettings, setSiteSettings] = useState({
+    showClientNames: true,
+    clientSectionTitle: "Trusted by leading OEMs and EMSs of the world"
+  });
 
   useEffect(() => {
     const fetchSiteContent = async () => {
       try {
         // Fetch all content in parallel
-        const [heroRes, statsRes, customersRes, productsRes] = await Promise.all([
+        const [heroRes, statsRes, customersRes, productsRes, settingsRes] = await Promise.all([
           axios.get(`${API}/hero-section`).catch(() => ({ data: null })),
           axios.get(`${API}/site-stats`).catch(() => ({ data: [] })),
           axios.get(`${API}/customer-logos`).catch(() => ({ data: [] })),
-          axios.get(`${API}/products`).catch(() => ({ data: [] }))
+          axios.get(`${API}/products`).catch(() => ({ data: [] })),
+          axios.get(`${API}/site-settings`).catch(() => ({ data: null }))
         ]);
 
         // Update hero data if available
@@ -163,6 +168,11 @@ const HomePage = () => {
         // Update products if available
         if (productsRes.data && productsRes.data.length > 0) {
           setProducts(productsRes.data);
+        }
+
+        // Update site settings if available
+        if (settingsRes.data) {
+          setSiteSettings(settingsRes.data);
         }
       } catch (error) {
         console.error('Error fetching site content:', error);
