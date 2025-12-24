@@ -339,12 +339,30 @@ const HomePage = () => {
       <section className="py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimatedSection animation="fade-up" className="text-center">
-            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-3">
+            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
               {siteSettings.clientSectionTitle}
             </h2>
-            <p className="text-lg text-slate-500 mb-6">
-              For <span className="text-emerald-600 font-medium">Owners/CEOs</span>, <span className="text-emerald-600 font-medium">Chief Sourcing/Procurement Officers</span>, <span className="text-emerald-600 font-medium">Chief Financial Officers</span>, <span className="text-emerald-600 font-medium">Procurement Teams</span>
-            </p>
+            
+            {/* Target Audience - Elegant Design */}
+            <div className="mb-8">
+              <p className="text-xl sm:text-2xl text-slate-600 font-light mb-4">
+                Built for procurement leaders who demand precision
+              </p>
+              <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
+                <span className="px-4 py-2 bg-slate-100 text-slate-700 rounded-full text-sm sm:text-base font-medium border border-slate-200">
+                  CEOs & Owners
+                </span>
+                <span className="px-4 py-2 bg-slate-100 text-slate-700 rounded-full text-sm sm:text-base font-medium border border-slate-200">
+                  Chief Procurement Officers
+                </span>
+                <span className="px-4 py-2 bg-slate-100 text-slate-700 rounded-full text-sm sm:text-base font-medium border border-slate-200">
+                  Chief Financial Officers
+                </span>
+                <span className="px-4 py-2 bg-slate-100 text-slate-700 rounded-full text-sm sm:text-base font-medium border border-slate-200">
+                  Sourcing Teams
+                </span>
+              </div>
+            </div>
             
             {/* Only show client names if enabled */}
             {siteSettings.showClientNames && (
