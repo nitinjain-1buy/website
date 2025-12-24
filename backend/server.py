@@ -557,8 +557,8 @@ async def scrape_unscraped_articles(limit: int = 50, retry_failed: bool = False,
             if not url or not article_id:
                 continue
             
-            # Scrape the article
-            scrape_result = await scrape_article_content(url)
+            # Scrape the article (with alternatives if enabled)
+            scrape_result = await scrape_article_content(url, use_alternatives=use_alternatives)
             
             # Update the article in database
             await db.news_articles.update_one(
