@@ -627,13 +627,16 @@ const CustomerLogosManager = ({ logos, isLoading, onRefresh }) => {
             </div>
             <div className="space-y-2">
               <label className="font-medium text-slate-700 text-sm flex items-center gap-2">
-                <Twitter className="h-4 w-4 text-sky-500" /> Twitter/X URL
+                <svg className="h-4 w-4 text-slate-700" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+                X (Twitter) URL
               </label>
               <div className="flex gap-2">
                 <Input
                   value={siteSettings.twitterUrl || ''}
                   onChange={(e) => setSiteSettings({ ...siteSettings, twitterUrl: e.target.value })}
-                  placeholder="https://twitter.com/1buy_ai"
+                  placeholder="https://x.com/1buy_ai"
                   className="flex-1"
                 />
                 <Button 
@@ -646,7 +649,7 @@ const CustomerLogosManager = ({ logos, isLoading, onRefresh }) => {
               </div>
             </div>
           </div>
-          <p className="text-xs text-slate-500 mt-2">These links will appear in the website footer</p>
+          <p className="text-xs text-slate-500 mt-2">These links will appear in the website footer (icons only show when URLs are set)</p>
         </div>
       </div>
 
