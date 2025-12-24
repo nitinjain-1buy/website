@@ -2090,8 +2090,8 @@ async def get_team_members():
     members = await db.team_members.find({}, {"_id": 0}).sort("order", 1).to_list(50)
     if not members:
         for m in DEFAULT_TEAM_MEMBERS:
-            await db.team_members.insert_one(m)
-        return DEFAULT_TEAM_MEMBERS
+            await db.team_members.insert_one({**m})
+        return await db.team_members.find({}, {"_id": 0}).sort("order", 1).to_list(50)
     return members
 
 @api_router.post("/team-members")
