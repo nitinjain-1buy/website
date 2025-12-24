@@ -165,9 +165,9 @@ const ProductsPage = () => {
       </section>
 
       {/* Products */}
-      {productsData.map((product, index) => {
+      {products.map((product, index) => {
         const IconComponent = iconMap[product.icon];
-        const details = productDetails[product.id];
+        const details = productDetails[product.productId || product.id];
         const isReverse = index % 2 === 1;
         const colors = [
           { accent: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' },
@@ -177,8 +177,8 @@ const ProductsPage = () => {
 
         return (
           <section
-            key={product.id}
-            id={product.id}
+            key={product.productId || product.id}
+            id={product.productId || product.id}
             className={`py-24 ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50'}`}
           >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -192,10 +192,10 @@ const ProductsPage = () => {
                     {product.name}
                   </h2>
                   <p className={`text-xl ${colors[index].accent} font-medium mb-4`}>
-                    {details.hero}
+                    {details?.hero || product.tagline}
                   </p>
                   <p className="text-lg text-slate-600 mb-8 leading-relaxed">
-                    {details.subtitle}
+                    {details?.subtitle || product.description}
                   </p>
 
                   {/* Key Benefits Grid */}
