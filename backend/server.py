@@ -1412,7 +1412,7 @@ async def seed_testimonials():
 class SiteStatCreate(BaseModel):
     key: str  # e.g., "cost_savings", "mpn_coverage", "data_sources", "enterprise_customers"
     value: str  # e.g., "15-20%", "25M+", "400+", "30+"
-    label: str  # e.g., "Cost Savings Identified"
+    label: str  # e.g., "Cost Savings Realised"
     description: str  # e.g., "Average savings identified across customer BOMs"
     order: int = 0
 
