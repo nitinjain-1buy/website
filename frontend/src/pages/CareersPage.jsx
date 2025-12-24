@@ -36,6 +36,7 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const CareersPage = () => {
   const [roles, setRoles] = useState([]);
+  const [benefits, setBenefits] = useState([]);
   const [selectedRole, setSelectedRole] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -48,8 +49,14 @@ const CareersPage = () => {
     whyJoin: ''
   });
 
+  // Icon mapping for dynamic icons
+  const iconMap = {
+    Rocket, Users, Zap, Globe, Briefcase, Sparkles, CheckCircle
+  };
+
   useEffect(() => {
     fetchRoles();
+    fetchBenefits();
   }, []);
 
   const fetchRoles = async () => {
@@ -59,6 +66,26 @@ const CareersPage = () => {
     } catch (error) {
       console.error('Error fetching roles:', error);
     }
+  };
+
+  const fetchBenefits = async () => {
+    try {
+      const res = await axios.get(`${API}/careers/benefits`);
+      setBenefits(res.data);
+    } catch (error) {
+      console.error('Error fetching benefits:', error);
+      // Fallback to defaults
+      setBenefits([
+        { icon: 'Rocket', title: 'Shape the Future', description: 'Work on cutting-edge AI and data technology' },
+        { icon: 'Users', title: 'World-Class Team', description: 'Collaborate with industry experts and innovators' },
+        { icon: 'Zap', title: 'Fast Growth', description: 'Accelerate your career in a high-growth startup' },
+        { icon: 'Globe', title: 'Global Impact', description: 'Transform electronics supply chains worldwide' }
+      ]);
+    }
+  };
+
+  const getIcon = (iconName) => {
+    return iconMap[iconName] || Briefcase;
   };
 
   const handleSubmit = async (e) => {
@@ -88,13 +115,6 @@ const CareersPage = () => {
       setIsSubmitting(false);
     }
   };
-
-  const benefits = [
-    { icon: Rocket, title: 'Shape the Future', description: 'Work on cutting-edge AI and data technology' },
-    { icon: Users, title: 'World-Class Team', description: 'Collaborate with industry experts and innovators' },
-    { icon: Zap, title: 'Fast Growth', description: 'Accelerate your career in a high-growth startup' },
-    { icon: Globe, title: 'Global Impact', description: 'Transform electronics supply chains worldwide' }
-  ];
 
   if (submitted) {
     return (
