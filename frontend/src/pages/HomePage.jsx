@@ -188,8 +188,8 @@ const HomePage = () => {
   const [stats, setStats] = useState(defaultStats);
   const [customers, setCustomers] = useState(defaultCustomers);
   const [products, setProducts] = useState(defaultProducts);
-  const [problems, setProblems] = useState([]);
-  const [workflowSteps, setWorkflowSteps] = useState([]);
+  const [problems, setProblems] = useState(defaultProblems);
+  const [workflowSteps, setWorkflowSteps] = useState(defaultWorkflowSteps);
   const [isLoading, setIsLoading] = useState(true);
   const [headlineComplete, setHeadlineComplete] = useState(false);
   const [siteSettings, setSiteSettings] = useState({
