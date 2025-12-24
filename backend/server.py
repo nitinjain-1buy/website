@@ -1605,6 +1605,107 @@ async def seed_site_stats():
     return {"message": f"Seeded {len(default_stats)} stats", "seeded": True}
 
 # =============================================
+# CAREER APPLICATIONS ENDPOINTS
+# =============================================
+
+CAREER_ROLES = [
+    {"id": "sales", "title": "Sales", "description": "Drive growth and build relationships with enterprise customers"},
+    {"id": "sourcing", "title": "Sourcing & Operations", "description": "Optimize supply chain and procurement processes"},
+    {"id": "ai_engineer", "title": "AI Engineer", "description": "Build intelligent systems that transform procurement"},
+    {"id": "data_scientist", "title": "Data Scientist", "description": "Extract insights from vast electronics market data"},
+    {"id": "electronics_rd", "title": "Electronics R&D Specialist", "description": "Deep domain expertise in electronic components"},
+    {"id": "product", "title": "Product", "description": "Shape the future of procurement technology"},
+    {"id": "design", "title": "Design", "description": "Create beautiful, intuitive user experiences"},
+    {"id": "legal", "title": "Legal", "description": "Navigate complex global trade and compliance"},
+    {"id": "hr_admin", "title": "HR & Admin", "description": "Build and nurture our high-performing team"}
+]
+
+class CareerApplicationCreate(BaseModel):
+    name: str
+    email: str
+    phone: Optional[str] = None
+    role: str
+    linkedinUrl: Optional[str] = None
+    resumeUrl: Optional[str] = None
+    coverLetter: Optional[str] = None
+    experience: Optional[str] = None
+    whyJoin: Optional[str] = None
+
+class CareerApplication(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    email: str
+    phone: Optional[str] = None
+    role: str
+    roleTitle: Optional[str] = None
+    linkedinUrl: Optional[str] = None
+    resumeUrl: Optional[str] = None
+    coverLetter: Optional[str] = None
+    experience: Optional[str] = None
+    whyJoin: Optional[str] = None
+    status: str = "new"  # new, reviewed, shortlisted, rejected
+    appliedAt: Optional[str] = None
+    notes: Optional[str] = None
+
+@api_router.get("/careers/roles")
+async def get_career_roles():
+    """Get available career roles"""
+    return CAREER_ROLES
+
+@api_router.post("/careers/apply", response_model=CareerApplication)
+async def submit_career_application(input: CareerApplicationCreate):
+    """Submit a career application"""
+    # Find the role title
+    role_title = next((r["title"] for r in CAREER_ROLES if r["id"] == input.role), input.role)
+    
+    application = CareerApplication(
+        **input.model_dump(),
+        roleTitle=role_title,
+        appliedAt=datetime.now(timezone.utc).isoformat()
+    )
+    
+    await db.career_applications.insert_one(application.model_dump())
+    logger.info(f"[Careers] New application received: {input.name} for {role_title}")
+    
+    return application
+
+@api_router.get("/careers/applications", response_model=List[CareerApplication])
+async def get_career_applications(status: Optional[str] = None):
+    """Get all career applications (admin)"""
+    query = {}
+    if status:
+        query["status"] = status
+    
+    applications = await db.career_applications.find(query, {"_id": 0}).sort("appliedAt", -1).to_list(500)
+    return applications
+
+@api_router.put("/careers/applications/{app_id}")
+async def update_career_application(app_id: str, status: str, notes: Optional[str] = None):
+    """Update application status (admin)"""
+    update_data = {"status": status}
+    if notes:
+        update_data["notes"] = notes
+    
+    result = await db.career_applications.update_one(
+        {"id": app_id},
+        {"$set": update_data}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Application not found")
+    
+    return {"success": True}
+
+@api_router.delete("/careers/applications/{app_id}")
+async def delete_career_application(app_id: str):
+    """Delete a career application (admin)"""
+    result = await db.career_applications.delete_one({"id": app_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Application not found")
+    return {"success": True}
+
+# =============================================
 # HERO SECTION ENDPOINTS
 # =============================================
 
