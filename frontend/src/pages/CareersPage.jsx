@@ -188,25 +188,28 @@ const CareersPage = () => {
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {benefits.map((benefit, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.1 }}
-                viewport={{ once: true }}
-              >
-                <Card className="h-full hover:shadow-lg transition-shadow border-0 bg-slate-50">
-                  <CardContent className="p-6 text-center">
-                    <div className="w-14 h-14 bg-emerald-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                      <benefit.icon className="w-7 h-7 text-emerald-600" />
-                    </div>
-                    <h3 className="font-semibold text-slate-900 mb-2">{benefit.title}</h3>
-                    <p className="text-sm text-slate-600">{benefit.description}</p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
+            {benefits.map((benefit, idx) => {
+              const IconComponent = getIcon(benefit.icon);
+              return (
+                <motion.div
+                  key={benefit.id || idx}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.1 }}
+                  viewport={{ once: true }}
+                >
+                  <Card className="h-full hover:shadow-lg transition-shadow border-0 bg-slate-50">
+                    <CardContent className="p-6 text-center">
+                      <div className="w-14 h-14 bg-emerald-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                        <IconComponent className="w-7 h-7 text-emerald-600" />
+                      </div>
+                      <h3 className="font-semibold text-slate-900 mb-2">{benefit.title}</h3>
+                      <p className="text-sm text-slate-600">{benefit.description}</p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
