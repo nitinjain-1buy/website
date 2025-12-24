@@ -581,20 +581,20 @@ const MarketIntelligencePage = () => {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 pt-1">
             {(selectedTopics.length > 0 || selectedRiskCategories.length > 0) ? (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleClearAll}
-                className="text-slate-600 hover:text-red-600 hover:border-red-300 text-xs sm:text-sm"
+                className="text-slate-600 hover:text-red-600 hover:border-red-300 text-xs h-7"
               >
-                <X className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                Clear Filters
+                <X className="w-3 h-3 mr-1" />
+                Clear
               </Button>
             ) : (
-              <span className="text-xs sm:text-sm text-slate-500">
-                Showing {sortedArticles.length} articles • Swipe to filter
+              <span className="text-xs text-slate-500">
+                {sortedArticles.length} articles
               </span>
             )}
           </div>
