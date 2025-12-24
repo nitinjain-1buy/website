@@ -25,4 +25,4 @@ Disallow: /admin
 Disallow: /api/
 
 # Sitemap location
-Sitemap: https://supply-intel-dash.preview.emergentagent.com/sitemap.xml
+Sitemap: https://youthful-bassi.preview.emergentagent.com/sitemap.xml

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 
-const BASE_URL = 'https://supply-intel-dash.preview.emergentagent.com';
+const BASE_URL = 'https://youthful-bassi.preview.emergentagent.com';
 
 const SEO = ({ 
   title = '1BUY.AI | AI-Powered Electronics Procurement Intelligence',
