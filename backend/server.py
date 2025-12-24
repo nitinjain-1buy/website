@@ -2069,8 +2069,8 @@ async def get_why_data():
     """Get why choose us data"""
     why = await db.why_data.find_one({"id": "why_data"}, {"_id": 0})
     if not why:
-        await db.why_data.insert_one(DEFAULT_WHY_DATA)
-        return DEFAULT_WHY_DATA
+        await db.why_data.insert_one({**DEFAULT_WHY_DATA})
+        return await db.why_data.find_one({"id": "why_data"}, {"_id": 0})
     return why
 
 @api_router.put("/why-data")
