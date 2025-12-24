@@ -352,21 +352,17 @@ const HomePage = () => {
             {/* Target Audience - Elegant Design */}
             <div className="mb-8">
               <p className="text-xl sm:text-2xl text-slate-600 font-light mb-4">
-                Built for procurement leaders who demand precision
+                {siteSettings.clientSectionSubtitle || "Built for procurement leaders who demand precision"}
               </p>
               <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
-                <span className="px-4 py-2 bg-slate-100 text-slate-700 rounded-full text-sm sm:text-base font-medium border border-slate-200">
-                  CEOs & Owners
-                </span>
-                <span className="px-4 py-2 bg-slate-100 text-slate-700 rounded-full text-sm sm:text-base font-medium border border-slate-200">
-                  Chief Procurement Officers
-                </span>
-                <span className="px-4 py-2 bg-slate-100 text-slate-700 rounded-full text-sm sm:text-base font-medium border border-slate-200">
-                  Chief Financial Officers
-                </span>
-                <span className="px-4 py-2 bg-slate-100 text-slate-700 rounded-full text-sm sm:text-base font-medium border border-slate-200">
-                  Sourcing Teams
-                </span>
+                {(siteSettings.targetAudience || []).map((audience, index) => (
+                  <span 
+                    key={index}
+                    className="px-4 py-2 bg-slate-100 text-slate-700 rounded-full text-sm sm:text-base font-medium border border-slate-200"
+                  >
+                    {audience}
+                  </span>
+                ))}
               </div>
             </div>
             
