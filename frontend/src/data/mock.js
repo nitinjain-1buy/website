@@ -327,8 +327,8 @@ export const navigationData = [
   { name: "How It Works", href: "/how-it-works" },
   { name: "Use Cases", href: "/use-cases" },
   { name: "Market Intelligence", href: "/market-intelligence" },
-  { name: "Join Us", href: "/careers" },
   { name: "Team", href: "/team" },
+  { name: "Join Us", href: "/careers" },
   { name: "About", href: "/about" }
 ];
 
