@@ -68,7 +68,9 @@ import {
   Eye,
   UserCheck,
   UserX,
-  Linkedin
+  Linkedin,
+  Download,
+  MessageSquare
 } from 'lucide-react';
 import { logoUrl } from '../data/mock';
 import MapLocationEditor from '../components/MapLocationEditor';
