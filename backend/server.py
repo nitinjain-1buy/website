@@ -2014,15 +2014,16 @@ async def get_use_cases():
 async def create_use_case(request: Request):
     """Create a new use case"""
     body = await request.json()
+    case_id = str(uuid.uuid4())
     case = {
-        "id": str(uuid.uuid4()),
+        "id": case_id,
         "industry": body.get("industry", ""),
         "description": body.get("description", ""),
         "icon": body.get("icon", "Settings"),
         "order": body.get("order", 0)
     }
     await db.use_cases.insert_one(case)
-    return case
+    return await db.use_cases.find_one({"id": case_id}, {"_id": 0})
 
 @api_router.put("/use-cases/{case_id}")
 async def update_use_case(case_id: str, request: Request):
