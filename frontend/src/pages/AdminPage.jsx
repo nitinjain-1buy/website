@@ -2824,8 +2824,11 @@ const CareersManager = ({ benefits, roles, applications, isLoading, onRefresh })
                         <div className="flex items-center gap-2">
                           <h4 className="font-semibold">{app.name}</h4>
                           <Badge variant="outline">{app.roleTitle || app.role}</Badge>
+                          {app.resumeData && (
+                            <Badge className="bg-emerald-100 text-emerald-700">Resume Attached</Badge>
+                          )}
                         </div>
-                        <div className="flex items-center gap-4 text-sm text-slate-500">
+                        <div className="flex items-center gap-4 text-sm text-slate-500 flex-wrap">
                           <span className="flex items-center gap-1">
                             <Mail className="w-3 h-3" />
                             {app.email}
@@ -2842,6 +2845,15 @@ const CareersManager = ({ benefits, roles, applications, isLoading, onRefresh })
                               LinkedIn
                             </a>
                           )}
+                          {app.resumeData && (
+                            <button 
+                              onClick={() => downloadResume(app)}
+                              className="flex items-center gap-1 text-emerald-600 hover:text-emerald-700 hover:underline"
+                            >
+                              <Download className="w-3 h-3" />
+                              Download Resume
+                            </button>
+                          )}
                         </div>
                         {app.experience && (
                           <p className="text-sm text-slate-600 mt-2">
@@ -2853,9 +2865,16 @@ const CareersManager = ({ benefits, roles, applications, isLoading, onRefresh })
                             <strong>Why Join:</strong> {app.whyJoin}
                           </p>
                         )}
-                        <p className="text-xs text-slate-400 mt-2">
-                          Applied: {new Date(app.appliedAt).toLocaleString()}
-                        </p>
+                        <div className="flex items-center gap-4 mt-2">
+                          <p className="text-xs text-slate-400">
+                            Applied: {new Date(app.appliedAt).toLocaleString()}
+                          </p>
+                          {app.reviews && app.reviews.length > 0 && (
+                            <Badge variant="outline" className="text-xs">
+                              {app.reviews.length} Review{app.reviews.length > 1 ? 's' : ''}
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                       <div className="flex items-center gap-2">
                         {/* Status Dropdown */}
@@ -2896,6 +2915,15 @@ const CareersManager = ({ benefits, roles, applications, isLoading, onRefresh })
                         <Button
                           variant="ghost"
                           size="sm"
+                          onClick={() => setExpandedApp(expandedApp === app.id ? null : app.id)}
+                          title="Add Review"
+                          className="text-slate-500 hover:text-emerald-600"
+                        >
+                          <MessageSquare className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => deleteApplication(app.id)}
                           title="Delete"
                           className="text-slate-400 hover:text-red-600"
@@ -2904,6 +2932,101 @@ const CareersManager = ({ benefits, roles, applications, isLoading, onRefresh })
                         </Button>
                       </div>
                     </div>
+                    
+                    {/* Expanded Interview Reviews Section */}
+                    {expandedApp === app.id && (
+                      <div className="mt-4 pt-4 border-t border-slate-200">
+                        <h5 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                          <MessageSquare className="w-4 h-4 text-emerald-600" />
+                          Interview Reviews
+                        </h5>
+                        
+                        {/* Existing Reviews */}
+                        {app.reviews && app.reviews.length > 0 && (
+                          <div className="space-y-3 mb-4">
+                            {app.reviews.map((review) => (
+                              <div key={review.id} className="bg-slate-50 p-3 rounded-lg">
+                                <div className="flex justify-between items-start">
+                                  <div className="space-y-1 flex-1">
+                                    <div className="flex items-center gap-2 text-sm">
+                                      <span className="font-medium text-slate-700">{review.interviewerEmail}</span>
+                                      <span className="text-slate-400">|</span>
+                                      <span className="text-slate-500">{new Date(review.interviewDate).toLocaleDateString()}</span>
+                                    </div>
+                                    <p className="text-sm text-slate-600">{review.comments}</p>
+                                    {review.nextSteps && (
+                                      <p className="text-sm text-emerald-600 mt-1">
+                                        <strong>Next Steps:</strong> {review.nextSteps}
+                                      </p>
+                                    )}
+                                  </div>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => deleteReview(app.id, review.id)}
+                                    className="text-slate-400 hover:text-red-600 h-6 w-6 p-0"
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        
+                        {/* Add New Review Form */}
+                        <div className="bg-emerald-50 p-4 rounded-lg">
+                          <h6 className="font-medium text-sm mb-3 text-emerald-800">Add Interview Review</h6>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <Label className="text-xs">Interviewer Email *</Label>
+                              <Input
+                                type="email"
+                                value={reviewForm.interviewerEmail}
+                                onChange={(e) => setReviewForm({...reviewForm, interviewerEmail: e.target.value})}
+                                placeholder="interviewer@company.com"
+                                className="h-8 text-sm"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Interview Date *</Label>
+                              <Input
+                                type="date"
+                                value={reviewForm.interviewDate}
+                                onChange={(e) => setReviewForm({...reviewForm, interviewDate: e.target.value})}
+                                className="h-8 text-sm"
+                              />
+                            </div>
+                          </div>
+                          <div className="mt-3">
+                            <Label className="text-xs">Comments / Remarks *</Label>
+                            <Textarea
+                              value={reviewForm.comments}
+                              onChange={(e) => setReviewForm({...reviewForm, comments: e.target.value})}
+                              placeholder="Your feedback about the candidate..."
+                              rows={2}
+                              className="text-sm"
+                            />
+                          </div>
+                          <div className="mt-3">
+                            <Label className="text-xs">Next Steps</Label>
+                            <Input
+                              value={reviewForm.nextSteps}
+                              onChange={(e) => setReviewForm({...reviewForm, nextSteps: e.target.value})}
+                              placeholder="e.g., Schedule technical round, Send offer letter..."
+                              className="h-8 text-sm"
+                            />
+                          </div>
+                          <Button
+                            onClick={() => addReview(app.id)}
+                            disabled={isAddingReview}
+                            className="mt-3 bg-emerald-600 hover:bg-emerald-700 h-8 text-sm"
+                          >
+                            {isAddingReview ? 'Adding...' : 'Add Review'}
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))}
