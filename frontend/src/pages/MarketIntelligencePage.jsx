@@ -72,7 +72,14 @@ const MarketIntelligencePage = () => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      setRiskCategoryCounts(data.categories || {});
+      // API returns array of {category, count}, convert to object
+      const countsObj = {};
+      if (Array.isArray(data)) {
+        data.forEach(item => {
+          countsObj[item.category] = item.count;
+        });
+      }
+      setRiskCategoryCounts(countsObj);
     } catch (error) {
       console.error('Error fetching risk categories:', error);
     }
