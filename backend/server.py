@@ -1625,6 +1625,184 @@ async def update_site_settings(input: SiteSettingsUpdate):
     return settings
 
 # =============================================
+# RISK CATEGORY CONFIGURATION ENDPOINTS
+# =============================================
+
+# Default risk categories to seed
+DEFAULT_RISK_CATEGORIES = [
+    {
+        "category": "SUPPLY_SHORTAGE",
+        "label": "Supply Shortage",
+        "strongTriggers": ["shortage", "allocation", "backorder", "out of stock", "constrained supply", "rationing", "supply crunch", "supply deficit"],
+        "mediumTriggers": ["tight supply", "limited availability", "scarcity", "undersupply", "supply gap"],
+        "order": 1
+    },
+    {
+        "category": "TARIFF_TRADE_POLICY",
+        "label": "Tariff/Trade",
+        "strongTriggers": ["tariff", "duty", "anti-dumping", "countervailing", "import tax", "trade remedy", "trade war", "trade restrictions"],
+        "mediumTriggers": ["customs levy", "trade policy", "import restrictions", "export restrictions", "trade barriers"],
+        "order": 2
+    },
+    {
+        "category": "PRICE_VOLATILITY",
+        "label": "Price Risk",
+        "strongTriggers": ["spot price", "price spike", "price surge", "price increase", "cost inflation", "ASP up", "prices soar"],
+        "mediumTriggers": ["pricing pressure", "volatility", "price hike", "price jump", "prices surge", "cost increase"],
+        "order": 3
+    },
+    {
+        "category": "FACTORY_FAB_OUTAGE",
+        "label": "Factory Outage",
+        "strongTriggers": ["fab outage", "plant fire", "explosion", "earthquake", "power outage", "factory shutdown", "fab fire", "plant shutdown"],
+        "mediumTriggers": ["production halted", "capacity loss", "line stoppage", "facility closure", "manufacturing disruption"],
+        "order": 4
+    },
+    {
+        "category": "GEOPOLITICAL_CONFLICT",
+        "label": "Geopolitical",
+        "strongTriggers": ["war", "conflict", "missile", "invasion", "Taiwan Strait", "escalation", "military action", "armed conflict"],
+        "mediumTriggers": ["geopolitical tension", "standoff", "political instability", "territorial dispute", "diplomatic crisis"],
+        "order": 5
+    },
+    {
+        "category": "LEAD_TIME_VOLATILITY",
+        "label": "Lead Time",
+        "strongTriggers": ["lead time", "extended lead times", "ETA slipped", "shipments delayed", "delivery delay", "lead time extension"],
+        "mediumTriggers": ["backlog", "pushed out", "delayed fulfillment", "shipping delays", "order delays"],
+        "order": 6
+    },
+    {
+        "category": "EOL_LIFECYCLE",
+        "label": "EOL/Lifecycle",
+        "strongTriggers": ["end of life", "EOL", "NRND", "PCN", "last time buy", "discontinued", "product discontinuation"],
+        "mediumTriggers": ["obsolete", "lifecycle notice", "phase out", "end of production", "obsolescence"],
+        "order": 7
+    },
+    {
+        "category": "BOM_CHANGE_COMPATIBILITY",
+        "label": "BOM Change",
+        "strongTriggers": ["redesign", "requalification", "qualify alternate", "form fit function", "pin-to-pin", "BOM change"],
+        "mediumTriggers": ["alternate parts", "second source", "drop-in replacement", "cross reference", "substitute"],
+        "order": 8
+    },
+    {
+        "category": "EXPORT_CONTROLS_SANCTIONS",
+        "label": "Export Controls",
+        "strongTriggers": ["export control", "entity list", "sanctions", "export ban", "license requirement", "blacklist", "trade ban"],
+        "mediumTriggers": ["restricted exports", "controls tightened", "export restrictions", "technology controls"],
+        "order": 9
+    },
+    {
+        "category": "LOGISTICS_SHIPPING_DISRUPTION",
+        "label": "Logistics",
+        "strongTriggers": ["port congestion", "shipping disruption", "Red Sea", "Suez", "freight rates", "container shortage"],
+        "mediumTriggers": ["logistics delays", "rerouting", "air freight", "sea freight", "shipping delays"],
+        "order": 10
+    },
+    {
+        "category": "QUALITY_COUNTERFEIT",
+        "label": "Quality/Counterfeit",
+        "strongTriggers": ["counterfeit", "fake chips", "recall", "defect", "authenticity", "non-genuine", "quality issue"],
+        "mediumTriggers": ["field failure", "reliability issue", "quality concern", "inspection failure"],
+        "order": 11
+    },
+    {
+        "category": "SUPPLIER_FINANCIAL_RISK",
+        "label": "Supplier Risk",
+        "strongTriggers": ["bankruptcy", "insolvency", "default", "debt restructuring", "liquidity crisis", "financial distress"],
+        "mediumTriggers": ["distress", "going concern", "credit downgrade", "financial trouble"],
+        "order": 12
+    },
+    {
+        "category": "REGULATORY_COMPLIANCE",
+        "label": "Regulatory",
+        "strongTriggers": ["RoHS", "REACH", "compliance violation", "regulatory ban", "restricted substance", "regulation change"],
+        "mediumTriggers": ["compliance update", "audit", "regulation", "regulatory requirement", "certification"],
+        "order": 13
+    },
+    {
+        "category": "CYBER_SECURITY_OPERATIONAL",
+        "label": "Cyber Security",
+        "strongTriggers": ["ransomware", "cyberattack", "systems down", "ERP outage", "data breach", "cyber incident"],
+        "mediumTriggers": ["security incident", "IT disruption", "system failure", "network attack"],
+        "order": 14
+    },
+    {
+        "category": "DEMAND_SHOCK",
+        "label": "Demand Shock",
+        "strongTriggers": ["demand surge", "orders spike", "demand collapse", "order cancellations", "demand shock"],
+        "mediumTriggers": ["inventory correction", "soft demand", "AI server demand surge", "EV demand spike", "demand volatility"],
+        "order": 15
+    }
+]
+
+@api_router.get("/risk-categories/config", response_model=List[RiskCategoryConfig])
+async def get_risk_category_configs():
+    """Get all risk category configurations"""
+    configs = await db.risk_category_configs.find({}, {"_id": 0}).to_list(100)
+    if not configs:
+        return []
+    configs.sort(key=lambda x: x.get('order', 0))
+    return configs
+
+@api_router.post("/risk-categories/config", response_model=RiskCategoryConfig)
+async def create_risk_category_config(input: RiskCategoryConfigCreate):
+    """Create a new risk category configuration"""
+    # Check if category already exists
+    existing = await db.risk_category_configs.find_one({"category": input.category})
+    if existing:
+        raise HTTPException(status_code=400, detail="Category already exists")
+    
+    config = RiskCategoryConfig(
+        **input.model_dump(),
+        createdAt=datetime.now(timezone.utc).isoformat()
+    )
+    await db.risk_category_configs.insert_one(config.model_dump())
+    return config
+
+@api_router.put("/risk-categories/config/{category}", response_model=RiskCategoryConfig)
+async def update_risk_category_config(category: str, input: RiskCategoryConfigUpdate):
+    """Update a risk category configuration"""
+    update_data = {k: v for k, v in input.model_dump().items() if v is not None}
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    
+    result = await db.risk_category_configs.update_one(
+        {"category": category},
+        {"$set": update_data}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Category not found")
+    
+    config = await db.risk_category_configs.find_one({"category": category}, {"_id": 0})
+    return config
+
+@api_router.delete("/risk-categories/config/{category}")
+async def delete_risk_category_config(category: str):
+    """Delete a risk category configuration"""
+    result = await db.risk_category_configs.delete_one({"category": category})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Category not found")
+    return {"success": True}
+
+@api_router.post("/risk-categories/config/seed")
+async def seed_risk_category_configs():
+    """Seed default risk category configurations"""
+    existing = await db.risk_category_configs.count_documents({})
+    if existing > 0:
+        return {"message": "Configurations already exist", "count": existing}
+    
+    for cat_data in DEFAULT_RISK_CATEGORIES:
+        config = RiskCategoryConfig(
+            **cat_data,
+            createdAt=datetime.now(timezone.utc).isoformat()
+        )
+        await db.risk_category_configs.insert_one(config.model_dump())
+    
+    return {"message": f"Seeded {len(DEFAULT_RISK_CATEGORIES)} risk categories", "seeded": True}
+
+# =============================================
 # PRODUCTS ENDPOINTS
 # =============================================
 
