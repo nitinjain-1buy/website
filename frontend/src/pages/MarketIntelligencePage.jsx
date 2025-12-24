@@ -631,6 +631,19 @@ const MarketIntelligencePage = () => {
               <RefreshCw className="w-10 h-10 animate-spin text-emerald-600 mb-4" />
               <span className="text-slate-600">Loading latest news...</span>
             </div>
+          ) : error ? (
+            <div className="text-center py-20 bg-white rounded-xl shadow-sm">
+              <AlertTriangle className="w-16 h-16 mx-auto text-amber-500 mb-4" />
+              <h3 className="text-xl font-semibold text-slate-700 mb-2">Connection Error</h3>
+              <p className="text-slate-500 mb-4">{error}</p>
+              <Button 
+                onClick={() => fetchNews()} 
+                className="bg-emerald-600 hover:bg-emerald-700"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Try Again
+              </Button>
+            </div>
           ) : displayArticles.length === 0 ? (
             <div className="text-center py-20 bg-white rounded-xl shadow-sm">
               {activeTab === 'archived' ? (
