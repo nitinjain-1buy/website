@@ -91,10 +91,15 @@ const MarketIntelligencePage = () => {
   const fetchNews = async (retryCount = 0, skip = 0, append = false) => {
     const maxRetries = 2;
     try {
-      setLoading(true);
+      if (append) {
+        setLoadingMore(true);
+      } else {
+        setLoading(true);
+      }
       setError(null);
-      // Fetch all articles (2500 limit to cover all)
-      const response = await fetch(`${API_URL}/api/news?limit=2500`);
+      
+      // Fetch articles with pagination
+      const response = await fetch(`${API_URL}/api/news?limit=${BATCH_SIZE}&skip=${skip}`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -105,6 +110,9 @@ const MarketIntelligencePage = () => {
       if (!Array.isArray(data)) {
         throw new Error('Invalid response format');
       }
+      
+      // Check if there are more articles to load
+      setHasMore(data.length === BATCH_SIZE);
       
       // Filter out articles without valid links or content
       const validArticles = data.filter(
@@ -120,18 +128,29 @@ const MarketIntelligencePage = () => {
         return dateB - dateA;
       });
       
-      setArticles(sortedData);
+      if (append) {
+        setArticles(prev => [...prev, ...sortedData]);
+      } else {
+        setArticles(sortedData);
+      }
       setError(null);
     } catch (error) {
       console.error('Error fetching news:', error);
       if (retryCount < maxRetries) {
         // Retry after 1 second
-        setTimeout(() => fetchNews(retryCount + 1), 1000);
+        setTimeout(() => fetchNews(retryCount + 1, skip, append), 1000);
         return;
       }
       setError(`Failed to load articles. Please check your internet connection and try again.`);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
+    }
+  };
+
+  const loadMoreArticles = () => {
+    if (!loadingMore && hasMore) {
+      fetchNews(0, articles.length, true);
     }
   };
 
