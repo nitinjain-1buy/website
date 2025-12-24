@@ -141,12 +141,14 @@ const HomePage = () => {
     const fetchSiteContent = async () => {
       try {
         // Fetch all content in parallel
-        const [heroRes, statsRes, customersRes, productsRes, settingsRes] = await Promise.all([
+        const [heroRes, statsRes, customersRes, productsRes, settingsRes, problemsRes, workflowRes] = await Promise.all([
           axios.get(`${API}/hero-section`).catch(() => ({ data: null })),
           axios.get(`${API}/site-stats`).catch(() => ({ data: [] })),
           axios.get(`${API}/customer-logos`).catch(() => ({ data: [] })),
           axios.get(`${API}/products`).catch(() => ({ data: [] })),
-          axios.get(`${API}/site-settings`).catch(() => ({ data: null }))
+          axios.get(`${API}/site-settings`).catch(() => ({ data: null })),
+          axios.get(`${API}/problems`).catch(() => ({ data: [] })),
+          axios.get(`${API}/workflow-steps`).catch(() => ({ data: [] }))
         ]);
 
         // Update hero data if available
@@ -167,6 +169,16 @@ const HomePage = () => {
         // Update products if available
         if (productsRes.data && productsRes.data.length > 0) {
           setProducts(productsRes.data);
+        }
+
+        // Update problems if available
+        if (problemsRes.data && problemsRes.data.length > 0) {
+          setProblems(problemsRes.data);
+        }
+
+        // Update workflow steps if available
+        if (workflowRes.data && workflowRes.data.length > 0) {
+          setWorkflowSteps(workflowRes.data);
         }
 
         // Update site settings if available
