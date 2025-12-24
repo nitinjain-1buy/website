@@ -50,8 +50,9 @@ function App() {
             } />
           </Routes>
           <Toaster position="top-right" />
-      </BrowserRouter>
-    </div>
+        </BrowserRouter>
+      </div>
+    </HelmetProvider>
   );
 }
 
