@@ -3487,7 +3487,7 @@ async def trigger_risk_analysis(limit: int = 100, force: bool = False):
             logger.info(f"[RiskEngine] Force mode: Reset risk data for {result.modified_count} articles")
         
         # Run risk analysis
-        analyzed_count = await run_risk_analysis(limit=limit)
+        analyzed_count = await compute_risk_for_unanalyzed_articles(limit=limit)
         return {
             "success": True,
             "message": f"Risk analysis completed for {analyzed_count} articles",
