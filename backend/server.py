@@ -1594,6 +1594,8 @@ class CustomerLogo(BaseModel):
 class SiteSettingsUpdate(BaseModel):
     showClientNames: Optional[bool] = None
     clientSectionTitle: Optional[str] = None
+    clientSectionSubtitle: Optional[str] = None
+    targetAudience: Optional[List[str]] = None
     twitterUrl: Optional[str] = None
     linkedinUrl: Optional[str] = None
 
@@ -1602,6 +1604,8 @@ class SiteSettings(BaseModel):
     id: str = "site_settings"
     showClientNames: bool = True
     clientSectionTitle: str = "Trusted by leading OEMs and EMSs of the world"
+    clientSectionSubtitle: str = "Built for procurement leaders who demand precision"
+    targetAudience: List[str] = ["CEOs & Owners", "Chief Procurement Officers", "Chief Financial Officers", "Sourcing Teams"]
     twitterUrl: str = ""
     linkedinUrl: str = ""
 
