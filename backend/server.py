@@ -1706,6 +1706,148 @@ async def delete_career_application(app_id: str):
     return {"success": True}
 
 # =============================================
+# CAREER BENEFITS & ROLES MANAGEMENT (DB-backed)
+# =============================================
+
+# Default benefits (used for seeding)
+DEFAULT_CAREER_BENEFITS = [
+    {"id": "shape_future", "icon": "Rocket", "title": "Shape the Future", "description": "Work on cutting-edge AI and data technology", "order": 0},
+    {"id": "world_class_team", "icon": "Users", "title": "World-Class Team", "description": "Collaborate with industry experts and innovators", "order": 1},
+    {"id": "fast_growth", "icon": "Zap", "title": "Fast Growth", "description": "Accelerate your career in a high-growth startup", "order": 2},
+    {"id": "global_impact", "icon": "Globe", "title": "Global Impact", "description": "Transform electronics supply chains worldwide", "order": 3}
+]
+
+# Default roles (used for seeding)
+DEFAULT_CAREER_ROLES = [
+    {"id": "sales", "title": "Sales", "description": "Drive growth and build relationships with enterprise customers", "icon": "Briefcase", "order": 0},
+    {"id": "sourcing", "title": "Sourcing & Operations", "description": "Optimize supply chain and procurement processes", "icon": "Briefcase", "order": 1},
+    {"id": "ai_engineer", "title": "AI Engineer", "description": "Build intelligent systems that transform procurement", "icon": "Briefcase", "order": 2},
+    {"id": "data_scientist", "title": "Data Scientist", "description": "Extract insights from vast electronics market data", "icon": "Briefcase", "order": 3},
+    {"id": "electronics_rd", "title": "Electronics R&D Specialist", "description": "Deep domain expertise in electronic components", "icon": "Briefcase", "order": 4},
+    {"id": "product", "title": "Product", "description": "Shape the future of procurement technology", "icon": "Briefcase", "order": 5},
+    {"id": "design", "title": "Design", "description": "Create beautiful, intuitive user experiences", "icon": "Briefcase", "order": 6},
+    {"id": "legal", "title": "Legal", "description": "Navigate complex global trade and compliance", "icon": "Briefcase", "order": 7},
+    {"id": "hr_admin", "title": "HR & Admin", "description": "Build and nurture our high-performing team", "icon": "Briefcase", "order": 8}
+]
+
+class CareerBenefit(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    icon: str = "Rocket"  # Lucide icon name
+    title: str
+    description: str
+    order: int = 0
+
+class CareerRole(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    description: str
+    icon: str = "Briefcase"
+    order: int = 0
+
+@api_router.get("/careers/benefits")
+async def get_career_benefits():
+    """Get career page benefits from DB"""
+    benefits = await db.career_benefits.find({}, {"_id": 0}).sort("order", 1).to_list(20)
+    if not benefits:
+        # Seed with defaults if empty
+        for benefit in DEFAULT_CAREER_BENEFITS:
+            await db.career_benefits.insert_one(benefit)
+        return DEFAULT_CAREER_BENEFITS
+    return benefits
+
+@api_router.post("/careers/benefits")
+async def create_career_benefit(benefit: CareerBenefit):
+    """Create a new career benefit"""
+    # Get max order
+    max_order = await db.career_benefits.find_one(sort=[("order", -1)])
+    benefit_dict = benefit.model_dump()
+    benefit_dict["order"] = (max_order.get("order", 0) + 1) if max_order else 0
+    await db.career_benefits.insert_one(benefit_dict)
+    return benefit_dict
+
+@api_router.put("/careers/benefits/{benefit_id}")
+async def update_career_benefit(benefit_id: str, title: str = None, description: str = None, icon: str = None, order: int = None):
+    """Update a career benefit"""
+    update_data = {}
+    if title is not None: update_data["title"] = title
+    if description is not None: update_data["description"] = description
+    if icon is not None: update_data["icon"] = icon
+    if order is not None: update_data["order"] = order
+    
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    
+    result = await db.career_benefits.update_one({"id": benefit_id}, {"$set": update_data})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Benefit not found")
+    
+    updated = await db.career_benefits.find_one({"id": benefit_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/careers/benefits/{benefit_id}")
+async def delete_career_benefit(benefit_id: str):
+    """Delete a career benefit"""
+    result = await db.career_benefits.delete_one({"id": benefit_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Benefit not found")
+    return {"success": True}
+
+@api_router.get("/careers/roles-config")
+async def get_career_roles_config():
+    """Get career roles from DB (configurable)"""
+    roles = await db.career_roles.find({}, {"_id": 0}).sort("order", 1).to_list(50)
+    if not roles:
+        # Seed with defaults if empty
+        for role in DEFAULT_CAREER_ROLES:
+            await db.career_roles.insert_one(role)
+        return DEFAULT_CAREER_ROLES
+    return roles
+
+@api_router.post("/careers/roles-config")
+async def create_career_role(role: CareerRole):
+    """Create a new career role"""
+    # Check if ID already exists
+    existing = await db.career_roles.find_one({"id": role.id})
+    if existing:
+        raise HTTPException(status_code=400, detail="Role ID already exists")
+    
+    # Get max order
+    max_order = await db.career_roles.find_one(sort=[("order", -1)])
+    role_dict = role.model_dump()
+    role_dict["order"] = (max_order.get("order", 0) + 1) if max_order else 0
+    await db.career_roles.insert_one(role_dict)
+    return role_dict
+
+@api_router.put("/careers/roles-config/{role_id}")
+async def update_career_role(role_id: str, title: str = None, description: str = None, icon: str = None, order: int = None):
+    """Update a career role"""
+    update_data = {}
+    if title is not None: update_data["title"] = title
+    if description is not None: update_data["description"] = description
+    if icon is not None: update_data["icon"] = icon
+    if order is not None: update_data["order"] = order
+    
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    
+    result = await db.career_roles.update_one({"id": role_id}, {"$set": update_data})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Role not found")
+    
+    updated = await db.career_roles.find_one({"id": role_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/careers/roles-config/{role_id}")
+async def delete_career_role(role_id: str):
+    """Delete a career role"""
+    result = await db.career_roles.delete_one({"id": role_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Role not found")
+    return {"success": True}
+
+# =============================================
 # HERO SECTION ENDPOINTS
 # =============================================
 
