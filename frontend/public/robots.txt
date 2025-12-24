@@ -25,4 +25,4 @@ Disallow: /admin
 Disallow: /api/
 
 # Sitemap location
-Sitemap: https://content-admin-dash-1.preview.emergentagent.com/sitemap.xml
+Sitemap: https://supply-intel-dash.preview.emergentagent.com/sitemap.xml
