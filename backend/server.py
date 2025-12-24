@@ -2484,15 +2484,38 @@ async def update_news_query(query_id: str, isActive: bool):
 
 @api_router.delete("/news/queries/{query_id}")
 async def delete_news_query(query_id: str):
-    """Delete a news search query"""
-    result = await db.news_queries.delete_one({"id": query_id})
-    if result.deleted_count == 0:
+    """Delete a news search query and remove the tag from all articles"""
+    # First, find the query to get its name
+    query_doc = await db.news_queries.find_one({"id": query_id})
+    if not query_doc:
         raise HTTPException(status_code=404, detail="Query not found")
-    return {"success": True}
+    
+    query_name = query_doc.get("query")
+    
+    # Delete the query
+    result = await db.news_queries.delete_one({"id": query_id})
+    
+    # Also remove this tag from all articles to prevent orphan tags
+    tag_removal = await db.news_articles.update_many(
+        {"queries": query_name},
+        {"$pull": {"queries": query_name}}
+    )
+    
+    logger.info(f"[Queries] Deleted query '{query_name}' and removed tag from {tag_removal.modified_count} articles")
+    
+    return {
+        "success": True,
+        "message": f"Query deleted and tag removed from {tag_removal.modified_count} articles",
+        "articlesUpdated": tag_removal.modified_count
+    }
 
 @api_router.delete("/news/tags/{tag_name}")
 async def remove_tag_from_articles(tag_name: str):
     """Remove a specific tag from all articles (cleanup orphan tags)"""
+    # URL decode the tag name
+    from urllib.parse import unquote
+    tag_name = unquote(tag_name)
+    
     # Remove the tag from the queries array of all articles that have it
     result = await db.news_articles.update_many(
         {"queries": tag_name},
