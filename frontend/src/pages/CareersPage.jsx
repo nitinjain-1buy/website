@@ -142,6 +142,12 @@ const CareersPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+      <SEO 
+        title="Careers at 1BUY.AI | Join Our Team"
+        description="Join 1BUY.AI and help build the future of electronics procurement intelligence. Explore open positions in AI, engineering, and more."
+        keywords="1BUY.AI careers, jobs in AI, electronics procurement jobs, semiconductor industry careers, tech jobs"
+        url="/careers"
+      />
       {/* Hero Section */}
       <section className="relative py-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/10 to-blue-600/10"></div>
