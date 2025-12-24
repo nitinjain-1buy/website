@@ -51,42 +51,44 @@ const RISK_CATEGORY_LABELS = {
 const MarketIntelligencePage = () => {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(null);
   const [selectedTopics, setSelectedTopics] = useState([]);
   const [selectedRiskCategories, setSelectedRiskCategories] = useState([]);
   const [sortBy, setSortBy] = useState('newest'); // 'newest' or 'risk'
   const [visibleCount, setVisibleCount] = useState(10);
   const [activeTab, setActiveTab] = useState('recent');
-  const [riskCategoryCounts, setRiskCategoryCounts] = useState({});
+  const [stats, setStats] = useState({
+    total: 0,
+    recent: 0,
+    archived: 0,
+    topics: {},
+    riskCategories: {},
+    riskBands: {}
+  });
+  const [hasMore, setHasMore] = useState(true);
+  const BATCH_SIZE = 500;
 
   const API_URL = process.env.REACT_APP_BACKEND_URL;
 
   useEffect(() => {
+    fetchStats();
     fetchNews();
-    fetchRiskCategories();
   }, []);
 
-  const fetchRiskCategories = async () => {
+  const fetchStats = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/news/risk-categories`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      const response = await fetch(`${API_URL}/api/news/stats`);
+      if (response.ok) {
+        const data = await response.json();
+        setStats(data);
       }
-      const data = await response.json();
-      // API returns array of {category, count}, convert to object
-      const countsObj = {};
-      if (Array.isArray(data)) {
-        data.forEach(item => {
-          countsObj[item.category] = item.count;
-        });
-      }
-      setRiskCategoryCounts(countsObj);
     } catch (error) {
-      console.error('Error fetching risk categories:', error);
+      console.error('Error fetching stats:', error);
     }
   };
 
-  const fetchNews = async (retryCount = 0) => {
+  const fetchNews = async (retryCount = 0, skip = 0, append = false) => {
     const maxRetries = 2;
     try {
       setLoading(true);
