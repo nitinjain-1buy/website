@@ -249,19 +249,19 @@ const GlobalNetworkMap = () => {
             </svg>
           </div>
 
-          {/* Legend - Bottom Left */}
-          <div className="absolute bottom-6 left-6 bg-slate-900/80 backdrop-blur-sm rounded-lg px-4 py-3 border border-slate-700">
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                <span className="text-slate-300 text-sm">Data Sources</span>
+          {/* Legend - Bottom Left - Responsive */}
+          <div className="absolute bottom-2 left-2 sm:bottom-6 sm:left-6 bg-slate-900/80 backdrop-blur-sm rounded-lg px-2 py-1.5 sm:px-4 sm:py-3 border border-slate-700">
+            <div className="flex items-center gap-3 sm:gap-6">
+              <div className="flex items-center gap-1 sm:gap-2">
+                <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-blue-500"></div>
+                <span className="text-slate-300 text-[10px] sm:text-sm">Data Sources</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-                <span className="text-slate-300 text-sm">Sourcing Hubs</span>
+              <div className="flex items-center gap-1 sm:gap-2">
+                <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-emerald-500"></div>
+                <span className="text-slate-300 text-[10px] sm:text-sm">Sourcing Hubs</span>
               </div>
             </div>
-            <p className="text-slate-500 text-xs mt-1">Live data flows updating in real-time</p>
+            <p className="text-slate-500 text-[8px] sm:text-xs mt-0.5 sm:mt-1 hidden sm:block">Live data flows updating in real-time</p>
           </div>
         </div>
 
