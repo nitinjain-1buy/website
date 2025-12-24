@@ -2433,6 +2433,409 @@ const NewsManager = ({ isLoading: parentLoading, onRefresh }) => {
   );
 };
 
+// Careers Manager Component
+const CareersManager = ({ benefits, roles, applications, isLoading, onRefresh }) => {
+  const [activeSection, setActiveSection] = useState('applications');
+  const [editingItem, setEditingItem] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [dialogType, setDialogType] = useState('benefit'); // 'benefit' or 'role'
+  const [formData, setFormData] = useState({});
+  const [isSaving, setIsSaving] = useState(false);
+  const [filterStatus, setFilterStatus] = useState('all');
+
+  const iconOptions = ['Rocket', 'Users', 'Zap', 'Globe', 'Briefcase', 'Sparkles', 'CheckCircle'];
+
+  const openCreateDialog = (type) => {
+    setEditingItem(null);
+    setDialogType(type);
+    if (type === 'benefit') {
+      setFormData({ icon: 'Rocket', title: '', description: '', order: benefits.length });
+    } else {
+      setFormData({ id: '', title: '', description: '', icon: 'Briefcase', order: roles.length });
+    }
+    setIsDialogOpen(true);
+  };
+
+  const openEditDialog = (item, type) => {
+    setEditingItem(item);
+    setDialogType(type);
+    setFormData({ ...item });
+    setIsDialogOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!formData.title || !formData.description) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const endpoint = dialogType === 'benefit' ? 'careers/benefits' : 'careers/roles-config';
+      if (editingItem) {
+        await axios.put(`${API}/${endpoint}/${editingItem.id}`, formData);
+        toast.success(`${dialogType === 'benefit' ? 'Benefit' : 'Role'} updated successfully`);
+      } else {
+        // For roles, we need to generate an ID from the title
+        if (dialogType === 'role' && !formData.id) {
+          formData.id = formData.title.toLowerCase().replace(/[^a-z0-9]/g, '_');
+        }
+        await axios.post(`${API}/${endpoint}`, formData);
+        toast.success(`${dialogType === 'benefit' ? 'Benefit' : 'Role'} created successfully`);
+      }
+      setIsDialogOpen(false);
+      onRefresh();
+    } catch (error) {
+      toast.error(`Failed to save ${dialogType}`);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async (id, type) => {
+    if (!window.confirm(`Are you sure you want to delete this ${type}?`)) return;
+    try {
+      const endpoint = type === 'benefit' ? 'careers/benefits' : 'careers/roles-config';
+      await axios.delete(`${API}/${endpoint}/${id}`);
+      toast.success(`${type === 'benefit' ? 'Benefit' : 'Role'} deleted successfully`);
+      onRefresh();
+    } catch (error) {
+      toast.error(`Failed to delete ${type}`);
+    }
+  };
+
+  const updateApplicationStatus = async (appId, status) => {
+    try {
+      await axios.put(`${API}/careers/applications/${appId}?status=${status}`);
+      toast.success(`Application marked as ${status}`);
+      onRefresh();
+    } catch (error) {
+      toast.error('Failed to update application status');
+    }
+  };
+
+  const deleteApplication = async (appId) => {
+    if (!window.confirm('Are you sure you want to delete this application?')) return;
+    try {
+      await axios.delete(`${API}/careers/applications/${appId}`);
+      toast.success('Application deleted');
+      onRefresh();
+    } catch (error) {
+      toast.error('Failed to delete application');
+    }
+  };
+
+  const filteredApplications = filterStatus === 'all' 
+    ? applications 
+    : applications.filter(app => app.status === filterStatus);
+
+  const getStatusBadge = (status) => {
+    const statusConfig = {
+      new: { color: 'bg-blue-100 text-blue-700', label: 'New' },
+      reviewed: { color: 'bg-yellow-100 text-yellow-700', label: 'Reviewed' },
+      shortlisted: { color: 'bg-emerald-100 text-emerald-700', label: 'Shortlisted' },
+      rejected: { color: 'bg-red-100 text-red-700', label: 'Rejected' }
+    };
+    const config = statusConfig[status] || statusConfig.new;
+    return <Badge className={config.color}>{config.label}</Badge>;
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Section Tabs */}
+      <div className="flex gap-2 border-b pb-2">
+        <Button 
+          variant={activeSection === 'applications' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setActiveSection('applications')}
+          className={activeSection === 'applications' ? 'bg-emerald-600' : ''}
+        >
+          <Users className="w-4 h-4 mr-2" />
+          Applications ({applications.length})
+        </Button>
+        <Button 
+          variant={activeSection === 'benefits' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setActiveSection('benefits')}
+          className={activeSection === 'benefits' ? 'bg-emerald-600' : ''}
+        >
+          <Rocket className="w-4 h-4 mr-2" />
+          Benefits ({benefits.length})
+        </Button>
+        <Button 
+          variant={activeSection === 'roles' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setActiveSection('roles')}
+          className={activeSection === 'roles' ? 'bg-emerald-600' : ''}
+        >
+          <Briefcase className="w-4 h-4 mr-2" />
+          Roles ({roles.length})
+        </Button>
+      </div>
+
+      {/* Applications Section */}
+      {activeSection === 'applications' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Job Applications</h3>
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="new">New</SelectItem>
+                <SelectItem value="reviewed">Reviewed</SelectItem>
+                <SelectItem value="shortlisted">Shortlisted</SelectItem>
+                <SelectItem value="rejected">Rejected</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {filteredApplications.length === 0 ? (
+            <div className="text-center py-8 text-slate-500">
+              <Users className="w-12 h-12 mx-auto mb-3 text-slate-300" />
+              <p>No applications found</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {filteredApplications.map((app) => (
+                <Card key={app.id} className="border">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-semibold">{app.name}</h4>
+                          {getStatusBadge(app.status)}
+                          <Badge variant="outline">{app.roleTitle || app.role}</Badge>
+                        </div>
+                        <div className="flex items-center gap-4 text-sm text-slate-500">
+                          <span className="flex items-center gap-1">
+                            <Mail className="w-3 h-3" />
+                            {app.email}
+                          </span>
+                          {app.phone && (
+                            <span className="flex items-center gap-1">
+                              <Phone className="w-3 h-3" />
+                              {app.phone}
+                            </span>
+                          )}
+                          {app.linkedinUrl && (
+                            <a href={app.linkedinUrl.startsWith('http') ? app.linkedinUrl : `https://${app.linkedinUrl}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-blue-600 hover:underline">
+                              <ExternalLink className="w-3 h-3" />
+                              LinkedIn
+                            </a>
+                          )}
+                        </div>
+                        {app.experience && (
+                          <p className="text-sm text-slate-600 mt-2">
+                            <strong>Experience:</strong> {app.experience}
+                          </p>
+                        )}
+                        {app.whyJoin && (
+                          <p className="text-sm text-slate-600">
+                            <strong>Why Join:</strong> {app.whyJoin}
+                          </p>
+                        )}
+                        <p className="text-xs text-slate-400 mt-2">
+                          Applied: {new Date(app.appliedAt).toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => updateApplicationStatus(app.id, 'reviewed')}
+                          title="Mark as Reviewed"
+                          className="text-yellow-600 hover:text-yellow-700"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => updateApplicationStatus(app.id, 'shortlisted')}
+                          title="Shortlist"
+                          className="text-emerald-600 hover:text-emerald-700"
+                        >
+                          <UserCheck className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => updateApplicationStatus(app.id, 'rejected')}
+                          title="Reject"
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <UserX className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => deleteApplication(app.id)}
+                          title="Delete"
+                          className="text-slate-400 hover:text-red-600"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Benefits Section */}
+      {activeSection === 'benefits' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">"Why Join" Benefits</h3>
+            <Button size="sm" onClick={() => openCreateDialog('benefit')} className="bg-emerald-600 hover:bg-emerald-700">
+              <Plus className="w-4 h-4 mr-1" />
+              Add Benefit
+            </Button>
+          </div>
+          <p className="text-sm text-slate-500">These appear on the Careers page under "Why Join 1BUY.AI?"</p>
+          
+          <div className="grid gap-3">
+            {benefits.map((benefit) => (
+              <Card key={benefit.id} className="border">
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+                      <span className="text-emerald-600 text-sm font-bold">{benefit.icon?.charAt(0) || 'R'}</span>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold">{benefit.title}</h4>
+                      <p className="text-sm text-slate-500">{benefit.description}</p>
+                      <Badge variant="outline" className="mt-1 text-xs">Icon: {benefit.icon}</Badge>
+                    </div>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="sm" onClick={() => openEditDialog(benefit, 'benefit')}>
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleDelete(benefit.id, 'benefit')} className="text-red-600 hover:text-red-700">
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Roles Section */}
+      {activeSection === 'roles' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Career Roles</h3>
+            <Button size="sm" onClick={() => openCreateDialog('role')} className="bg-emerald-600 hover:bg-emerald-700">
+              <Plus className="w-4 h-4 mr-1" />
+              Add Role
+            </Button>
+          </div>
+          <p className="text-sm text-slate-500">These appear in the Open Roles section and the application form dropdown</p>
+          
+          <div className="grid gap-3">
+            {roles.map((role) => (
+              <Card key={role.id} className="border">
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center">
+                      <Briefcase className="w-5 h-5 text-slate-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold">{role.title}</h4>
+                      <p className="text-sm text-slate-500">{role.description}</p>
+                      <Badge variant="outline" className="mt-1 text-xs">ID: {role.id}</Badge>
+                    </div>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="sm" onClick={() => openEditDialog(role, 'role')}>
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleDelete(role.id, 'role')} className="text-red-600 hover:text-red-700">
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Edit/Create Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {editingItem ? 'Edit' : 'Create'} {dialogType === 'benefit' ? 'Benefit' : 'Role'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {dialogType === 'role' && !editingItem && (
+              <div>
+                <Label>Role ID</Label>
+                <Input 
+                  value={formData.id || ''} 
+                  onChange={(e) => setFormData({...formData, id: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '_')})}
+                  placeholder="e.g., senior_engineer"
+                />
+                <p className="text-xs text-slate-500 mt-1">Unique identifier (auto-generated if left blank)</p>
+              </div>
+            )}
+            <div>
+              <Label>Title *</Label>
+              <Input 
+                value={formData.title || ''} 
+                onChange={(e) => setFormData({...formData, title: e.target.value})}
+                placeholder={dialogType === 'benefit' ? 'e.g., Fast Growth' : 'e.g., Senior Engineer'}
+              />
+            </div>
+            <div>
+              <Label>Description *</Label>
+              <Textarea 
+                value={formData.description || ''} 
+                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                placeholder="Brief description..."
+                rows={3}
+              />
+            </div>
+            {dialogType === 'benefit' && (
+              <div>
+                <Label>Icon</Label>
+                <Select value={formData.icon || 'Rocket'} onValueChange={(v) => setFormData({...formData, icon: v})}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {iconOptions.map(icon => (
+                      <SelectItem key={icon} value={icon}>{icon}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+              <Button onClick={handleSave} disabled={isSaving} className="bg-emerald-600 hover:bg-emerald-700">
+                {isSaving ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                Save
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
 // Dashboard Component
 const AdminDashboard = ({ onLogout }) => {
   const [customerRequests, setCustomerRequests] = useState([]);
