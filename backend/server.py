@@ -2049,8 +2049,8 @@ async def get_about_data():
     """Get about page data"""
     about = await db.about_data.find_one({"id": "about_data"}, {"_id": 0})
     if not about:
-        await db.about_data.insert_one(DEFAULT_ABOUT_DATA)
-        return DEFAULT_ABOUT_DATA
+        await db.about_data.insert_one({**DEFAULT_ABOUT_DATA})
+        return await db.about_data.find_one({"id": "about_data"}, {"_id": 0})
     return about
 
 @api_router.put("/about-data")
