@@ -422,6 +422,47 @@ const CareersPage = () => {
                       />
                     </div>
 
+                    {/* Resume Upload */}
+                    <div>
+                      <Label htmlFor="resume" className="flex items-center gap-1">
+                        <Upload className="w-3 h-3" /> Attach Resume
+                      </Label>
+                      <div className="mt-1">
+                        {resumeFile ? (
+                          <div className="flex items-center gap-2 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+                            <FileText className="w-5 h-5 text-emerald-600" />
+                            <span className="flex-1 text-sm text-emerald-700 truncate">{resumeFile.name}</span>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={removeFile}
+                              className="text-slate-400 hover:text-red-600 p-1 h-auto"
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <div 
+                            className="border-2 border-dashed border-slate-200 rounded-lg p-4 text-center cursor-pointer hover:border-emerald-400 transition-colors"
+                            onClick={() => fileInputRef.current?.click()}
+                          >
+                            <Upload className="w-6 h-6 mx-auto mb-2 text-slate-400" />
+                            <p className="text-sm text-slate-600">Click to upload your resume</p>
+                            <p className="text-xs text-slate-400 mt-1">PDF or Word (max 5MB)</p>
+                          </div>
+                        )}
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          id="resume"
+                          accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                          onChange={handleFileChange}
+                          className="hidden"
+                        />
+                      </div>
+                    </div>
+
                     <Button 
                       type="submit" 
                       className="w-full bg-emerald-600 hover:bg-emerald-700"
