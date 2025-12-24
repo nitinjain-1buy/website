@@ -65,14 +65,29 @@ const CareersPage = () => {
       // Check file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         toast.error('File size must be less than 5MB');
+        e.target.value = '';
         return;
       }
-      // Check file type
-      const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+      
+      // Check file extension (only .pdf and .docx allowed)
+      const fileName = file.name.toLowerCase();
+      const allowedExtensions = ['.pdf', '.docx'];
+      const hasValidExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
+      
+      if (!hasValidExtension) {
+        toast.error('Only PDF and DOCX files are allowed');
+        e.target.value = '';
+        return;
+      }
+      
+      // Check MIME type as secondary validation
+      const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
       if (!allowedTypes.includes(file.type)) {
-        toast.error('Please upload a PDF or Word document');
+        toast.error('Invalid file format. Please upload a PDF or DOCX file');
+        e.target.value = '';
         return;
       }
+      
       setResumeFile(file);
     }
   };
