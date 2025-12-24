@@ -547,32 +547,33 @@ const MarketIntelligencePage = () => {
             </div>
           </div>
 
-          {/* Topic Chips - Scrollable on mobile */}
-          <div className="flex gap-1.5 sm:gap-2 mb-2 overflow-x-auto pb-1.5 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible scrollbar-hide">
-            {/* All News Chip */}
-            <button
-              onClick={() => { setSelectedTopics([]); }}
-              className={`inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 border whitespace-nowrap flex-shrink-0 ${
-                selectedTopics.length === 0
-                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-md'
-                  : 'bg-white text-slate-700 border-slate-300 hover:border-emerald-400 hover:bg-emerald-50'
-              }`}
-            >
-              {selectedTopics.length === 0 && <Check className="w-3 h-3" />}
-              <span>All</span>
-              <span className={`text-xs px-1 py-0.5 rounded-full ${
-                selectedTopics.length === 0 ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-500'
-              }`}>
-                {activeTab === 'recent' 
-                  ? (stats.recent || recentArticles.length)
-                  : (stats.archived || archivedArticles.length)
-                }
-              </span>
-            </button>
+          {/* Topic Chips - Grid layout for better visibility */}
+          <div className="mb-4">
+            <div className="flex flex-wrap gap-2">
+              {/* All News Chip */}
+              <button
+                onClick={() => { setSelectedTopics([]); }}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 border ${
+                  selectedTopics.length === 0
+                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-md'
+                    : 'bg-white text-slate-700 border-slate-300 hover:border-emerald-400 hover:bg-emerald-50'
+                }`}
+              >
+                {selectedTopics.length === 0 && <Check className="w-3 h-3" />}
+                <span>All Topics</span>
+                <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                  selectedTopics.length === 0 ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-500'
+                }`}>
+                  {activeTab === 'recent' 
+                    ? (stats.recent || recentArticles.length)
+                    : (stats.archived || archivedArticles.length)
+                  }
+                </span>
+              </button>
 
-            {/* Individual Topic Chips */}
-            {topicsWithCounts.map(({ topic, count }) => {
-              const isSelected = selectedTopics.includes(topic);
+              {/* Individual Topic Chips */}
+              {topicsWithCounts.map(({ topic, count }) => {
+                const isSelected = selectedTopics.includes(topic);
               return (
                 <button
                   key={topic}
