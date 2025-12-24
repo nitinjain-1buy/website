@@ -1070,6 +1070,10 @@ async def lifespan(app: FastAPI):
 # Create the main app with lifespan
 app = FastAPI(lifespan=lifespan)
 
+# Add security middlewares
+app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(RateLimitMiddleware)
+
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
