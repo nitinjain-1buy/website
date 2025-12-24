@@ -61,7 +61,8 @@ import {
   Newspaper,
   Search,
   ExternalLink,
-  FileText
+  FileText,
+  AlertTriangle
 } from 'lucide-react';
 import { logoUrl } from '../data/mock';
 import MapLocationEditor from '../components/MapLocationEditor';
