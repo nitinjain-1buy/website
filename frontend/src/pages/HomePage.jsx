@@ -336,49 +336,46 @@ const HomePage = () => {
       </section>
 
       {/* Trusted By - Customer Logos - Separate white section */}
-      <section className="py-12 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <AnimatedSection animation="fade-up" className="text-center">
-            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-6">
-              {siteSettings.clientSectionTitle}
-            </h2>
-            
-            {/* Only show client names if enabled */}
-            {siteSettings.showClientNames && (
-              <>
-                {/* Marquee Container */}
-                <div className="relative overflow-hidden py-4">
-                  {/* Gradient Masks */}
-                  <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-white to-transparent z-10"></div>
-                  <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white to-transparent z-10"></div>
-                  
-                  {/* Scrolling Content */}
-                  <div className="flex animate-marquee whitespace-nowrap">
-                    {/* First set */}
-                    {customers.map((customer, index) => (
-                      <span 
-                        key={`first-${index}`} 
-                        className="text-xl text-slate-400 font-semibold mx-8 hover:text-slate-600 transition-colors"
-                      >
-                        {customer}
-                      </span>
-                    ))}
-                    {/* Duplicate set for seamless loop */}
-                    {customers.map((customer, index) => (
-                      <span 
-                        key={`second-${index}`} 
-                        className="text-xl text-slate-400 font-semibold mx-8 hover:text-slate-600 transition-colors"
-                      >
-                        {customer}
-                      </span>
-                    ))}
-                  </div>
+      {siteSettings.showClientNames && (
+        <section className="py-12 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <AnimatedSection animation="fade-up" className="text-center">
+              <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-6">
+                {siteSettings.clientSectionTitle}
+              </h2>
+              
+              {/* Marquee Container */}
+              <div className="relative overflow-hidden py-4">
+                {/* Gradient Masks */}
+                <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-white to-transparent z-10"></div>
+                <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white to-transparent z-10"></div>
+                
+                {/* Scrolling Content */}
+                <div className="flex animate-marquee whitespace-nowrap">
+                  {/* First set */}
+                  {customers.map((customer, index) => (
+                    <span 
+                      key={`first-${index}`} 
+                      className="text-xl text-slate-400 font-semibold mx-8 hover:text-slate-600 transition-colors"
+                    >
+                      {customer}
+                    </span>
+                  ))}
+                  {/* Duplicate set for seamless loop */}
+                  {customers.map((customer, index) => (
+                    <span 
+                      key={`second-${index}`} 
+                      className="text-xl text-slate-400 font-semibold mx-8 hover:text-slate-600 transition-colors"
+                    >
+                      {customer}
+                    </span>
+                  ))}
                 </div>
-              </>
-            )}
-          </AnimatedSection>
-        </div>
-      </section>
+              </div>
+            </AnimatedSection>
+          </div>
+        </section>
+      )}
 
       {/* Product Screenshot Section */}
       <section className="relative overflow-hidden bg-slate-50 py-16">
