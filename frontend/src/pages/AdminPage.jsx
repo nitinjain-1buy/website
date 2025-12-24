@@ -62,7 +62,12 @@ import {
   Search,
   ExternalLink,
   FileText,
-  AlertTriangle
+  AlertTriangle,
+  Briefcase,
+  Zap,
+  Eye,
+  UserCheck,
+  UserX
 } from 'lucide-react';
 import { logoUrl } from '../data/mock';
 import MapLocationEditor from '../components/MapLocationEditor';
