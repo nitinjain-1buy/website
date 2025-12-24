@@ -2248,26 +2248,22 @@ async def get_risk_stats():
         }
     }
 
-@api_router.get("/news/risk-categories", response_model=dict)
+@api_router.get("/news/risk-categories")
 async def get_risk_category_counts():
     """Get counts of articles per risk category"""
-    category_counts = {}
+    results = []
     
     for category in RISK_CATEGORIES:
         count = await db.news_articles.count_documents({
             "risk_categories": category
         })
-        category_counts[category] = count
+        if count > 0:
+            results.append({"category": category, "count": count})
     
-    # Also get total with any risk category
-    with_risk = await db.news_articles.count_documents({
-        "risk_categories": {"$exists": True, "$ne": []}
-    })
+    # Sort by count descending
+    results.sort(key=lambda x: x["count"], reverse=True)
     
-    return {
-        "categories": category_counts,
-        "totalWithRisk": with_risk
-    }
+    return results
 
 @api_router.get("/news/{article_id}/content", response_model=dict)
 async def get_article_content(article_id: str):
