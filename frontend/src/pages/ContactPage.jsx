@@ -541,12 +541,13 @@ const SupplierForm = () => {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="phone">Phone Number</Label>
+          <Label htmlFor="phone">Phone Number *</Label>
           <Input
             id="phone"
             name="phone"
             value={formData.phone}
             onChange={handleInputChange}
+            required
             placeholder="+1 (555) 000-0000"
             className="h-12"
           />
