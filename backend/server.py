@@ -2509,6 +2509,25 @@ async def trigger_article_scraping(limit: int = 50):
     asyncio.create_task(scrape_unscraped_articles(limit=limit))
     return {"success": True, "message": f"Scraping started for up to {limit} articles"}
 
+@api_router.post("/news/scrape-retry-failed")
+async def retry_failed_scraping(limit: int = 200):
+    """Retry scraping permanently failed articles to extract metadata"""
+    # Reset permanent failures to allow retry with new metadata extraction
+    result = await db.news_articles.update_many(
+        {"permanentFailure": True, "scraped": {"$ne": True}},
+        {"$unset": {"permanentFailure": "", "scrapeError": ""}}
+    )
+    
+    logger.info(f"[Scraper] Reset {result.modified_count} permanently failed articles for retry")
+    
+    # Run scraping in background
+    asyncio.create_task(scrape_unscraped_articles(limit=limit))
+    return {
+        "success": True, 
+        "message": f"Reset {result.modified_count} failed articles, scraping started for up to {limit}",
+        "resetCount": result.modified_count
+    }
+
 @api_router.get("/news/scrape-stats", response_model=dict)
 async def get_scrape_stats():
     """Get detailed scraping statistics"""
