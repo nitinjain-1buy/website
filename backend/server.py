@@ -1970,15 +1970,16 @@ async def create_workflow_step(request: Request):
     """Create a new workflow step"""
     body = await request.json()
     max_step = await db.workflow_steps.find_one(sort=[("step", -1)])
+    step_id = str(uuid.uuid4())
     step = {
-        "id": str(uuid.uuid4()),
+        "id": step_id,
         "step": (max_step.get("step", 0) + 1) if max_step else 1,
         "title": body.get("title", ""),
         "description": body.get("description", ""),
         "icon": body.get("icon", "CheckCircle")
     }
     await db.workflow_steps.insert_one(step)
-    return step
+    return await db.workflow_steps.find_one({"id": step_id}, {"_id": 0})
 
 @api_router.put("/workflow-steps/{step_id}")
 async def update_workflow_step(step_id: str, request: Request):
