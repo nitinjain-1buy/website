@@ -90,7 +90,7 @@ const Header = () => {
           <div className="hidden lg:flex items-center space-x-3">
             <Link to="/contact">
               <Button className="bg-slate-900 hover:bg-slate-800 text-white">
-                Request Demo
+                Connect with us
               </Button>
             </Link>
           </div>
@@ -138,7 +138,7 @@ const Header = () => {
                   </Link>
                   <Link to="/contact" onClick={() => setIsOpen(false)}>
                     <Button className="w-full bg-slate-900 hover:bg-slate-800">
-                      Request Demo
+                      Connect with us
                     </Button>
                   </Link>
                 </div>
