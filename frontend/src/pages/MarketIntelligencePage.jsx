@@ -91,7 +91,8 @@ const MarketIntelligencePage = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(`${API_URL}/api/news?limit=500`);
+      // Fetch all articles (2500 limit to cover all)
+      const response = await fetch(`${API_URL}/api/news?limit=2500`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
