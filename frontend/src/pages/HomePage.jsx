@@ -259,6 +259,12 @@ const HomePage = () => {
 
   return (
     <div className="bg-white overflow-x-hidden">
+      <SEO 
+        title="1BUY.AI | AI-Powered Electronics Procurement Intelligence"
+        description="Decision-grade AI driven intelligence for electronics procurement. Real-time market intelligence, risk analysis, and supply chain insights for the semiconductor industry."
+        keywords="electronics procurement, semiconductor intelligence, supply chain risk, BOM analysis, component sourcing, AI procurement"
+        url="/"
+      />
       {/* Hero Section */}
       <section className="relative overflow-hidden hero-gradient-bg">
         {/* Electronic Components Watermark Background */}
