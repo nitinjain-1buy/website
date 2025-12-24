@@ -1669,15 +1669,24 @@ CAREER_ROLES = [
 ]
 
 class CareerApplicationCreate(BaseModel):
-    name: str
-    email: str
-    phone: Optional[str] = None
-    role: str
-    linkedinUrl: Optional[str] = None
-    resumeUrl: Optional[str] = None
-    coverLetter: Optional[str] = None
-    experience: Optional[str] = None
-    whyJoin: Optional[str] = None
+    name: str = Field(..., min_length=2, max_length=100)
+    email: EmailStr
+    phone: Optional[str] = Field(None, max_length=20)
+    role: str = Field(..., min_length=1, max_length=100)
+    linkedinUrl: Optional[str] = Field(None, max_length=500)
+    resumeUrl: Optional[str] = Field(None, max_length=500)
+    coverLetter: Optional[str] = Field(None, max_length=5000)
+    experience: Optional[str] = Field(None, max_length=500)
+    whyJoin: Optional[str] = Field(None, max_length=2000)
+    
+    @field_validator('linkedinUrl', 'resumeUrl')
+    @classmethod
+    def validate_urls(cls, v):
+        if v and not v.startswith(('http://', 'https://')):
+            raise ValueError('URL must start with http:// or https://')
+        if v and ('javascript:' in v.lower() or 'data:' in v.lower()):
+            raise ValueError('Invalid URL scheme')
+        return v
 
 class CareerApplication(BaseModel):
     model_config = ConfigDict(extra="ignore")
