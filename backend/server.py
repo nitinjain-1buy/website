@@ -1354,6 +1354,30 @@ class SiteSettings(BaseModel):
     showClientNames: bool = True
     clientSectionTitle: str = "Trusted by leading OEMs and EMSs of the world"
 
+# Risk Category Configuration Model
+class RiskCategoryConfigCreate(BaseModel):
+    category: str
+    label: str
+    strongTriggers: List[str] = []
+    mediumTriggers: List[str] = []
+    order: int = 0
+
+class RiskCategoryConfigUpdate(BaseModel):
+    label: Optional[str] = None
+    strongTriggers: Optional[List[str]] = None
+    mediumTriggers: Optional[List[str]] = None
+    order: Optional[int] = None
+
+class RiskCategoryConfig(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    category: str  # e.g., "SUPPLY_SHORTAGE"
+    label: str  # e.g., "Supply Shortage"
+    strongTriggers: List[str] = []
+    mediumTriggers: List[str] = []
+    order: int = 0
+    createdAt: Optional[str] = None
+
 # Product Model
 class ProductFeature(BaseModel):
     text: str
