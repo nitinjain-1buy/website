@@ -577,15 +577,16 @@ const MarketIntelligencePage = () => {
                 <button
                   key={topic}
                   onClick={() => handleTopicToggle(topic)}
-                  className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-all duration-200 border whitespace-nowrap flex-shrink-0 ${
+                  title={topic}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 border flex-shrink-0 ${
                     isSelected
                       ? 'bg-emerald-600 text-white border-emerald-600 shadow-md'
                       : 'bg-white text-slate-700 border-slate-300 hover:border-emerald-400 hover:bg-emerald-50'
                   }`}
                 >
-                  {isSelected && <Check className="w-2.5 h-2.5" />}
-                  <span className="max-w-[100px] truncate">{topic}</span>
-                  <span className={`text-xs px-1 py-0.5 rounded-full ${
+                  {isSelected && <Check className="w-3 h-3 flex-shrink-0" />}
+                  <span className="capitalize">{topic}</span>
+                  <span className={`text-xs px-1.5 py-0.5 rounded-full flex-shrink-0 ${
                     isSelected ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-500'
                   }`}>
                     {count}
