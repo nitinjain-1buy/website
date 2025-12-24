@@ -464,14 +464,14 @@ const CareersPage = () => {
                           >
                             <Upload className="w-6 h-6 mx-auto mb-2 text-slate-400" />
                             <p className="text-sm text-slate-600">Click to upload your resume</p>
-                            <p className="text-xs text-slate-400 mt-1">PDF or Word (max 5MB)</p>
+                            <p className="text-xs text-slate-400 mt-1">PDF or DOCX only (max 5MB)</p>
                           </div>
                         )}
                         <input
                           ref={fileInputRef}
                           type="file"
                           id="resume"
-                          accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                          accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                           onChange={handleFileChange}
                           className="hidden"
                         />
