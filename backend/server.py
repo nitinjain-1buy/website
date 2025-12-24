@@ -1167,16 +1167,32 @@ class StatusCheckCreate(BaseModel):
 
 # Demo Request Models
 class DemoRequestCreate(BaseModel):
-    firstName: str
-    lastName: str
+    firstName: str = Field(..., min_length=1, max_length=100)
+    lastName: str = Field(..., min_length=1, max_length=100)
     email: EmailStr
-    company: str
-    title: Optional[str] = None
+    phone: Optional[str] = Field(None, max_length=30)
+    company: str = Field(..., min_length=1, max_length=200)
+    title: Optional[str] = Field(None, max_length=100)
     companySize: Optional[str] = None
     interest: Optional[List[str]] = None
     factoryLocations: Optional[List[str]] = None
     headOfficeLocation: Optional[List[str]] = None
-    message: Optional[str] = None
+    message: Optional[str] = Field(None, max_length=2000)
+    
+    @field_validator('phone')
+    @classmethod
+    def validate_phone(cls, v):
+        if not v:
+            return v
+        # Remove spaces, dashes, parentheses for validation
+        cleaned = v.replace(' ', '').replace('-', '').replace('(', '').replace(')', '').replace('.', '')
+        # Allow + at the start and digits only after that
+        if cleaned.startswith('+'):
+            cleaned = cleaned[1:]
+        # Check if remaining characters are digits
+        if not cleaned.isdigit():
+            raise ValueError('Phone number should contain only digits, +, spaces, dashes, or parentheses')
+        return v
 
 class DemoRequest(BaseModel):
     model_config = ConfigDict(extra="ignore")
