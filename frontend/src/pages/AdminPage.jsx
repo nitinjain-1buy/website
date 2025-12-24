@@ -68,8 +68,7 @@ import {
   Eye,
   UserCheck,
   UserX,
-  Linkedin,
-  Twitter
+  Linkedin
 } from 'lucide-react';
 import { logoUrl } from '../data/mock';
 import MapLocationEditor from '../components/MapLocationEditor';
