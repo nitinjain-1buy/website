@@ -3261,11 +3261,30 @@ async def refresh_mediastack_news():
     return {"success": True, "message": "MediaStack news refresh triggered (weekly API)"}
 
 @api_router.post("/news/scrape")
-async def trigger_article_scraping(limit: int = 50):
+async def trigger_article_scraping(limit: int = 50, use_alternatives: bool = False):
     """Manually trigger article content scraping for unscraped articles"""
     # Run scraping in background
-    asyncio.create_task(scrape_unscraped_articles(limit=limit))
-    return {"success": True, "message": f"Scraping started for up to {limit} articles"}
+    asyncio.create_task(scrape_unscraped_articles(limit=limit, use_alternatives=use_alternatives))
+    return {"success": True, "message": f"Scraping started for up to {limit} articles (alternatives: {use_alternatives})"}
+
+@api_router.post("/news/scrape-alternatives")
+async def trigger_alternative_scraping(limit: int = 100):
+    """Scrape failed articles using Google Cache and Wayback Machine"""
+    # Reset permanent failures to allow retry with alternatives
+    result = await db.news_articles.update_many(
+        {"permanentFailure": True, "scraped": {"$ne": True}},
+        {"$unset": {"permanentFailure": "", "scrapeError": ""}}
+    )
+    
+    logger.info(f"[Scraper] Reset {result.modified_count} failed articles for alternative scraping")
+    
+    # Run scraping with alternatives enabled
+    asyncio.create_task(scrape_unscraped_articles(limit=limit, use_alternatives=True))
+    return {
+        "success": True, 
+        "message": f"Alternative scraping started (Google Cache + Wayback Machine) for up to {limit} articles",
+        "resetCount": result.modified_count
+    }
 
 @api_router.post("/news/scrape-retry-failed")
 async def retry_failed_scraping(limit: int = 200):
