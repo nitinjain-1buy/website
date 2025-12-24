@@ -339,9 +339,12 @@ const HomePage = () => {
       <section className="py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimatedSection animation="fade-up" className="text-center">
-            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-6">
+            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-3">
               {siteSettings.clientSectionTitle}
             </h2>
+            <p className="text-lg text-slate-500 mb-6">
+              For <span className="text-emerald-600 font-medium">Owners/CEOs</span>, <span className="text-emerald-600 font-medium">Chief Sourcing/Procurement Officers</span>, <span className="text-emerald-600 font-medium">Chief Financial Officers</span>, <span className="text-emerald-600 font-medium">Procurement Teams</span>
+            </p>
             
             {/* Only show client names if enabled */}
             {siteSettings.showClientNames && (
