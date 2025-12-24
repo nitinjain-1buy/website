@@ -441,7 +441,33 @@ const SupplierForm = () => {
       toast.success('Thank you! We will review your application and get back to you.');
     } catch (error) {
       console.error('Error submitting supplier request:', error);
-      toast.error('Something went wrong. Please try again.');
+      // Extract and show specific error message from backend
+      if (error.response?.data?.detail) {
+        const detail = error.response.data.detail;
+        if (Array.isArray(detail)) {
+          const errorMessages = detail.map(err => {
+            const field = err.loc?.[1] || 'field';
+            const msg = err.msg || 'Invalid value';
+            const fieldNames = {
+              'companyName': 'Company Name',
+              'contactName': 'Contact Name',
+              'email': 'Email',
+              'phone': 'Phone',
+              'website': 'Website',
+              'inventoryDescription': 'Inventory Description'
+            };
+            const friendlyField = fieldNames[field] || field;
+            return `${friendlyField}: ${msg}`;
+          });
+          toast.error(errorMessages.join('\n'), { duration: 5000 });
+        } else if (typeof detail === 'string') {
+          toast.error(detail, { duration: 5000 });
+        } else {
+          toast.error('Failed to submit. Please check your inputs.');
+        }
+      } else {
+        toast.error('Something went wrong. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }
