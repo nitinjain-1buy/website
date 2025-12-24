@@ -1775,13 +1775,14 @@ async def create_career_benefit(benefit: CareerBenefit):
     return benefit_dict
 
 @api_router.put("/careers/benefits/{benefit_id}")
-async def update_career_benefit(benefit_id: str, title: str = None, description: str = None, icon: str = None, order: int = None):
+async def update_career_benefit(benefit_id: str, request: Request):
     """Update a career benefit"""
+    body = await request.json()
     update_data = {}
-    if title is not None: update_data["title"] = title
-    if description is not None: update_data["description"] = description
-    if icon is not None: update_data["icon"] = icon
-    if order is not None: update_data["order"] = order
+    if "title" in body and body["title"]: update_data["title"] = body["title"]
+    if "description" in body and body["description"]: update_data["description"] = body["description"]
+    if "icon" in body: update_data["icon"] = body["icon"]
+    if "order" in body: update_data["order"] = body["order"]
     
     if not update_data:
         raise HTTPException(status_code=400, detail="No fields to update")
