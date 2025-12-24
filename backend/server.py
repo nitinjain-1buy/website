@@ -1768,9 +1768,13 @@ class CareerApplicationCreate(BaseModel):
     @field_validator('linkedinUrl', 'resumeUrl')
     @classmethod
     def validate_urls(cls, v):
-        if v and not v.startswith(('http://', 'https://')):
-            raise ValueError('URL must start with http:// or https://')
-        if v and ('javascript:' in v.lower() or 'data:' in v.lower()):
+        if not v:
+            return v
+        # Auto-prefix with https:// if no protocol specified
+        if not v.startswith(('http://', 'https://')):
+            v = 'https://' + v
+        # Security check
+        if 'javascript:' in v.lower() or 'data:' in v.lower():
             raise ValueError('Invalid URL scheme')
         return v
 
