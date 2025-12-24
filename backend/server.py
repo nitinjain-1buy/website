@@ -1800,7 +1800,7 @@ CAREER_ROLES = [
 class CareerApplicationCreate(BaseModel):
     name: str = Field(..., min_length=2, max_length=100)
     email: EmailStr
-    phone: Optional[str] = Field(None, max_length=30)
+    phone: str = Field(..., min_length=5, max_length=30)
     role: str = Field(..., min_length=1, max_length=100)
     linkedinUrl: Optional[str] = Field(None, max_length=500)
     resumeUrl: Optional[str] = Field(None, max_length=500)
@@ -1814,7 +1814,7 @@ class CareerApplicationCreate(BaseModel):
     @classmethod
     def validate_phone(cls, v):
         if not v:
-            return v
+            raise ValueError('Phone number is required')
         # Remove spaces, dashes, parentheses for validation
         cleaned = v.replace(' ', '').replace('-', '').replace('(', '').replace(')', '').replace('.', '')
         # Allow + at the start and digits only after that
