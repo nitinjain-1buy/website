@@ -1594,12 +1594,16 @@ class CustomerLogo(BaseModel):
 class SiteSettingsUpdate(BaseModel):
     showClientNames: Optional[bool] = None
     clientSectionTitle: Optional[str] = None
+    twitterUrl: Optional[str] = None
+    linkedinUrl: Optional[str] = None
 
 class SiteSettings(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = "site_settings"
     showClientNames: bool = True
     clientSectionTitle: str = "Trusted by leading OEMs and EMSs of the world"
+    twitterUrl: str = ""
+    linkedinUrl: str = ""
 
 # Risk Category Configuration Model
 class RiskCategoryConfigCreate(BaseModel):
