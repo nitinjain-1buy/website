@@ -1619,6 +1619,261 @@ const TestimonialsManager = ({ testimonials, isLoading, onRefresh }) => {
   );
 };
 
+// Risk Category Configuration Manager Component
+const RiskCategoryConfigManager = () => {
+  const [configs, setConfigs] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [editingConfig, setEditingConfig] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [formData, setFormData] = useState({
+    category: '',
+    label: '',
+    strongTriggers: '',
+    mediumTriggers: '',
+    order: 0
+  });
+
+  useEffect(() => {
+    fetchConfigs();
+  }, []);
+
+  const fetchConfigs = async () => {
+    try {
+      const res = await axios.get(`${API}/risk-categories/config`);
+      setConfigs(res.data);
+    } catch (error) {
+      console.error('Error fetching risk category configs:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const seedDefaults = async () => {
+    try {
+      const res = await axios.post(`${API}/risk-categories/config/seed`);
+      toast.success(res.data.message);
+      fetchConfigs();
+    } catch (error) {
+      toast.error('Failed to seed defaults');
+    }
+  };
+
+  const openCreateDialog = () => {
+    setEditingConfig(null);
+    setFormData({
+      category: '',
+      label: '',
+      strongTriggers: '',
+      mediumTriggers: '',
+      order: configs.length
+    });
+    setIsDialogOpen(true);
+  };
+
+  const openEditDialog = (config) => {
+    setEditingConfig(config);
+    setFormData({
+      category: config.category,
+      label: config.label,
+      strongTriggers: config.strongTriggers?.join(', ') || '',
+      mediumTriggers: config.mediumTriggers?.join(', ') || '',
+      order: config.order || 0
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!formData.category || !formData.label) {
+      toast.error('Category key and label are required');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const payload = {
+        category: formData.category.toUpperCase().replace(/\s+/g, '_'),
+        label: formData.label,
+        strongTriggers: formData.strongTriggers.split(',').map(s => s.trim()).filter(s => s),
+        mediumTriggers: formData.mediumTriggers.split(',').map(s => s.trim()).filter(s => s),
+        order: formData.order
+      };
+
+      if (editingConfig) {
+        await axios.put(`${API}/risk-categories/config/${editingConfig.category}`, payload);
+        toast.success('Category updated');
+      } else {
+        await axios.post(`${API}/risk-categories/config`, payload);
+        toast.success('Category created');
+      }
+      setIsDialogOpen(false);
+      fetchConfigs();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to save');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async (category) => {
+    if (!confirm(`Delete category "${category}"?`)) return;
+    try {
+      await axios.delete(`${API}/risk-categories/config/${category}`);
+      toast.success('Category deleted');
+      fetchConfigs();
+    } catch (error) {
+      toast.error('Failed to delete');
+    }
+  };
+
+  return (
+    <Card className="mt-6">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Settings className="h-5 w-5 text-slate-500" />
+              Risk Category Configuration
+            </CardTitle>
+            <p className="text-sm text-slate-500 mt-1">Configure triggers for each risk category</p>
+          </div>
+          <div className="flex gap-2">
+            {configs.length === 0 && (
+              <Button variant="outline" size="sm" onClick={seedDefaults}>
+                Load Defaults
+              </Button>
+            )}
+            <Button size="sm" onClick={openCreateDialog}>
+              <Plus className="h-4 w-4 mr-1" /> Add Category
+            </Button>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="flex justify-center py-8">
+            <RefreshCw className="h-6 w-6 animate-spin text-slate-400" />
+          </div>
+        ) : configs.length === 0 ? (
+          <div className="text-center py-8">
+            <Settings className="h-12 w-12 mx-auto text-slate-300" />
+            <p className="text-slate-500 mt-2">No risk categories configured</p>
+            <Button variant="outline" className="mt-4" onClick={seedDefaults}>
+              Load Default Categories
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {configs.map((config) => (
+              <div key={config.category} className="border rounded-lg p-4 hover:bg-slate-50">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="font-semibold text-slate-900">{config.label}</span>
+                      <Badge variant="outline" className="text-xs font-mono">{config.category}</Badge>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex flex-wrap gap-1">
+                        <span className="text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">Strong:</span>
+                        {config.strongTriggers?.slice(0, 5).map((trigger, idx) => (
+                          <span key={idx} className="text-xs bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded">
+                            {trigger}
+                          </span>
+                        ))}
+                        {config.strongTriggers?.length > 5 && (
+                          <span className="text-xs text-slate-500">+{config.strongTriggers.length - 5} more</span>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        <span className="text-xs font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded">Medium:</span>
+                        {config.mediumTriggers?.slice(0, 5).map((trigger, idx) => (
+                          <span key={idx} className="text-xs bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">
+                            {trigger}
+                          </span>
+                        ))}
+                        {config.mediumTriggers?.length > 5 && (
+                          <span className="text-xs text-slate-500">+{config.mediumTriggers.length - 5} more</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-1 ml-4">
+                    <Button variant="ghost" size="sm" onClick={() => openEditDialog(config)}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700" onClick={() => handleDelete(config.category)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Edit/Create Dialog */}
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>{editingConfig ? 'Edit Risk Category' : 'Add Risk Category'}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Category Key</Label>
+                  <Input
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    placeholder="e.g., SUPPLY_SHORTAGE"
+                    disabled={!!editingConfig}
+                    className="font-mono"
+                  />
+                  <p className="text-xs text-slate-500 mt-1">Uppercase with underscores</p>
+                </div>
+                <div>
+                  <Label>Display Label</Label>
+                  <Input
+                    value={formData.label}
+                    onChange={(e) => setFormData({ ...formData, label: e.target.value })}
+                    placeholder="e.g., Supply Shortage"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label>Strong Triggers</Label>
+                <Textarea
+                  value={formData.strongTriggers}
+                  onChange={(e) => setFormData({ ...formData, strongTriggers: e.target.value })}
+                  placeholder="shortage, allocation, backorder, out of stock, constrained supply"
+                  rows={3}
+                />
+                <p className="text-xs text-slate-500 mt-1">Comma-separated. 1 strong trigger = category assigned (strength: 100)</p>
+              </div>
+              <div>
+                <Label>Medium Triggers</Label>
+                <Textarea
+                  value={formData.mediumTriggers}
+                  onChange={(e) => setFormData({ ...formData, mediumTriggers: e.target.value })}
+                  placeholder="tight supply, limited availability, scarcity"
+                  rows={3}
+                />
+                <p className="text-xs text-slate-500 mt-1">Comma-separated. 2+ medium triggers = category assigned (strength: 60)</p>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+                <Button onClick={handleSave} disabled={isSaving}>
+                  {isSaving ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+                  Save
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </CardContent>
+    </Card>
+  );
+};
+
 // News Manager Component
 const NewsManager = ({ isLoading: parentLoading, onRefresh }) => {
   const [articles, setArticles] = useState([]);
