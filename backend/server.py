@@ -240,22 +240,55 @@ async def scrape_article_content(url: str, use_alternatives: bool = False) -> di
             result["metaDescription"] = metadata.get("description")
             result["ogDescription"] = metadata.get("og_description")
             
-            # If paywall or 403, use metadata as content
+            # If paywall or 403, try alternatives first if enabled
             if response.status_code == 403 or is_paywall_site:
-                meta_content = metadata.get("og_description") or metadata.get("description") or metadata.get("twitter_description")
-                if meta_content and len(meta_content) > 50:
-                    result["scraped"] = True
-                    result["scrapedAt"] = datetime.now(timezone.utc).isoformat()
-                    result["fullContent"] = meta_content
-                    result["summary"] = meta_content[:500] if len(meta_content) > 500 else meta_content
-                    result["wordCount"] = len(meta_content.split())
-                    result["scrapeError"] = "Paywall - metadata only"
-                    logger.info(f"[Scraper] Extracted metadata ({result['wordCount']} words) from paywall: {url[:50]}...")
-                    return result
+                # Try alternative sources if enabled
+                if use_alternatives:
+                    # Try Google Cache
+                    logger.info(f"[Scraper] Trying Google Cache for {url[:50]}...")
+                    cache_html = await try_google_cache(url, headers)
+                    if cache_html:
+                        soup = BeautifulSoup(cache_html, 'lxml')
+                        # Continue processing with cached content
+                        logger.info(f"[Scraper] Got content from Google Cache for {url[:50]}")
+                    else:
+                        # Try Wayback Machine
+                        logger.info(f"[Scraper] Trying Wayback Machine for {url[:50]}...")
+                        wayback_html = await try_wayback_machine(url, headers)
+                        if wayback_html:
+                            soup = BeautifulSoup(wayback_html, 'lxml')
+                            logger.info(f"[Scraper] Got content from Wayback Machine for {url[:50]}")
+                        else:
+                            # Fall back to metadata
+                            meta_content = metadata.get("og_description") or metadata.get("description") or metadata.get("twitter_description")
+                            if meta_content and len(meta_content) > 50:
+                                result["scraped"] = True
+                                result["scrapedAt"] = datetime.now(timezone.utc).isoformat()
+                                result["fullContent"] = meta_content
+                                result["summary"] = meta_content[:500] if len(meta_content) > 500 else meta_content
+                                result["wordCount"] = len(meta_content.split())
+                                result["scrapeError"] = "Paywall - metadata only (alternatives failed)"
+                                logger.info(f"[Scraper] Using metadata ({result['wordCount']} words) from paywall: {url[:50]}...")
+                                return result
+                            else:
+                                result["scrapeError"] = f"Paywall site - all alternatives failed"
+                                result["permanentFailure"] = True
+                                return result
                 else:
-                    result["scrapeError"] = f"Paywall site - no metadata available"
-                    result["permanentFailure"] = True
-                    return result
+                    meta_content = metadata.get("og_description") or metadata.get("description") or metadata.get("twitter_description")
+                    if meta_content and len(meta_content) > 50:
+                        result["scraped"] = True
+                        result["scrapedAt"] = datetime.now(timezone.utc).isoformat()
+                        result["fullContent"] = meta_content
+                        result["summary"] = meta_content[:500] if len(meta_content) > 500 else meta_content
+                        result["wordCount"] = len(meta_content.split())
+                        result["scrapeError"] = "Paywall - metadata only"
+                        logger.info(f"[Scraper] Extracted metadata ({result['wordCount']} words) from paywall: {url[:50]}...")
+                        return result
+                    else:
+                        result["scrapeError"] = f"Paywall site - no metadata available"
+                        result["permanentFailure"] = True
+                        return result
             
             response.raise_for_status()
             
