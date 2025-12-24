@@ -2741,10 +2741,9 @@ const CareersManager = ({ benefits, roles, applications, isLoading, onRefresh })
                 <Card key={app.id} className="border">
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">
-                      <div className="space-y-1">
+                      <div className="space-y-1 flex-1">
                         <div className="flex items-center gap-2">
                           <h4 className="font-semibold">{app.name}</h4>
-                          {getStatusBadge(app.status)}
                           <Badge variant="outline">{app.roleTitle || app.role}</Badge>
                         </div>
                         <div className="flex items-center gap-4 text-sm text-slate-500">
@@ -2779,34 +2778,42 @@ const CareersManager = ({ benefits, roles, applications, isLoading, onRefresh })
                           Applied: {new Date(app.appliedAt).toLocaleString()}
                         </p>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => updateApplicationStatus(app.id, 'reviewed')}
-                          title="Mark as Reviewed"
-                          className="text-yellow-600 hover:text-yellow-700"
+                      <div className="flex items-center gap-2">
+                        {/* Status Dropdown */}
+                        <Select 
+                          value={app.status || 'new'} 
+                          onValueChange={(value) => updateApplicationStatus(app.id, value)}
                         >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => updateApplicationStatus(app.id, 'shortlisted')}
-                          title="Shortlist"
-                          className="text-emerald-600 hover:text-emerald-700"
-                        >
-                          <UserCheck className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => updateApplicationStatus(app.id, 'rejected')}
-                          title="Reject"
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <UserX className="w-4 h-4" />
-                        </Button>
+                          <SelectTrigger className="w-36 h-8 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="new">
+                              <span className="flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                                New
+                              </span>
+                            </SelectItem>
+                            <SelectItem value="reviewed">
+                              <span className="flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-yellow-500"></span>
+                                Under Review
+                              </span>
+                            </SelectItem>
+                            <SelectItem value="shortlisted">
+                              <span className="flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                Selected
+                              </span>
+                            </SelectItem>
+                            <SelectItem value="rejected">
+                              <span className="flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                                Rejected
+                              </span>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
                         <Button
                           variant="ghost"
                           size="sm"
