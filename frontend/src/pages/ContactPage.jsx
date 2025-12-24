@@ -40,6 +40,7 @@ const CustomerForm = () => {
     firstName: '',
     lastName: '',
     email: '',
+    phone: '',
     company: '',
     title: '',
     companySize: '',
@@ -103,7 +104,34 @@ const CustomerForm = () => {
       toast.success('Thank you! Our team will reach out shortly.');
     } catch (error) {
       console.error('Error submitting demo request:', error);
-      toast.error('Something went wrong. Please try again.');
+      // Extract and show specific error message from backend
+      if (error.response?.data?.detail) {
+        const detail = error.response.data.detail;
+        if (Array.isArray(detail)) {
+          const errorMessages = detail.map(err => {
+            const field = err.loc?.[1] || 'field';
+            const msg = err.msg || 'Invalid value';
+            const fieldNames = {
+              'firstName': 'First Name',
+              'lastName': 'Last Name',
+              'email': 'Email',
+              'phone': 'Phone',
+              'company': 'Company',
+              'title': 'Job Title',
+              'message': 'Message'
+            };
+            const friendlyField = fieldNames[field] || field;
+            return `${friendlyField}: ${msg}`;
+          });
+          toast.error(errorMessages.join('\n'), { duration: 5000 });
+        } else if (typeof detail === 'string') {
+          toast.error(detail, { duration: 5000 });
+        } else {
+          toast.error('Failed to submit. Please check your inputs.');
+        }
+      } else {
+        toast.error('Something went wrong. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }
