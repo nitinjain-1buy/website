@@ -2671,6 +2671,77 @@ const CareersManager = ({ benefits, roles, applications, isLoading, onRefresh })
     }
   };
 
+  // Download resume as file
+  const downloadResume = (app) => {
+    if (!app.resumeData || !app.resumeFileName) {
+      toast.error('No resume available');
+      return;
+    }
+    
+    try {
+      // Determine MIME type from filename
+      const ext = app.resumeFileName.toLowerCase().split('.').pop();
+      let mimeType = 'application/octet-stream';
+      if (ext === 'pdf') mimeType = 'application/pdf';
+      else if (ext === 'doc') mimeType = 'application/msword';
+      else if (ext === 'docx') mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      
+      // Convert base64 to blob
+      const byteCharacters = atob(app.resumeData);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: mimeType });
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = app.resumeFileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading resume:', error);
+      toast.error('Failed to download resume');
+    }
+  };
+
+  // Add interview review
+  const addReview = async (appId) => {
+    if (!reviewForm.interviewerEmail || !reviewForm.comments || !reviewForm.interviewDate) {
+      toast.error('Please fill in required fields (Email, Comments, Date)');
+      return;
+    }
+    
+    setIsAddingReview(true);
+    try {
+      await axios.post(`${API}/careers/applications/${appId}/reviews`, reviewForm);
+      toast.success('Review added successfully');
+      setReviewForm({ interviewerEmail: '', comments: '', interviewDate: '', nextSteps: '' });
+      onRefresh();
+    } catch (error) {
+      toast.error('Failed to add review');
+    } finally {
+      setIsAddingReview(false);
+    }
+  };
+
+  // Delete interview review
+  const deleteReview = async (appId, reviewId) => {
+    if (!window.confirm('Are you sure you want to delete this review?')) return;
+    try {
+      await axios.delete(`${API}/careers/applications/${appId}/reviews/${reviewId}`);
+      toast.success('Review deleted');
+      onRefresh();
+    } catch (error) {
+      toast.error('Failed to delete review');
+    }
+  };
+
   const filteredApplications = filterStatus === 'all' 
     ? applications 
     : applications.filter(app => app.status === filterStatus);
