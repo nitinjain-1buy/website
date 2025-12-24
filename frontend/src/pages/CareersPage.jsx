@@ -541,27 +541,10 @@ const CareersPage = () => {
       <section className="py-16 bg-slate-900 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold mb-4">Our Culture</h2>
-          <p className="text-xl text-slate-300 max-w-3xl mx-auto mb-8">
+          <p className="text-xl text-slate-300 max-w-3xl mx-auto">
             We're builders, dreamers, and doers. We move fast, learn constantly, and believe that the 
             best ideas can come from anywhere. If you're ready to make an impact, we're ready for you.
           </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Badge variant="outline" className="text-emerald-400 border-emerald-400/50 px-4 py-2">
-              Remote-First
-            </Badge>
-            <Badge variant="outline" className="text-blue-400 border-blue-400/50 px-4 py-2">
-              Learning Budget
-            </Badge>
-            <Badge variant="outline" className="text-purple-400 border-purple-400/50 px-4 py-2">
-              Equity Options
-            </Badge>
-            <Badge variant="outline" className="text-amber-400 border-amber-400/50 px-4 py-2">
-              Flexible Hours
-            </Badge>
-            <Badge variant="outline" className="text-pink-400 border-pink-400/50 px-4 py-2">
-              Health Coverage
-            </Badge>
-          </div>
         </div>
       </section>
     </div>
