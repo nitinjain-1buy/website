@@ -458,7 +458,9 @@ const CustomerLogosManager = ({ logos, isLoading, onRefresh }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [siteSettings, setSiteSettings] = useState({
     showClientNames: true,
-    clientSectionTitle: "Trusted by leading OEMs and EMSs of the world"
+    clientSectionTitle: "Trusted by leading OEMs and EMSs of the world",
+    twitterUrl: '',
+    linkedinUrl: ''
   });
   const [isUpdatingSettings, setIsUpdatingSettings] = useState(false);
 
