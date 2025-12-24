@@ -2941,26 +2941,34 @@ const CareersManager = ({ benefits, roles, applications, isLoading, onRefresh })
                         <h5 className="font-semibold text-sm mb-3 flex items-center gap-2">
                           <MessageSquare className="w-4 h-4 text-emerald-600" />
                           Interview Reviews
+                          {app.reviews && app.reviews.length > 0 && (
+                            <Badge variant="outline" className="text-xs ml-2">
+                              {app.reviews.length} {app.reviews.length === 1 ? 'review' : 'reviews'}
+                            </Badge>
+                          )}
                         </h5>
+                        <p className="text-xs text-slate-500 mb-3">Record feedback from each interviewer. Multiple interviewers can add their reviews.</p>
                         
                         {/* Existing Reviews */}
                         {app.reviews && app.reviews.length > 0 && (
                           <div className="space-y-3 mb-4">
-                            {app.reviews.map((review) => (
-                              <div key={review.id} className="bg-slate-50 p-3 rounded-lg">
+                            {app.reviews.map((review, idx) => (
+                              <div key={review.id} className="bg-slate-50 p-3 rounded-lg border-l-4 border-emerald-400">
                                 <div className="flex justify-between items-start">
                                   <div className="space-y-1 flex-1">
-                                    <div className="flex items-center gap-2 text-sm">
+                                    <div className="flex items-center gap-2 text-sm flex-wrap">
+                                      <Badge variant="outline" className="text-xs bg-white">Review #{idx + 1}</Badge>
                                       <span className="font-medium text-slate-700">{review.interviewerEmail}</span>
                                       <span className="text-slate-400">|</span>
                                       <span className="text-slate-500">{new Date(review.interviewDate).toLocaleDateString()}</span>
                                     </div>
-                                    <p className="text-sm text-slate-600">{review.comments}</p>
+                                    <p className="text-sm text-slate-600 mt-2">{review.comments}</p>
                                     {review.nextSteps && (
                                       <p className="text-sm text-emerald-600 mt-1">
                                         <strong>Next Steps:</strong> {review.nextSteps}
                                       </p>
                                     )}
+                                    <p className="text-xs text-slate-400 mt-1">Added: {new Date(review.createdAt).toLocaleString()}</p>
                                   </div>
                                   <Button
                                     variant="ghost"
