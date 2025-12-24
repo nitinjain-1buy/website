@@ -391,7 +391,14 @@ const MarketIntelligencePage = () => {
   };
 
   const handleLoadMore = () => {
-    setVisibleCount(prev => prev + 10);
+    // First, show more of the already loaded articles
+    if (visibleCount < displayArticles.length) {
+      setVisibleCount(prev => prev + 10);
+    }
+    // If we're showing all loaded articles and there are more on the server, fetch them
+    else if (hasMore && !loadingMore) {
+      loadMoreArticles();
+    }
   };
 
   const handleTabChange = (tab) => {
