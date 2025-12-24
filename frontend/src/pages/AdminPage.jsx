@@ -460,10 +460,13 @@ const CustomerLogosManager = ({ logos, isLoading, onRefresh }) => {
   const [siteSettings, setSiteSettings] = useState({
     showClientNames: true,
     clientSectionTitle: "Trusted by leading OEMs and EMSs of the world",
+    clientSectionSubtitle: "Built for procurement leaders who demand precision",
+    targetAudience: ["CEOs & Owners", "Chief Procurement Officers", "Chief Financial Officers", "Sourcing Teams"],
     twitterUrl: '',
     linkedinUrl: ''
   });
   const [isUpdatingSettings, setIsUpdatingSettings] = useState(false);
+  const [newAudienceTag, setNewAudienceTag] = useState('');
 
   // Fetch site settings on mount
   useEffect(() => {
@@ -471,7 +474,11 @@ const CustomerLogosManager = ({ logos, isLoading, onRefresh }) => {
       try {
         const res = await axios.get(`${API}/site-settings`);
         if (res.data) {
-          setSiteSettings(res.data);
+          setSiteSettings({
+            ...siteSettings,
+            ...res.data,
+            targetAudience: res.data.targetAudience || ["CEOs & Owners", "Chief Procurement Officers", "Chief Financial Officers", "Sourcing Teams"]
+          });
         }
       } catch (error) {
         console.error('Error fetching site settings:', error);
