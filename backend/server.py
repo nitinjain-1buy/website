@@ -1857,6 +1857,278 @@ async def delete_career_role(role_id: str):
     return {"success": True}
 
 # =============================================
+# CONTENT MANAGEMENT ENDPOINTS (Problems, Workflow, About, Team, UseCases, Why)
+# =============================================
+
+# Default data for seeding
+DEFAULT_PROBLEMS = [
+    {"id": "1", "title": "No Price Confidence", "description": "Prices decided via RFQs and distributor quotes with no independent benchmark. Relationship-driven pricing leaves you uncertain if you're overpaying.", "icon": "TrendingDown", "order": 0},
+    {"id": "2", "title": "BOM Complexity", "description": "Heavy use of Excel and email. Unable to consistently optimize pricing and risk for large, complex BOMs across vendors and regions.", "icon": "Layers", "order": 1},
+    {"id": "3", "title": "Alternate & Lifecycle Risk", "description": "Hard to find qualified alternates quickly. Lifecycle, EOL, and supplier risk discovered too late, causing disruptions.", "icon": "AlertTriangle", "order": 2},
+    {"id": "4", "title": "Excess Inventory Lock-up", "description": "Components become excess or obsolete with no structured way to liquidate at the right price. Pure working-capital loss.", "icon": "Package", "order": 3}
+]
+
+DEFAULT_WORKFLOW_STEPS = [
+    {"id": "1", "step": 1, "title": "Upload BOM", "description": "Connect your ERP or simply upload your Bill of Materials. Our platform ingests and normalizes your component data instantly.", "icon": "Upload"},
+    {"id": "2", "step": 2, "title": "Identify", "description": "AI analyzes pricing gaps, qualified alternates, and risks across your entire BOM. Savings opportunities are highlighted automatically.", "icon": "Search"},
+    {"id": "3", "step": 3, "title": "Decide", "description": "Armed with decision-grade intelligence, choose to renegotiate with current suppliers, re-source, or hold positions.", "icon": "CheckCircle"},
+    {"id": "4", "step": 4, "title": "Execute", "description": "For high-impact components, execute sourcing through 1Source with vetted global suppliers and transparent pricing.", "icon": "Zap"},
+    {"id": "5", "step": 5, "title": "Liquidate", "description": "Turn excess and EOL inventory into cash through 1Xcess with approved buyers and competitive bidding.", "icon": "DollarSign"}
+]
+
+DEFAULT_USE_CASES = [
+    {"id": "1", "industry": "Electric Vehicles", "description": "EV programs have 6x component load. 1Buy.AI helps manage pricing volatility and supply risk across complex, high-volume BOMs.", "icon": "Zap", "order": 0},
+    {"id": "2", "industry": "Smart Meters", "description": "High BOM sensitivity with strict compliance requirements. Our platform ensures cost optimization without compromising quality.", "icon": "Activity", "order": 1},
+    {"id": "3", "industry": "Industrial Electronics", "description": "Long product lifecycles demand proactive obsolescence management. Stay ahead of EOL risks with predictive intelligence.", "icon": "Settings", "order": 2},
+    {"id": "4", "industry": "Consumer Electronics", "description": "Fast-moving markets require agile sourcing. Reduce cycle times and capture savings in competitive categories.", "icon": "Smartphone", "order": 3}
+]
+
+DEFAULT_ABOUT_DATA = {
+    "id": "about_data",
+    "mission": "To make global electronics procurement intelligent, cheaper, transparent, and optimized — enabling every buyer to make faster, smarter, and more resilient sourcing and excess selling decisions.",
+    "vision": "Building the global operating system for electronics procurement — serving customers across Asia, Europe, and the Americas.",
+    "values": [
+        {"title": "Data-First", "description": "Every decision backed by defensible, auditable data"},
+        {"title": "Customer-Centric", "description": "Built for procurement teams, not around them"},
+        {"title": "Execution-Focused", "description": "Intelligence without execution is just noise"},
+        {"title": "Trust & Transparency", "description": "Your data is your moat. We protect it."}
+    ]
+}
+
+DEFAULT_WHY_DATA = {
+    "id": "why_data",
+    "differentiators": [
+        {"title": "Why Not Distributors?", "points": ["Distributors have inherent conflict of interest", "Limited visibility into global market pricing", "Relationship-driven, not data-driven", "No incentive to find you the best price"]},
+        {"title": "Why Not SaaS-Only Tools?", "points": ["Insights without execution are incomplete", "Data without context lacks value", "No path from decision to action", "Siloed tools create workflow friction"]},
+        {"title": "Why 1Buy.AI?", "points": ["Intelligence + Execution + Liquidity in one platform", "Proprietary data keeps procurement auditable", "Decision-grade tools for defensible outcomes", "Built by supply chain operators for operators"]}
+    ]
+}
+
+DEFAULT_TEAM_MEMBERS = [
+    {"id": "1", "name": "Visham Sikand", "role": "Co-Founder (Product Innovation)", "bio": "Serial entrepreneur with exits: IHO to Aetna Inc (USA) & Goals101 to M2P. 18+ years experience in building superlative teams, boards, managing investor relations and returns.", "expertise": "New Product Innovation, Global Scale up & Exit skills", "education": "Harvard Business School", "linkedin": "https://www.linkedin.com/in/visham-sikand-a769105/", "image": None, "type": "founder", "order": 0},
+    {"id": "2", "name": "Nitin Jain", "role": "Co-Founder (GTM + Ops)", "bio": "Co-Founder to 2 Unicorns. 15 years experience of investment banking & building 2 unicorn startups. Scaled Supply Chain Businesses with company turnover of more than $3Bn and profitable.", "expertise": "Scaling Supply Chain Businesses, 0-100 scale expertise", "education": "IIT Delhi (Computer Science, Silver Medalist)", "linkedin": "https://www.linkedin.com/in/nitin-jain-17b82310/", "image": None, "type": "founder", "order": 1},
+    {"id": "3", "name": "Pradeep Paliwal", "role": "Co-Founder (Technology & Data)", "bio": "CTO at multiple unicorns: TBO, EBIX Cash, RateGain. 20+ years in building scalable SaaS and Data platforms globally.", "expertise": "Building Enterprise Data driven SaaS platforms globally", "education": "BITS Pilani, VJTI", "linkedin": "https://www.linkedin.com/in/ppaliwal/", "image": None, "type": "founder", "order": 2}
+]
+
+# Problems endpoints
+@api_router.get("/problems")
+async def get_problems():
+    """Get problem cards for homepage"""
+    problems = await db.problems.find({}, {"_id": 0}).sort("order", 1).to_list(20)
+    if not problems:
+        for p in DEFAULT_PROBLEMS:
+            await db.problems.insert_one(p)
+        return DEFAULT_PROBLEMS
+    return problems
+
+@api_router.post("/problems")
+async def create_problem(request: Request):
+    """Create a new problem card"""
+    body = await request.json()
+    problem = {
+        "id": str(uuid.uuid4()),
+        "title": body.get("title", ""),
+        "description": body.get("description", ""),
+        "icon": body.get("icon", "AlertTriangle"),
+        "order": body.get("order", 0)
+    }
+    await db.problems.insert_one(problem)
+    return problem
+
+@api_router.put("/problems/{problem_id}")
+async def update_problem(problem_id: str, request: Request):
+    """Update a problem card"""
+    body = await request.json()
+    update_data = {k: v for k, v in body.items() if v is not None and k in ["title", "description", "icon", "order"]}
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    await db.problems.update_one({"id": problem_id}, {"$set": update_data})
+    return await db.problems.find_one({"id": problem_id}, {"_id": 0})
+
+@api_router.delete("/problems/{problem_id}")
+async def delete_problem(problem_id: str):
+    """Delete a problem card"""
+    result = await db.problems.delete_one({"id": problem_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Problem not found")
+    return {"success": True}
+
+# Workflow Steps endpoints
+@api_router.get("/workflow-steps")
+async def get_workflow_steps():
+    """Get workflow steps for how it works section"""
+    steps = await db.workflow_steps.find({}, {"_id": 0}).sort("step", 1).to_list(20)
+    if not steps:
+        for s in DEFAULT_WORKFLOW_STEPS:
+            await db.workflow_steps.insert_one(s)
+        return DEFAULT_WORKFLOW_STEPS
+    return steps
+
+@api_router.post("/workflow-steps")
+async def create_workflow_step(request: Request):
+    """Create a new workflow step"""
+    body = await request.json()
+    max_step = await db.workflow_steps.find_one(sort=[("step", -1)])
+    step = {
+        "id": str(uuid.uuid4()),
+        "step": (max_step.get("step", 0) + 1) if max_step else 1,
+        "title": body.get("title", ""),
+        "description": body.get("description", ""),
+        "icon": body.get("icon", "CheckCircle")
+    }
+    await db.workflow_steps.insert_one(step)
+    return step
+
+@api_router.put("/workflow-steps/{step_id}")
+async def update_workflow_step(step_id: str, request: Request):
+    """Update a workflow step"""
+    body = await request.json()
+    update_data = {k: v for k, v in body.items() if v is not None and k in ["step", "title", "description", "icon"]}
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    await db.workflow_steps.update_one({"id": step_id}, {"$set": update_data})
+    return await db.workflow_steps.find_one({"id": step_id}, {"_id": 0})
+
+@api_router.delete("/workflow-steps/{step_id}")
+async def delete_workflow_step(step_id: str):
+    """Delete a workflow step"""
+    result = await db.workflow_steps.delete_one({"id": step_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Workflow step not found")
+    return {"success": True}
+
+# Use Cases endpoints
+@api_router.get("/use-cases")
+async def get_use_cases():
+    """Get use cases"""
+    cases = await db.use_cases.find({}, {"_id": 0}).sort("order", 1).to_list(20)
+    if not cases:
+        for c in DEFAULT_USE_CASES:
+            await db.use_cases.insert_one(c)
+        return DEFAULT_USE_CASES
+    return cases
+
+@api_router.post("/use-cases")
+async def create_use_case(request: Request):
+    """Create a new use case"""
+    body = await request.json()
+    case = {
+        "id": str(uuid.uuid4()),
+        "industry": body.get("industry", ""),
+        "description": body.get("description", ""),
+        "icon": body.get("icon", "Settings"),
+        "order": body.get("order", 0)
+    }
+    await db.use_cases.insert_one(case)
+    return case
+
+@api_router.put("/use-cases/{case_id}")
+async def update_use_case(case_id: str, request: Request):
+    """Update a use case"""
+    body = await request.json()
+    update_data = {k: v for k, v in body.items() if v is not None and k in ["industry", "description", "icon", "order"]}
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    await db.use_cases.update_one({"id": case_id}, {"$set": update_data})
+    return await db.use_cases.find_one({"id": case_id}, {"_id": 0})
+
+@api_router.delete("/use-cases/{case_id}")
+async def delete_use_case(case_id: str):
+    """Delete a use case"""
+    result = await db.use_cases.delete_one({"id": case_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Use case not found")
+    return {"success": True}
+
+# About Data endpoint
+@api_router.get("/about-data")
+async def get_about_data():
+    """Get about page data"""
+    about = await db.about_data.find_one({"id": "about_data"}, {"_id": 0})
+    if not about:
+        await db.about_data.insert_one(DEFAULT_ABOUT_DATA)
+        return DEFAULT_ABOUT_DATA
+    return about
+
+@api_router.put("/about-data")
+async def update_about_data(request: Request):
+    """Update about page data"""
+    body = await request.json()
+    update_data = {k: v for k, v in body.items() if k in ["mission", "vision", "values"]}
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    await db.about_data.update_one({"id": "about_data"}, {"$set": update_data}, upsert=True)
+    return await db.about_data.find_one({"id": "about_data"}, {"_id": 0})
+
+# Why Data endpoint
+@api_router.get("/why-data")
+async def get_why_data():
+    """Get why choose us data"""
+    why = await db.why_data.find_one({"id": "why_data"}, {"_id": 0})
+    if not why:
+        await db.why_data.insert_one(DEFAULT_WHY_DATA)
+        return DEFAULT_WHY_DATA
+    return why
+
+@api_router.put("/why-data")
+async def update_why_data(request: Request):
+    """Update why choose us data"""
+    body = await request.json()
+    update_data = {k: v for k, v in body.items() if k in ["differentiators"]}
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    await db.why_data.update_one({"id": "why_data"}, {"$set": update_data}, upsert=True)
+    return await db.why_data.find_one({"id": "why_data"}, {"_id": 0})
+
+# Team Members endpoints
+@api_router.get("/team-members")
+async def get_team_members():
+    """Get team members"""
+    members = await db.team_members.find({}, {"_id": 0}).sort("order", 1).to_list(50)
+    if not members:
+        for m in DEFAULT_TEAM_MEMBERS:
+            await db.team_members.insert_one(m)
+        return DEFAULT_TEAM_MEMBERS
+    return members
+
+@api_router.post("/team-members")
+async def create_team_member(request: Request):
+    """Create a new team member"""
+    body = await request.json()
+    member = {
+        "id": str(uuid.uuid4()),
+        "name": body.get("name", ""),
+        "role": body.get("role", ""),
+        "bio": body.get("bio", ""),
+        "expertise": body.get("expertise", ""),
+        "education": body.get("education", ""),
+        "linkedin": body.get("linkedin", ""),
+        "image": body.get("image"),
+        "type": body.get("type", "team"),
+        "order": body.get("order", 0)
+    }
+    await db.team_members.insert_one(member)
+    return member
+
+@api_router.put("/team-members/{member_id}")
+async def update_team_member(member_id: str, request: Request):
+    """Update a team member"""
+    body = await request.json()
+    update_data = {k: v for k, v in body.items() if k in ["name", "role", "bio", "expertise", "education", "linkedin", "image", "type", "order"]}
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    await db.team_members.update_one({"id": member_id}, {"$set": update_data})
+    return await db.team_members.find_one({"id": member_id}, {"_id": 0})
+
+@api_router.delete("/team-members/{member_id}")
+async def delete_team_member(member_id: str):
+    """Delete a team member"""
+    result = await db.team_members.delete_one({"id": member_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Team member not found")
+    return {"success": True}
+
+# =============================================
 # HERO SECTION ENDPOINTS
 # =============================================
 
