@@ -1759,6 +1759,8 @@ class CareerApplicationCreate(BaseModel):
     role: str = Field(..., min_length=1, max_length=100)
     linkedinUrl: Optional[str] = Field(None, max_length=500)
     resumeUrl: Optional[str] = Field(None, max_length=500)
+    resumeData: Optional[str] = None  # Base64 encoded resume file
+    resumeFileName: Optional[str] = None  # Original filename
     coverLetter: Optional[str] = Field(None, max_length=5000)
     experience: Optional[str] = Field(None, max_length=500)
     whyJoin: Optional[str] = Field(None, max_length=2000)
@@ -1772,6 +1774,14 @@ class CareerApplicationCreate(BaseModel):
             raise ValueError('Invalid URL scheme')
         return v
 
+class InterviewReview(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    interviewerEmail: str
+    comments: str
+    interviewDate: str
+    nextSteps: Optional[str] = None
+    createdAt: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
 class CareerApplication(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -1782,12 +1792,15 @@ class CareerApplication(BaseModel):
     roleTitle: Optional[str] = None
     linkedinUrl: Optional[str] = None
     resumeUrl: Optional[str] = None
+    resumeData: Optional[str] = None  # Base64 encoded resume
+    resumeFileName: Optional[str] = None
     coverLetter: Optional[str] = None
     experience: Optional[str] = None
     whyJoin: Optional[str] = None
     status: str = "new"  # new, reviewed, shortlisted, rejected
     appliedAt: Optional[str] = None
     notes: Optional[str] = None
+    reviews: List[InterviewReview] = []  # Interview reviews
 
 @api_router.get("/careers/roles")
 async def get_career_roles():
