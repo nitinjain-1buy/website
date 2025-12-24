@@ -1650,14 +1650,21 @@ class CareerApplication(BaseModel):
 
 @api_router.get("/careers/roles")
 async def get_career_roles():
-    """Get available career roles"""
+    """Get available career roles (from DB, falls back to hardcoded)"""
+    roles = await db.career_roles.find({}, {"_id": 0}).sort("order", 1).to_list(50)
+    if roles:
+        return roles
     return CAREER_ROLES
 
 @api_router.post("/careers/apply", response_model=CareerApplication)
 async def submit_career_application(input: CareerApplicationCreate):
     """Submit a career application"""
-    # Find the role title
-    role_title = next((r["title"] for r in CAREER_ROLES if r["id"] == input.role), input.role)
+    # Try to get role title from DB first, then fallback to hardcoded
+    db_role = await db.career_roles.find_one({"id": input.role}, {"_id": 0})
+    if db_role:
+        role_title = db_role.get("title", input.role)
+    else:
+        role_title = next((r["title"] for r in CAREER_ROLES if r["id"] == input.role), input.role)
     
     application = CareerApplication(
         **input.model_dump(),
