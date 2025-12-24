@@ -2836,6 +2836,494 @@ const CareersManager = ({ benefits, roles, applications, isLoading, onRefresh })
   );
 };
 
+// Page Content Manager Component (Problems, Workflow, Use Cases, About, Why)
+const ContentManager = ({ problems, workflowSteps, useCases, aboutData, whyData, isLoading, onRefresh }) => {
+  const [activeSection, setActiveSection] = useState('problems');
+  const [editingItem, setEditingItem] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [dialogType, setDialogType] = useState('problem');
+  const [formData, setFormData] = useState({});
+  const [isSaving, setIsSaving] = useState(false);
+
+  const iconOptions = ['TrendingDown', 'Layers', 'AlertTriangle', 'Package', 'Upload', 'Search', 'CheckCircle', 'Zap', 'DollarSign', 'Settings', 'Activity', 'Smartphone'];
+
+  const openCreateDialog = (type) => {
+    setEditingItem(null);
+    setDialogType(type);
+    if (type === 'problem') {
+      setFormData({ title: '', description: '', icon: 'AlertTriangle', order: problems.length });
+    } else if (type === 'workflow') {
+      setFormData({ title: '', description: '', icon: 'CheckCircle', step: workflowSteps.length + 1 });
+    } else if (type === 'usecase') {
+      setFormData({ industry: '', description: '', icon: 'Settings', order: useCases.length });
+    }
+    setIsDialogOpen(true);
+  };
+
+  const openEditDialog = (item, type) => {
+    setEditingItem(item);
+    setDialogType(type);
+    setFormData({ ...item });
+    setIsDialogOpen(true);
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      let endpoint = '';
+      if (dialogType === 'problem') endpoint = 'problems';
+      else if (dialogType === 'workflow') endpoint = 'workflow-steps';
+      else if (dialogType === 'usecase') endpoint = 'use-cases';
+
+      if (editingItem) {
+        await axios.put(`${API}/${endpoint}/${editingItem.id}`, formData);
+        toast.success('Updated successfully');
+      } else {
+        await axios.post(`${API}/${endpoint}`, formData);
+        toast.success('Created successfully');
+      }
+      setIsDialogOpen(false);
+      onRefresh();
+    } catch (error) {
+      toast.error('Failed to save');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async (id, type) => {
+    if (!window.confirm('Are you sure you want to delete this?')) return;
+    try {
+      let endpoint = '';
+      if (type === 'problem') endpoint = 'problems';
+      else if (type === 'workflow') endpoint = 'workflow-steps';
+      else if (type === 'usecase') endpoint = 'use-cases';
+      await axios.delete(`${API}/${endpoint}/${id}`);
+      toast.success('Deleted successfully');
+      onRefresh();
+    } catch (error) {
+      toast.error('Failed to delete');
+    }
+  };
+
+  const handleAboutSave = async () => {
+    setIsSaving(true);
+    try {
+      await axios.put(`${API}/about-data`, formData);
+      toast.success('About data updated');
+      setIsDialogOpen(false);
+      onRefresh();
+    } catch (error) {
+      toast.error('Failed to update');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Section Tabs */}
+      <div className="flex gap-2 border-b pb-2 flex-wrap">
+        <Button variant={activeSection === 'problems' ? 'default' : 'outline'} size="sm" onClick={() => setActiveSection('problems')} className={activeSection === 'problems' ? 'bg-emerald-600' : ''}>
+          Problems ({problems.length})
+        </Button>
+        <Button variant={activeSection === 'workflow' ? 'default' : 'outline'} size="sm" onClick={() => setActiveSection('workflow')} className={activeSection === 'workflow' ? 'bg-emerald-600' : ''}>
+          Workflow ({workflowSteps.length})
+        </Button>
+        <Button variant={activeSection === 'usecases' ? 'default' : 'outline'} size="sm" onClick={() => setActiveSection('usecases')} className={activeSection === 'usecases' ? 'bg-emerald-600' : ''}>
+          Use Cases ({useCases.length})
+        </Button>
+        <Button variant={activeSection === 'about' ? 'default' : 'outline'} size="sm" onClick={() => setActiveSection('about')} className={activeSection === 'about' ? 'bg-emerald-600' : ''}>
+          About
+        </Button>
+        <Button variant={activeSection === 'why' ? 'default' : 'outline'} size="sm" onClick={() => setActiveSection('why')} className={activeSection === 'why' ? 'bg-emerald-600' : ''}>
+          Why Us
+        </Button>
+      </div>
+
+      {/* Problems Section */}
+      {activeSection === 'problems' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold">Problem Cards</h3>
+              <p className="text-sm text-slate-500">Homepage "The Problem" section</p>
+            </div>
+            <Button size="sm" onClick={() => openCreateDialog('problem')} className="bg-emerald-600 hover:bg-emerald-700">
+              <Plus className="w-4 h-4 mr-1" /> Add Problem
+            </Button>
+          </div>
+          <div className="grid gap-3">
+            {problems.map((problem) => (
+              <Card key={problem.id} className="border">
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                      <AlertTriangle className="w-5 h-5 text-red-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold">{problem.title}</h4>
+                      <p className="text-sm text-slate-500 line-clamp-1">{problem.description}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="sm" onClick={() => openEditDialog(problem, 'problem')}><Pencil className="w-4 h-4" /></Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleDelete(problem.id, 'problem')} className="text-red-600"><Trash2 className="w-4 h-4" /></Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Workflow Section */}
+      {activeSection === 'workflow' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold">Workflow Steps</h3>
+              <p className="text-sm text-slate-500">Homepage "How It Works" section</p>
+            </div>
+            <Button size="sm" onClick={() => openCreateDialog('workflow')} className="bg-emerald-600 hover:bg-emerald-700">
+              <Plus className="w-4 h-4 mr-1" /> Add Step
+            </Button>
+          </div>
+          <div className="grid gap-3">
+            {workflowSteps.map((step) => (
+              <Card key={step.id} className="border">
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center font-bold text-blue-600">
+                      {step.step}
+                    </div>
+                    <div>
+                      <h4 className="font-semibold">{step.title}</h4>
+                      <p className="text-sm text-slate-500 line-clamp-1">{step.description}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="sm" onClick={() => openEditDialog(step, 'workflow')}><Pencil className="w-4 h-4" /></Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleDelete(step.id, 'workflow')} className="text-red-600"><Trash2 className="w-4 h-4" /></Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Use Cases Section */}
+      {activeSection === 'usecases' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold">Use Cases</h3>
+              <p className="text-sm text-slate-500">Use Cases page content</p>
+            </div>
+            <Button size="sm" onClick={() => openCreateDialog('usecase')} className="bg-emerald-600 hover:bg-emerald-700">
+              <Plus className="w-4 h-4 mr-1" /> Add Use Case
+            </Button>
+          </div>
+          <div className="grid gap-3">
+            {useCases.map((useCase) => (
+              <Card key={useCase.id} className="border">
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+                      <Zap className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold">{useCase.industry}</h4>
+                      <p className="text-sm text-slate-500 line-clamp-1">{useCase.description}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="sm" onClick={() => openEditDialog(useCase, 'usecase')}><Pencil className="w-4 h-4" /></Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleDelete(useCase.id, 'usecase')} className="text-red-600"><Trash2 className="w-4 h-4" /></Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* About Section */}
+      {activeSection === 'about' && aboutData && (
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">About Page Content</h3>
+          <Card className="border">
+            <CardContent className="p-4 space-y-4">
+              <div>
+                <Label className="font-semibold">Mission</Label>
+                <p className="text-sm text-slate-600 mt-1">{aboutData.mission}</p>
+              </div>
+              <div>
+                <Label className="font-semibold">Vision</Label>
+                <p className="text-sm text-slate-600 mt-1">{aboutData.vision}</p>
+              </div>
+              <div>
+                <Label className="font-semibold">Values ({aboutData.values?.length || 0})</Label>
+                <div className="mt-2 grid gap-2">
+                  {aboutData.values?.map((v, i) => (
+                    <div key={i} className="bg-slate-50 p-2 rounded">
+                      <span className="font-medium">{v.title}:</span> {v.description}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <Button onClick={() => { setFormData(aboutData); setDialogType('about'); setIsDialogOpen(true); }} className="bg-emerald-600 hover:bg-emerald-700">
+                <Pencil className="w-4 h-4 mr-2" /> Edit About Content
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Why Us Section */}
+      {activeSection === 'why' && whyData && (
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Why Choose Us Content</h3>
+          <Card className="border">
+            <CardContent className="p-4 space-y-4">
+              {whyData.differentiators?.map((diff, i) => (
+                <div key={i} className="border-b pb-3 last:border-0">
+                  <h4 className="font-semibold text-slate-900">{diff.title}</h4>
+                  <ul className="mt-1 text-sm text-slate-600">
+                    {diff.points?.map((point, j) => (
+                      <li key={j}>• {point}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+              <Button onClick={() => { setFormData(whyData); setDialogType('why'); setIsDialogOpen(true); }} className="bg-emerald-600 hover:bg-emerald-700">
+                <Pencil className="w-4 h-4 mr-2" /> Edit Why Us Content
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Edit Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{editingItem ? 'Edit' : 'Create'} {dialogType === 'problem' ? 'Problem' : dialogType === 'workflow' ? 'Workflow Step' : dialogType === 'usecase' ? 'Use Case' : dialogType === 'about' ? 'About Content' : 'Why Us'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 max-h-96 overflow-y-auto">
+            {dialogType === 'problem' && (
+              <>
+                <div><Label>Title *</Label><Input value={formData.title || ''} onChange={(e) => setFormData({...formData, title: e.target.value})} /></div>
+                <div><Label>Description *</Label><Textarea value={formData.description || ''} onChange={(e) => setFormData({...formData, description: e.target.value})} rows={3} /></div>
+                <div><Label>Icon</Label>
+                  <Select value={formData.icon || 'AlertTriangle'} onValueChange={(v) => setFormData({...formData, icon: v})}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>{iconOptions.map(icon => <SelectItem key={icon} value={icon}>{icon}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+              </>
+            )}
+            {dialogType === 'workflow' && (
+              <>
+                <div><Label>Step Number</Label><Input type="number" value={formData.step || 1} onChange={(e) => setFormData({...formData, step: parseInt(e.target.value)})} /></div>
+                <div><Label>Title *</Label><Input value={formData.title || ''} onChange={(e) => setFormData({...formData, title: e.target.value})} /></div>
+                <div><Label>Description *</Label><Textarea value={formData.description || ''} onChange={(e) => setFormData({...formData, description: e.target.value})} rows={3} /></div>
+                <div><Label>Icon</Label>
+                  <Select value={formData.icon || 'CheckCircle'} onValueChange={(v) => setFormData({...formData, icon: v})}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>{iconOptions.map(icon => <SelectItem key={icon} value={icon}>{icon}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+              </>
+            )}
+            {dialogType === 'usecase' && (
+              <>
+                <div><Label>Industry *</Label><Input value={formData.industry || ''} onChange={(e) => setFormData({...formData, industry: e.target.value})} /></div>
+                <div><Label>Description *</Label><Textarea value={formData.description || ''} onChange={(e) => setFormData({...formData, description: e.target.value})} rows={3} /></div>
+                <div><Label>Icon</Label>
+                  <Select value={formData.icon || 'Settings'} onValueChange={(v) => setFormData({...formData, icon: v})}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>{iconOptions.map(icon => <SelectItem key={icon} value={icon}>{icon}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+              </>
+            )}
+            {dialogType === 'about' && (
+              <>
+                <div><Label>Mission</Label><Textarea value={formData.mission || ''} onChange={(e) => setFormData({...formData, mission: e.target.value})} rows={3} /></div>
+                <div><Label>Vision</Label><Textarea value={formData.vision || ''} onChange={(e) => setFormData({...formData, vision: e.target.value})} rows={3} /></div>
+              </>
+            )}
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+              <Button onClick={dialogType === 'about' ? handleAboutSave : handleSave} disabled={isSaving} className="bg-emerald-600 hover:bg-emerald-700">
+                {isSaving ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />} Save
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+// Team Manager Component
+const TeamManager = ({ members, isLoading, onRefresh }) => {
+  const [editingMember, setEditingMember] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [formData, setFormData] = useState({});
+  const [isSaving, setIsSaving] = useState(false);
+
+  const openCreateDialog = () => {
+    setEditingMember(null);
+    setFormData({ name: '', role: '', bio: '', expertise: '', education: '', linkedin: '', type: 'team', order: members.length });
+    setIsDialogOpen(true);
+  };
+
+  const openEditDialog = (member) => {
+    setEditingMember(member);
+    setFormData({ ...member });
+    setIsDialogOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!formData.name || !formData.role) {
+      toast.error('Name and Role are required');
+      return;
+    }
+    setIsSaving(true);
+    try {
+      if (editingMember) {
+        await axios.put(`${API}/team-members/${editingMember.id}`, formData);
+        toast.success('Team member updated');
+      } else {
+        await axios.post(`${API}/team-members`, formData);
+        toast.success('Team member added');
+      }
+      setIsDialogOpen(false);
+      onRefresh();
+    } catch (error) {
+      toast.error('Failed to save');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this team member?')) return;
+    try {
+      await axios.delete(`${API}/team-members/${id}`);
+      toast.success('Team member deleted');
+      onRefresh();
+    } catch (error) {
+      toast.error('Failed to delete');
+    }
+  };
+
+  const founders = members.filter(m => m.type === 'founder');
+  const team = members.filter(m => m.type !== 'founder');
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold">Team Members</h3>
+        <Button size="sm" onClick={openCreateDialog} className="bg-emerald-600 hover:bg-emerald-700">
+          <Plus className="w-4 h-4 mr-1" /> Add Member
+        </Button>
+      </div>
+
+      {founders.length > 0 && (
+        <div>
+          <h4 className="font-medium text-slate-700 mb-2">Founders ({founders.length})</h4>
+          <div className="grid gap-3">
+            {founders.map((member) => (
+              <Card key={member.id} className="border">
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
+                      <Users className="w-6 h-6 text-emerald-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold">{member.name}</h4>
+                      <p className="text-sm text-emerald-600">{member.role}</p>
+                      <p className="text-xs text-slate-500">{member.education}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="sm" onClick={() => openEditDialog(member)}><Pencil className="w-4 h-4" /></Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleDelete(member.id)} className="text-red-600"><Trash2 className="w-4 h-4" /></Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {team.length > 0 && (
+        <div>
+          <h4 className="font-medium text-slate-700 mb-2">Team ({team.length})</h4>
+          <div className="grid gap-3">
+            {team.map((member) => (
+              <Card key={member.id} className="border">
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center">
+                      <Users className="w-6 h-6 text-slate-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold">{member.name}</h4>
+                      <p className="text-sm text-slate-600">{member.role}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="sm" onClick={() => openEditDialog(member)}><Pencil className="w-4 h-4" /></Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleDelete(member.id)} className="text-red-600"><Trash2 className="w-4 h-4" /></Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Edit Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{editingMember ? 'Edit' : 'Add'} Team Member</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 max-h-96 overflow-y-auto">
+            <div><Label>Name *</Label><Input value={formData.name || ''} onChange={(e) => setFormData({...formData, name: e.target.value})} /></div>
+            <div><Label>Role *</Label><Input value={formData.role || ''} onChange={(e) => setFormData({...formData, role: e.target.value})} /></div>
+            <div><Label>Type</Label>
+              <Select value={formData.type || 'team'} onValueChange={(v) => setFormData({...formData, type: v})}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="founder">Founder</SelectItem>
+                  <SelectItem value="team">Team</SelectItem>
+                  <SelectItem value="advisor">Advisor</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div><Label>Bio</Label><Textarea value={formData.bio || ''} onChange={(e) => setFormData({...formData, bio: e.target.value})} rows={3} /></div>
+            <div><Label>Expertise</Label><Input value={formData.expertise || ''} onChange={(e) => setFormData({...formData, expertise: e.target.value})} /></div>
+            <div><Label>Education</Label><Input value={formData.education || ''} onChange={(e) => setFormData({...formData, education: e.target.value})} /></div>
+            <div><Label>LinkedIn URL</Label><Input value={formData.linkedin || ''} onChange={(e) => setFormData({...formData, linkedin: e.target.value})} /></div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+              <Button onClick={handleSave} disabled={isSaving} className="bg-emerald-600 hover:bg-emerald-700">
+                {isSaving ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />} Save
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
 // Dashboard Component
 const AdminDashboard = ({ onLogout }) => {
   const [customerRequests, setCustomerRequests] = useState([]);
