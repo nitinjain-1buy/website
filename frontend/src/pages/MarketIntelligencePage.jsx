@@ -427,6 +427,12 @@ const MarketIntelligencePage = () => {
 
   return (
     <div className="min-h-screen bg-slate-50">
+      <SEO 
+        title="Market Intelligence | 1BUY.AI - Electronics & Semiconductor News"
+        description="Real-time market intelligence, risk analysis, and news from the electronics and semiconductor industry. Track supply chain risks, geopolitical impacts, and component availability."
+        keywords="semiconductor news, electronics supply chain, chip shortage, risk analysis, market intelligence, component availability"
+        url="/market-intelligence"
+      />
       {/* Hero Section */}
       <section className="relative py-16 bg-gradient-to-b from-slate-900 to-slate-800 overflow-hidden">
         <ElectronicComponentsPattern opacity={0.03} />
