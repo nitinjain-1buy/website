@@ -1961,8 +1961,8 @@ async def get_workflow_steps():
     steps = await db.workflow_steps.find({}, {"_id": 0}).sort("step", 1).to_list(20)
     if not steps:
         for s in DEFAULT_WORKFLOW_STEPS:
-            await db.workflow_steps.insert_one(s)
-        return DEFAULT_WORKFLOW_STEPS
+            await db.workflow_steps.insert_one({**s})
+        return await db.workflow_steps.find({}, {"_id": 0}).sort("step", 1).to_list(20)
     return steps
 
 @api_router.post("/workflow-steps")
