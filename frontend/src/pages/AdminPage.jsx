@@ -1630,10 +1630,40 @@ const NewsManager = ({ isLoading: parentLoading, onRefresh }) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoadingMoreLogs, setIsLoadingMoreLogs] = useState(false);
   const [activeNewsTab, setActiveNewsTab] = useState('queries');
+  const [riskCategories, setRiskCategories] = useState([]);
+
+  // Risk category labels for display
+  const RISK_CATEGORY_LABELS = {
+    'SUPPLY_SHORTAGE': 'Supply Shortage',
+    'LEAD_TIME_VOLATILITY': 'Lead Time',
+    'PRICE_VOLATILITY': 'Price Risk',
+    'EOL_LIFECYCLE': 'EOL/Lifecycle',
+    'BOM_CHANGE_COMPATIBILITY': 'BOM Change',
+    'TARIFF_TRADE_POLICY': 'Tariff/Trade',
+    'EXPORT_CONTROLS_SANCTIONS': 'Export Controls',
+    'GEOPOLITICAL_CONFLICT': 'Geopolitical',
+    'LOGISTICS_SHIPPING_DISRUPTION': 'Logistics',
+    'FACTORY_FAB_OUTAGE': 'Factory Outage',
+    'QUALITY_COUNTERFEIT': 'Quality/Counterfeit',
+    'SUPPLIER_FINANCIAL_RISK': 'Supplier Risk',
+    'REGULATORY_COMPLIANCE': 'Regulatory',
+    'CYBER_SECURITY_OPERATIONAL': 'Cyber Security',
+    'DEMAND_SHOCK': 'Demand Shock'
+  };
 
   useEffect(() => {
     fetchNewsData();
+    fetchRiskCategories();
   }, []);
+
+  const fetchRiskCategories = async () => {
+    try {
+      const res = await axios.get(`${API}/news/risk-categories`);
+      setRiskCategories(res.data);
+    } catch (error) {
+      console.error('Error fetching risk categories:', error);
+    }
+  };
 
   const fetchNewsData = async () => {
     try {
