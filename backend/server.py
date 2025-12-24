@@ -1917,8 +1917,8 @@ async def get_problems():
     problems = await db.problems.find({}, {"_id": 0}).sort("order", 1).to_list(20)
     if not problems:
         for p in DEFAULT_PROBLEMS:
-            await db.problems.insert_one(p)
-        return DEFAULT_PROBLEMS
+            await db.problems.insert_one({**p})
+        return await db.problems.find({}, {"_id": 0}).sort("order", 1).to_list(20)
     return problems
 
 @api_router.post("/problems")
