@@ -543,6 +543,55 @@ const CustomerLogosManager = ({ logos, isLoading, onRefresh }) => {
 
   return (
     <div>
+      {/* Site Settings Card */}
+      <div className="bg-slate-50 rounded-lg p-4 mb-6 border border-slate-200">
+        <h4 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
+          <Settings className="h-4 w-4" />
+          Display Settings
+        </h4>
+        
+        {/* Toggle for showing client names */}
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <label className="font-medium text-slate-700">Show Client Names</label>
+            <p className="text-xs text-slate-500">Toggle visibility of client names on homepage</p>
+          </div>
+          <button
+            onClick={() => updateSiteSettings({ showClientNames: !siteSettings.showClientNames })}
+            disabled={isUpdatingSettings}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              siteSettings.showClientNames ? 'bg-emerald-600' : 'bg-slate-300'
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                siteSettings.showClientNames ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </button>
+        </div>
+
+        {/* Section Title */}
+        <div className="space-y-2">
+          <label className="font-medium text-slate-700 text-sm">Section Title</label>
+          <div className="flex gap-2">
+            <Input
+              value={siteSettings.clientSectionTitle}
+              onChange={(e) => setSiteSettings({ ...siteSettings, clientSectionTitle: e.target.value })}
+              placeholder="Trusted by leading OEMs and EMSs of the world"
+              className="flex-1"
+            />
+            <Button 
+              onClick={() => updateSiteSettings({ clientSectionTitle: siteSettings.clientSectionTitle })}
+              disabled={isUpdatingSettings}
+              size="sm"
+            >
+              Save
+            </Button>
+          </div>
+        </div>
+      </div>
+
       <div className="flex justify-between items-center mb-6">
         <div>
           <h3 className="text-lg font-semibold text-slate-900">Customer Logos</h3>
