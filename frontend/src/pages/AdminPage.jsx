@@ -1154,6 +1154,9 @@ const CustomerRequestsTable = ({ requests, isLoading, onStatusUpdate, updatingId
                     <div>
                       <p className="font-medium text-slate-900">{request.firstName} {request.lastName}</p>
                       <p className="text-sm text-slate-500 flex items-center"><Mail className="h-3 w-3 mr-1" />{request.email}</p>
+                      {request.phone && (
+                        <p className="text-sm text-slate-500 flex items-center"><Phone className="h-3 w-3 mr-1" />{request.phone}</p>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell><div className="flex items-center"><Building2 className="h-4 w-4 mr-2 text-slate-400" /><span>{request.company}</span></div></TableCell>
