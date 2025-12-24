@@ -2851,13 +2851,19 @@ const AdminDashboard = ({ onLogout }) => {
   const [careerBenefits, setCareerBenefits] = useState([]);
   const [careerRoles, setCareerRoles] = useState([]);
   const [careerApplications, setCareerApplications] = useState([]);
+  const [problems, setProblems] = useState([]);
+  const [workflowSteps, setWorkflowSteps] = useState([]);
+  const [useCases, setUseCases] = useState([]);
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [aboutData, setAboutData] = useState(null);
+  const [whyData, setWhyData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
 
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [customersRes, suppliersRes, testimonialsRes, statsRes, heroRes, logosRes, productsRes, mapLocationsRes, regionCardsRes, flowLinesRes, benefitsRes, rolesRes, applicationsRes] = await Promise.all([
+      const [customersRes, suppliersRes, testimonialsRes, statsRes, heroRes, logosRes, productsRes, mapLocationsRes, regionCardsRes, flowLinesRes, benefitsRes, rolesRes, applicationsRes, problemsRes, workflowRes, useCasesRes, teamRes, aboutRes, whyRes] = await Promise.all([
         axios.get(`${API}/demo-requests`),
         axios.get(`${API}/supplier-requests`),
         axios.get(`${API}/testimonials`),
@@ -2870,7 +2876,13 @@ const AdminDashboard = ({ onLogout }) => {
         axios.get(`${API}/flow-lines`),
         axios.get(`${API}/careers/benefits`),
         axios.get(`${API}/careers/roles-config`),
-        axios.get(`${API}/careers/applications`)
+        axios.get(`${API}/careers/applications`),
+        axios.get(`${API}/problems`),
+        axios.get(`${API}/workflow-steps`),
+        axios.get(`${API}/use-cases`),
+        axios.get(`${API}/team-members`),
+        axios.get(`${API}/about-data`),
+        axios.get(`${API}/why-data`)
       ]);
       setCustomerRequests(customersRes.data);
       setSupplierRequests(suppliersRes.data);
@@ -2885,6 +2897,12 @@ const AdminDashboard = ({ onLogout }) => {
       setCareerBenefits(benefitsRes.data);
       setCareerRoles(rolesRes.data);
       setCareerApplications(applicationsRes.data);
+      setProblems(problemsRes.data);
+      setWorkflowSteps(workflowRes.data);
+      setUseCases(useCasesRes.data);
+      setTeamMembers(teamRes.data);
+      setAboutData(aboutRes.data);
+      setWhyData(whyRes.data);
     } catch (err) {
       toast.error('Failed to fetch data');
     } finally {
