@@ -1223,14 +1223,42 @@ class DemoRequest(BaseModel):
 
 # Supplier Request Models
 class SupplierRequestCreate(BaseModel):
-    companyName: str
-    contactName: str
+    companyName: str = Field(..., min_length=1, max_length=200)
+    contactName: str = Field(..., min_length=1, max_length=100)
     email: EmailStr
-    phone: Optional[str] = None
-    website: Optional[str] = None
+    phone: Optional[str] = Field(None, max_length=30)
+    website: Optional[str] = Field(None, max_length=500)
     productCategories: Optional[List[str]] = None
     regionsServed: Optional[List[str]] = None
-    inventoryDescription: Optional[str] = None
+    inventoryDescription: Optional[str] = Field(None, max_length=2000)
+    
+    @field_validator('phone')
+    @classmethod
+    def validate_phone(cls, v):
+        if not v:
+            return v
+        # Remove spaces, dashes, parentheses for validation
+        cleaned = v.replace(' ', '').replace('-', '').replace('(', '').replace(')', '').replace('.', '')
+        # Allow + at the start and digits only after that
+        if cleaned.startswith('+'):
+            cleaned = cleaned[1:]
+        # Check if remaining characters are digits
+        if not cleaned.isdigit():
+            raise ValueError('Phone number should contain only digits, +, spaces, dashes, or parentheses')
+        return v
+    
+    @field_validator('website')
+    @classmethod
+    def validate_website(cls, v):
+        if not v:
+            return v
+        # Auto-prefix with https:// if no protocol specified
+        if not v.startswith(('http://', 'https://')):
+            v = 'https://' + v
+        # Security check
+        if 'javascript:' in v.lower() or 'data:' in v.lower():
+            raise ValueError('Invalid URL scheme')
+        return v
 
 class SupplierRequest(BaseModel):
     model_config = ConfigDict(extra="ignore")
