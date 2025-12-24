@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import axios from 'axios';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { productsData } from '../data/mock';
 import {
   Database,
   ShoppingCart,
@@ -21,14 +21,59 @@ import {
 } from 'lucide-react';
 import ElectronicComponentsPattern from '../components/ElectronicComponentsPattern';
 
+const API = process.env.REACT_APP_BACKEND_URL;
+
 const iconMap = {
   Database,
   ShoppingCart,
   RefreshCw
 };
 
+// Default products for fallback
+const defaultProducts = [
+  {
+    productId: "1data",
+    name: "1Data",
+    tagline: "Pricing & Risk Intelligence",
+    description: "Bloomberg for Components. Independent global price benchmarks, alternate discovery, and risk intelligence for defensible procurement decisions.",
+    features: ["Independent global price benchmarks", "Alternate part discovery", "Lifecycle and risk alerts", "AI-driven price predictions"],
+    icon: "Database"
+  },
+  {
+    productId: "1source",
+    name: "1Source",
+    tagline: "High-Impact Sourcing Execution",
+    description: "Amazon for Procurement. Execute sourcing where it matters most with vetted global suppliers and transparent landed-cost comparison.",
+    features: ["Vetted global suppliers", "Transparent landed-cost comparison", "Faster RFQ workflows", "Seamless ERP integration"],
+    icon: "ShoppingCart"
+  },
+  {
+    productId: "1xcess",
+    name: "1Xcess",
+    tagline: "Excess Inventory Monetization",
+    description: "eBay for Components. Structured liquidation of excess and EOL inventory through competitive bidding with approved buyers.",
+    features: ["Approved buyers with global reach", "Competitive bidding & transparency", "Reverse auctions for best pricing", "Escrow + QA for trust"],
+    icon: "RefreshCw"
+  }
+];
+
 const ProductsPage = () => {
   const location = useLocation();
+  const [products, setProducts] = useState(defaultProducts);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await axios.get(`${API}/api/products`);
+        if (res.data && res.data.length > 0) {
+          setProducts(res.data);
+        }
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   useEffect(() => {
     if (location.hash) {
