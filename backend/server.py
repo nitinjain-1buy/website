@@ -151,7 +151,46 @@ async def fetch_news_from_mediastack(query: str) -> List[dict]:
 
 # ============== WEB SCRAPER ==============
 
-async def scrape_article_content(url: str) -> dict:
+async def try_google_cache(url: str, headers: dict) -> str:
+    """Try to fetch content from Google's cache"""
+    # Google cache URL format
+    cache_url = f"https://webcache.googleusercontent.com/search?q=cache:{url}"
+    
+    try:
+        async with httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
+            response = await client.get(cache_url, headers=headers)
+            if response.status_code == 200:
+                return response.text
+    except Exception as e:
+        logger.debug(f"[Scraper] Google cache failed for {url[:50]}: {str(e)}")
+    return None
+
+async def try_wayback_machine(url: str, headers: dict) -> str:
+    """Try to fetch content from Wayback Machine"""
+    # First, check if archive exists
+    availability_url = f"https://archive.org/wayback/available?url={url}"
+    
+    try:
+        async with httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
+            # Check availability
+            avail_response = await client.get(availability_url)
+            if avail_response.status_code == 200:
+                data = avail_response.json()
+                snapshots = data.get("archived_snapshots", {})
+                closest = snapshots.get("closest", {})
+                
+                if closest.get("available") and closest.get("url"):
+                    # Fetch from archive
+                    archive_url = closest["url"]
+                    response = await client.get(archive_url, headers=headers)
+                    if response.status_code == 200:
+                        logger.info(f"[Scraper] Found Wayback snapshot for {url[:50]}")
+                        return response.text
+    except Exception as e:
+        logger.debug(f"[Scraper] Wayback Machine failed for {url[:50]}: {str(e)}")
+    return None
+
+async def scrape_article_content(url: str, use_alternatives: bool = False) -> dict:
     """Scrape full article content from URL"""
     result = {
         "scraped": False,
