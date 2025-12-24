@@ -3087,8 +3087,8 @@ class NewsFetchLog(BaseModel):
 
 # News API Endpoints
 @api_router.get("/news", response_model=List[dict])
-async def get_news(limit: int = 50, query: Optional[str] = None):
-    """Get stored news articles"""
+async def get_news(limit: int = 50, skip: int = 0, query: Optional[str] = None):
+    """Get stored news articles with pagination"""
     # Filter out articles without valid links or content
     filter_query = {
         "isHidden": False,
@@ -3102,9 +3102,69 @@ async def get_news(limit: int = 50, query: Optional[str] = None):
     articles = await db.news_articles.find(
         filter_query, 
         {"_id": 0}
-    ).sort("fetchedAt", -1).limit(limit).to_list(limit)
+    ).sort("fetchedAt", -1).skip(skip).limit(limit).to_list(limit)
     
     return articles
+
+@api_router.get("/news/stats")
+async def get_news_stats():
+    """Get article counts by topic, risk category, and time period for optimized frontend display"""
+    from datetime import timedelta
+    
+    # Base filter for valid articles
+    base_filter = {
+        "isHidden": False,
+        "link": {"$exists": True, "$nin": ["", None]},
+        "title": {"$exists": True, "$nin": ["", None]},
+        "source.name": {"$exists": True, "$ne": None}
+    }
+    
+    # Total count
+    total_count = await db.news_articles.count_documents(base_filter)
+    
+    # Recent vs Archived (8 months cutoff)
+    eight_months_ago = (datetime.now(timezone.utc) - timedelta(days=240)).isoformat()
+    
+    recent_filter = {**base_filter, "iso_date": {"$gte": eight_months_ago}}
+    recent_count = await db.news_articles.count_documents(recent_filter)
+    archived_count = total_count - recent_count
+    
+    # Counts by query/topic
+    topic_pipeline = [
+        {"$match": base_filter},
+        {"$group": {"_id": "$query", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}}
+    ]
+    topic_results = await db.news_articles.aggregate(topic_pipeline).to_list(100)
+    topics = {item["_id"]: item["count"] for item in topic_results if item["_id"]}
+    
+    # Counts by risk category
+    risk_pipeline = [
+        {"$match": {**base_filter, "risk_categories": {"$exists": True, "$ne": []}}},
+        {"$unwind": "$risk_categories"},
+        {"$group": {"_id": "$risk_categories", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}}
+    ]
+    risk_results = await db.news_articles.aggregate(risk_pipeline).to_list(50)
+    risk_categories = {item["_id"]: item["count"] for item in risk_results if item["_id"]}
+    
+    # Counts by risk band
+    band_pipeline = [
+        {"$match": {**base_filter, "risk_band": {"$exists": True}}},
+        {"$group": {"_id": "$risk_band", "count": {"$sum": 1}}},
+        {"$sort": {"_id": 1}}
+    ]
+    band_results = await db.news_articles.aggregate(band_pipeline).to_list(10)
+    risk_bands = {item["_id"]: item["count"] for item in band_results if item["_id"]}
+    
+    return {
+        "total": total_count,
+        "recent": recent_count,
+        "archived": archived_count,
+        "topics": topics,
+        "riskCategories": risk_categories,
+        "riskBands": risk_bands
+    }
 
 @api_router.get("/news/queries", response_model=List[dict])
 async def get_news_queries():
