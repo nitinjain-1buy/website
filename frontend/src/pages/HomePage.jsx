@@ -370,7 +370,7 @@ const HomePage = () => {
           </AnimatedSection>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {problemsData.map((problem, index) => {
+            {problems.map((problem, index) => {
               const IconComponent = iconMap[problem.icon];
               return (
                 <AnimatedCard 
