@@ -71,6 +71,66 @@ const defaultCustomers = [
   "Google", "Uno Minda", "Dixon", "Napino", "SGS Syrma", "NCR Atleos", "Lucas TVS", "Lumax", "Bajaj"
 ];
 
+const defaultProblems = [
+  {
+    id: 1,
+    title: "No Price Confidence",
+    description: "Prices decided via RFQs and distributor quotes with no independent benchmark. Relationship-driven pricing leaves you uncertain if you're overpaying.",
+    icon: "TrendingDown"
+  },
+  {
+    id: 2,
+    title: "BOM Complexity",
+    description: "Heavy use of Excel and email. Unable to consistently optimize pricing and risk for large, complex BOMs across vendors and regions.",
+    icon: "Layers"
+  },
+  {
+    id: 3,
+    title: "Alternate & Lifecycle Risk",
+    description: "Hard to find qualified alternates quickly. Lifecycle, EOL, and supplier risk discovered too late, causing disruptions.",
+    icon: "AlertTriangle"
+  },
+  {
+    id: 4,
+    title: "Excess Inventory Lock-up",
+    description: "Components become excess or obsolete with no structured way to liquidate at the right price. Pure working-capital loss.",
+    icon: "Package"
+  }
+];
+
+const defaultWorkflowSteps = [
+  {
+    step: 1,
+    title: "Upload BOM",
+    description: "Connect your ERP or simply upload your Bill of Materials. Our platform ingests and normalizes your component data instantly.",
+    icon: "Upload"
+  },
+  {
+    step: 2,
+    title: "Identify",
+    description: "AI analyzes pricing gaps, qualified alternates, and risks across your entire BOM. Savings opportunities are highlighted automatically.",
+    icon: "Search"
+  },
+  {
+    step: 3,
+    title: "Decide",
+    description: "Armed with decision-grade intelligence, choose to renegotiate with current suppliers, re-source, or hold positions.",
+    icon: "CheckCircle"
+  },
+  {
+    step: 4,
+    title: "Execute",
+    description: "For high-impact components, execute sourcing through 1Source with vetted global suppliers and transparent pricing.",
+    icon: "Zap"
+  },
+  {
+    step: 5,
+    title: "Liquidate",
+    description: "Turn excess and EOL inventory into cash through 1Xcess with approved buyers and competitive bidding.",
+    icon: "DollarSign"
+  }
+];
+
 const defaultProducts = [
   {
     productId: "1data",
