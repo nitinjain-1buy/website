@@ -1201,6 +1201,7 @@ class DemoRequest(BaseModel):
     firstName: str
     lastName: str
     email: str
+    phone: Optional[str] = None
     company: str
     title: Optional[str] = None
     companySize: Optional[str] = None
