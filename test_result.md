@@ -728,3 +728,94 @@ test_plan:
 agent_communication:
     - agent: "main"
       message: "RISK ENGINE UI IMPLEMENTATION COMPLETE. Fixed syntax error in MarketIntelligencePage.jsx that was blocking the page. Added risk display to article cards including: risk badges with color coding, risk category chips (top 3 by strength), horizon & confidence meta line. All features verified working via screenshots. Please test: 1) Go to /market-intelligence page 2) Verify Filter by Risk chips with counts 3) Click risk category chips - should filter articles 4) Click 'Highest Risk' sort - CRITICAL articles should appear first 5) Verify article cards show risk badges, category chips, and meta info 6) Test multi-select risk filtering (OR logic) 7) Verify Clear All Filters button works"
+    - agent: "main"
+      message: "CAREERS PAGE IMPLEMENTATION COMPLETE. Please test the new Careers Page feature: 1) Navigation: Verify 'Careers' link appears in the header navigation between 'Market Intelligence' and 'Team'. 2) Page Load: Go to /careers - should show 'Join the Category Definers' hero with 'We're Hiring' badge. 3) Open Roles: Verify all 9 roles are displayed: Sales, Sourcing & Operations, AI Engineer, Data Scientist, Electronics R&D Specialist, Product, Design, Legal, HR & Admin. Each role should be clickable and show a checkmark when selected. 4) Application Form: Form should have fields for Full Name*, Email*, Phone, LinkedIn Profile, Role dropdown*, Relevant Experience, Why do you want to join 1BUY.AI? 5) Form Submission: Fill out form and submit - should show success message and redirect to confirmation screen. 6) Backend Verification: After submission, verify data is stored by checking /api/careers/applications endpoint. 7) HOMEPAGE STATS: Also verify homepage stats section shows 5 stats in a row: 15-20% Cost Savings Realised, 25M+ MPN Coverage, 400+ Data Sources, 30+ Enterprise Customers, 500M+ Data Points."
+
+# Careers Page Feature - Testing Required
+# Added by main agent on 2025-12-24
+
+frontend:
+  - task: "Careers Page navigation link"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/data/mock.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Added 'Careers' link to navigationData array between Market Intelligence and Team. Verified via screenshot - Careers link visible in header navigation."
+
+  - task: "Careers Page route"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Added /careers route to App.js with CareersPage component. Installed framer-motion dependency. Page loads successfully."
+
+  - task: "Careers Page hero and role listing"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/CareersPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Hero section shows 'Join the Category Definers' with We're Hiring badge. All 9 roles displayed (Sales, Sourcing & Operations, AI Engineer, Data Scientist, Electronics R&D Specialist, Product, Design, Legal, HR & Admin). Verified via screenshots."
+
+  - task: "Careers Page application form"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/CareersPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Application form has all required fields: Full Name, Email, Phone, LinkedIn Profile, Role dropdown, Relevant Experience, Why do you want to join. Form connects to backend API. Submit button sends data to /api/careers/apply."
+
+  - task: "Homepage stats - 5 stats including Data Points"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/HomePage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Updated stats grid from 4 to 5 columns (lg:grid-cols-5). Added 500M+ Data Points stat. Changed 'Cost Savings Identified' to 'Cost Savings Realised'. Verified via screenshots - all 5 stats displayed correctly."
+
+backend:
+  - task: "Careers API - roles and applications"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "GET /api/careers/roles returns 9 career roles. POST /api/careers/apply accepts applications. GET /api/careers/applications returns all applications. Tested via curl - application created successfully with ID and status 'new'."
+
+test_plan:
+  current_focus:
+    - "Careers Page navigation link"
+    - "Careers Page route"
+    - "Careers Page hero and role listing"
+    - "Careers Page application form"
+    - "Homepage stats - 5 stats including Data Points"
+    - "Careers API - roles and applications"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
