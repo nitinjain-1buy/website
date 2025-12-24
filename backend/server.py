@@ -1569,6 +1569,38 @@ async def seed_customer_logos():
     return {"message": f"Seeded {len(default_logos)} logos", "seeded": True}
 
 # =============================================
+# SITE SETTINGS ENDPOINTS
+# =============================================
+
+@api_router.get("/site-settings", response_model=SiteSettings)
+async def get_site_settings():
+    """Get site settings"""
+    settings = await db.site_settings.find_one({"id": "site_settings"}, {"_id": 0})
+    if not settings:
+        # Return default settings
+        return SiteSettings()
+    return settings
+
+@api_router.put("/site-settings", response_model=SiteSettings)
+async def update_site_settings(input: SiteSettingsUpdate):
+    """Update site settings"""
+    update_data = {k: v for k, v in input.model_dump().items() if v is not None}
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    
+    # Upsert the settings
+    result = await db.site_settings.update_one(
+        {"id": "site_settings"},
+        {"$set": update_data},
+        upsert=True
+    )
+    
+    settings = await db.site_settings.find_one({"id": "site_settings"}, {"_id": 0})
+    if not settings:
+        return SiteSettings(**update_data)
+    return settings
+
+# =============================================
 # PRODUCTS ENDPOINTS
 # =============================================
 
