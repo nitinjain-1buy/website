@@ -450,6 +450,39 @@ const CustomerLogosManager = ({ logos, isLoading, onRefresh }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({ name: '', logoUrl: '', order: 0 });
   const [isSaving, setIsSaving] = useState(false);
+  const [siteSettings, setSiteSettings] = useState({
+    showClientNames: true,
+    clientSectionTitle: "Trusted by leading OEMs and EMSs of the world"
+  });
+  const [isUpdatingSettings, setIsUpdatingSettings] = useState(false);
+
+  // Fetch site settings on mount
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await axios.get(`${API}/site-settings`);
+        if (res.data) {
+          setSiteSettings(res.data);
+        }
+      } catch (error) {
+        console.error('Error fetching site settings:', error);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  const updateSiteSettings = async (updates) => {
+    setIsUpdatingSettings(true);
+    try {
+      const res = await axios.put(`${API}/site-settings`, updates);
+      setSiteSettings(res.data);
+      toast.success('Settings updated successfully');
+    } catch (error) {
+      toast.error('Failed to update settings');
+    } finally {
+      setIsUpdatingSettings(false);
+    }
+  };
 
   const openCreateDialog = () => {
     setEditingLogo(null);
