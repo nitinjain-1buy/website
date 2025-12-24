@@ -141,8 +141,8 @@ const CareersPage = () => {
       return;
     }
     
-    if (!formData.name || !formData.email) {
-      toast.error('Please fill in required fields');
+    if (!formData.name || !formData.email || !formData.phone) {
+      toast.error('Please fill in all required fields (Name, Email, Phone)');
       return;
     }
 
