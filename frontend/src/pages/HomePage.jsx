@@ -64,10 +64,11 @@ const defaultHeroData = {
 };
 
 const defaultStats = [
-  { value: "15-20%", label: "Cost Savings Identified", description: "Average savings identified across customer BOMs" },
+  { value: "15-20%", label: "Cost Savings Realised", description: "Average savings realised across customer BOMs" },
   { value: "25M+", label: "MPN Coverage", description: "Comprehensive part number database" },
   { value: "400+", label: "Data Sources", description: "Proprietary data pipes for intelligence" },
-  { value: "30+", label: "Enterprise Customers", description: "Active OEM & EMS engagements" }
+  { value: "30+", label: "Enterprise Customers", description: "Active OEM & EMS engagements" },
+  { value: "500M+", label: "Data Points", description: "Real-time market intelligence signals processed daily" }
 ];
 
 const defaultCustomers = [
