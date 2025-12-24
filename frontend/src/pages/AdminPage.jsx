@@ -2191,59 +2191,61 @@ const NewsManager = ({ isLoading: parentLoading, onRefresh }) => {
 
       {/* Tab Content */}
       {activeNewsTab === 'risk' ? (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5 text-orange-500" />
-                  Risk Categories Overview
-                </CardTitle>
-                <p className="text-sm text-slate-500 mt-1">Article counts by risk category (sorted by frequency)</p>
+        <>
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-orange-500" />
+                    Risk Categories Overview
+                  </CardTitle>
+                  <p className="text-sm text-slate-500 mt-1">Article counts by risk category (sorted by frequency)</p>
+                </div>
+                <Button variant="ghost" size="sm" onClick={fetchRiskCategories}>
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
               </div>
-              <Button variant="ghost" size="sm" onClick={fetchRiskCategories}>
-                <RefreshCw className="h-4 w-4" />
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
-              {riskCategories
-                .sort((a, b) => b.count - a.count)
-                .map((cat, idx) => (
-                  <div 
-                    key={cat.category} 
-                    className={`p-4 rounded-lg border ${
-                      idx === 0 ? 'bg-orange-50 border-orange-200' :
-                      idx === 1 ? 'bg-amber-50 border-amber-200' :
-                      idx === 2 ? 'bg-yellow-50 border-yellow-200' :
-                      'bg-slate-50 border-slate-200'
-                    }`}
-                  >
-                    <p className="text-2xl font-bold text-slate-900">{cat.count}</p>
-                    <p className={`text-sm font-medium ${
-                      idx === 0 ? 'text-orange-700' :
-                      idx === 1 ? 'text-amber-700' :
-                      idx === 2 ? 'text-yellow-700' :
-                      'text-slate-600'
-                    }`}>
-                      {RISK_CATEGORY_LABELS[cat.category] || cat.category}
-                    </p>
-                  </div>
-                ))}
-            </div>
-            {riskCategories.length === 0 && (
-              <div className="text-center py-8">
-                <AlertTriangle className="h-12 w-12 mx-auto text-slate-300" />
-                <p className="text-slate-500 mt-2">No risk data available yet</p>
-                <p className="text-xs text-slate-400">Run the scraper and risk analysis to populate data</p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
+                {riskCategories
+                  .sort((a, b) => b.count - a.count)
+                  .map((cat, idx) => (
+                    <div 
+                      key={cat.category} 
+                      className={`p-4 rounded-lg border ${
+                        idx === 0 ? 'bg-orange-50 border-orange-200' :
+                        idx === 1 ? 'bg-amber-50 border-amber-200' :
+                        idx === 2 ? 'bg-yellow-50 border-yellow-200' :
+                        'bg-slate-50 border-slate-200'
+                      }`}
+                    >
+                      <p className="text-2xl font-bold text-slate-900">{cat.count}</p>
+                      <p className={`text-sm font-medium ${
+                        idx === 0 ? 'text-orange-700' :
+                        idx === 1 ? 'text-amber-700' :
+                        idx === 2 ? 'text-yellow-700' :
+                        'text-slate-600'
+                      }`}>
+                        {RISK_CATEGORY_LABELS[cat.category] || cat.category}
+                      </p>
+                    </div>
+                  ))}
               </div>
-            )}
-          </CardContent>
-        </Card>
-        
-        {/* Risk Category Configuration */}
-        <RiskCategoryConfigManager />
+              {riskCategories.length === 0 && (
+                <div className="text-center py-8">
+                  <AlertTriangle className="h-12 w-12 mx-auto text-slate-300" />
+                  <p className="text-slate-500 mt-2">No risk data available yet</p>
+                  <p className="text-xs text-slate-400">Run the scraper and risk analysis to populate data</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+          
+          {/* Risk Category Configuration */}
+          <RiskCategoryConfigManager />
+        </>
       ) : activeNewsTab === 'queries' ? (
         <>
           {/* Search Queries Management */}
