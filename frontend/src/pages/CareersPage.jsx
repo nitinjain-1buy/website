@@ -170,7 +170,36 @@ const CareersPage = () => {
       setSubmitted(true);
       toast.success('Application submitted successfully!');
     } catch (error) {
-      toast.error('Failed to submit application. Please try again.');
+      // Extract and show specific error message from backend
+      if (error.response?.data?.detail) {
+        const detail = error.response.data.detail;
+        if (Array.isArray(detail)) {
+          // Pydantic validation errors
+          const errorMessages = detail.map(err => {
+            const field = err.loc?.[1] || 'field';
+            const msg = err.msg || 'Invalid value';
+            // Make field names user-friendly
+            const fieldNames = {
+              'name': 'Name',
+              'email': 'Email',
+              'phone': 'Phone',
+              'linkedinUrl': 'LinkedIn Profile',
+              'role': 'Role',
+              'experience': 'Experience',
+              'whyJoin': 'Why Join'
+            };
+            const friendlyField = fieldNames[field] || field;
+            return `${friendlyField}: ${msg}`;
+          });
+          toast.error(errorMessages.join('\n'), { duration: 5000 });
+        } else if (typeof detail === 'string') {
+          toast.error(detail, { duration: 5000 });
+        } else {
+          toast.error('Failed to submit application. Please check your inputs.');
+        }
+      } else {
+        toast.error('Failed to submit application. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }
