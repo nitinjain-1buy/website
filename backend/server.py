@@ -1,13 +1,15 @@
 from fastapi import FastAPI, APIRouter, HTTPException, BackgroundTasks, Request
+from fastapi.responses import Response
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
 import asyncio
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict, EmailStr, field_validator
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Dict
 import uuid
 from datetime import datetime, timezone
 import httpx
@@ -15,7 +17,49 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from contextlib import asynccontextmanager
 from bs4 import BeautifulSoup
 import re
+import time
+from collections import defaultdict
 from risk_engine import analyze_article, analyze_articles_batch, RISK_CATEGORIES
+
+# Rate limiting storage (in production, use Redis)
+rate_limit_store: Dict[str, list] = defaultdict(list)
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    """Add security headers to all responses"""
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+        return response
+
+class RateLimitMiddleware(BaseHTTPMiddleware):
+    """Simple rate limiting for login endpoint"""
+    async def dispatch(self, request: Request, call_next):
+        # Only rate limit login endpoint
+        if request.url.path == "/api/admin/login" and request.method == "POST":
+            client_ip = request.client.host if request.client else "unknown"
+            current_time = time.time()
+            
+            # Clean old entries (older than 60 seconds)
+            rate_limit_store[client_ip] = [
+                t for t in rate_limit_store[client_ip] 
+                if current_time - t < 60
+            ]
+            
+            # Check rate limit (max 5 attempts per minute)
+            if len(rate_limit_store[client_ip]) >= 5:
+                return Response(
+                    content='{"detail": "Too many login attempts. Please wait 60 seconds."}',
+                    status_code=429,
+                    media_type="application/json"
+                )
+            
+            rate_limit_store[client_ip].append(current_time)
+        
+        return await call_next(request)
 
 
 ROOT_DIR = Path(__file__).parent
