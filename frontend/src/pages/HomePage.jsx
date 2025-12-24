@@ -5,10 +5,6 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import {
-  problemsData,
-  workflowSteps
-} from '../data/mock';
-import {
   TrendingDown,
   Layers,
   AlertTriangle,
