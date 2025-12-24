@@ -1170,7 +1170,7 @@ class DemoRequestCreate(BaseModel):
     firstName: str = Field(..., min_length=1, max_length=100)
     lastName: str = Field(..., min_length=1, max_length=100)
     email: EmailStr
-    phone: Optional[str] = Field(None, max_length=30)
+    phone: str = Field(..., min_length=5, max_length=30)
     company: str = Field(..., min_length=1, max_length=200)
     title: Optional[str] = Field(None, max_length=100)
     companySize: Optional[str] = None
@@ -1183,7 +1183,7 @@ class DemoRequestCreate(BaseModel):
     @classmethod
     def validate_phone(cls, v):
         if not v:
-            return v
+            raise ValueError('Phone number is required')
         # Remove spaces, dashes, parentheses for validation
         cleaned = v.replace(' ', '').replace('-', '').replace('(', '').replace(')', '').replace('.', '')
         # Allow + at the start and digits only after that
@@ -1226,7 +1226,7 @@ class SupplierRequestCreate(BaseModel):
     companyName: str = Field(..., min_length=1, max_length=200)
     contactName: str = Field(..., min_length=1, max_length=100)
     email: EmailStr
-    phone: Optional[str] = Field(None, max_length=30)
+    phone: str = Field(..., min_length=5, max_length=30)
     website: Optional[str] = Field(None, max_length=500)
     productCategories: Optional[List[str]] = None
     regionsServed: Optional[List[str]] = None
@@ -1236,7 +1236,7 @@ class SupplierRequestCreate(BaseModel):
     @classmethod
     def validate_phone(cls, v):
         if not v:
-            return v
+            raise ValueError('Phone number is required')
         # Remove spaces, dashes, parentheses for validation
         cleaned = v.replace(' ', '').replace('-', '').replace('(', '').replace(')', '').replace('.', '')
         # Allow + at the start and digits only after that
