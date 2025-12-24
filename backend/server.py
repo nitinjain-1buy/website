@@ -502,7 +502,7 @@ def extract_metadata(soup: BeautifulSoup, url: str) -> dict:
     return metadata
 
 
-async def scrape_unscraped_articles(limit: int = 50, retry_failed: bool = False):
+async def scrape_unscraped_articles(limit: int = 50, retry_failed: bool = False, use_alternatives: bool = False):
     """Background task to scrape articles that haven't been scraped yet.
     
     IMPORTANT: This function ONLY scrapes articles where scraped != True.
@@ -511,11 +511,15 @@ async def scrape_unscraped_articles(limit: int = 50, retry_failed: bool = False)
     Args:
         limit: Maximum number of articles to scrape
         retry_failed: If True, also retry articles marked as retryable failures
+        use_alternatives: If True, try Google Cache and Wayback Machine for failed articles
     """
     logger.info("=" * 60)
     logger.info("[Scraper] Starting background article scraping...")
     logger.info("[Scraper] Note: Already scraped articles will be skipped")
-    logger.info("[Scraper] Note: Paywall sites (Reuters, Bloomberg, etc.) will be skipped")
+    if use_alternatives:
+        logger.info("[Scraper] ALTERNATIVE MODE: Will try Google Cache and Wayback Machine")
+    else:
+        logger.info("[Scraper] Note: Paywall sites (Reuters, Bloomberg, etc.) will be skipped")
     logger.info("=" * 60)
     
     try:
