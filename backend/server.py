@@ -2490,6 +2490,45 @@ async def delete_news_query(query_id: str):
         raise HTTPException(status_code=404, detail="Query not found")
     return {"success": True}
 
+@api_router.delete("/news/tags/{tag_name}")
+async def remove_tag_from_articles(tag_name: str):
+    """Remove a specific tag from all articles (cleanup orphan tags)"""
+    # Remove the tag from the queries array of all articles that have it
+    result = await db.news_articles.update_many(
+        {"queries": tag_name},
+        {"$pull": {"queries": tag_name}}
+    )
+    
+    logger.info(f"[Tags] Removed tag '{tag_name}' from {result.modified_count} articles")
+    return {
+        "success": True, 
+        "message": f"Removed tag '{tag_name}' from {result.modified_count} articles",
+        "modifiedCount": result.modified_count
+    }
+
+@api_router.get("/news/orphan-tags")
+async def get_orphan_tags():
+    """Get tags that exist on articles but not in managed queries"""
+    # Get all managed query names
+    managed_queries = await db.news_queries.find({}, {"query": 1, "_id": 0}).to_list(100)
+    managed_set = set(q["query"] for q in managed_queries)
+    
+    # Get all unique tags from articles
+    pipeline = [
+        {"$unwind": "$queries"},
+        {"$group": {"_id": "$queries", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}}
+    ]
+    article_tags = await db.news_articles.aggregate(pipeline).to_list(100)
+    
+    # Find orphan tags (in articles but not managed)
+    orphan_tags = []
+    for tag in article_tags:
+        if tag["_id"] and tag["_id"] not in managed_set:
+            orphan_tags.append({"tag": tag["_id"], "articleCount": tag["count"]})
+    
+    return orphan_tags
+
 @api_router.post("/news/refresh")
 async def refresh_news():
     """Manually trigger news fetch (SerpAPI + GDELT only)"""
