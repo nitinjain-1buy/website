@@ -2006,8 +2006,8 @@ async def get_use_cases():
     cases = await db.use_cases.find({}, {"_id": 0}).sort("order", 1).to_list(20)
     if not cases:
         for c in DEFAULT_USE_CASES:
-            await db.use_cases.insert_one(c)
-        return DEFAULT_USE_CASES
+            await db.use_cases.insert_one({**c})  # Copy to avoid _id mutation
+        return await db.use_cases.find({}, {"_id": 0}).sort("order", 1).to_list(20)
     return cases
 
 @api_router.post("/use-cases")
