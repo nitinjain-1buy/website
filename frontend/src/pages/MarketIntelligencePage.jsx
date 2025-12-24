@@ -595,16 +595,17 @@ const MarketIntelligencePage = () => {
                 </button>
               );
             })}
+            </div>
           </div>
 
-          {/* Risk Category Filter Chips - Scrollable on mobile */}
-          <div className="mb-1 sm:mb-2">
-            <div className="flex items-center gap-2 mb-1.5">
+          {/* Risk Category Filter Chips */}
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-2">
               <AlertTriangle className="w-4 h-4 text-orange-500" />
-              <span className="font-semibold text-slate-700 text-xs sm:text-sm">Filter by Risk</span>
+              <span className="font-semibold text-slate-700 text-sm">Filter by Risk Category</span>
               {selectedRiskCategories.length > 0 && (
                 <Badge className="bg-orange-100 text-orange-700 text-xs">
-                  {selectedRiskCategories.length}
+                  {selectedRiskCategories.length} selected
                 </Badge>
               )}
             </div>
