@@ -56,7 +56,7 @@ const iconMap = {
 
 // Default values for fallback
 const defaultHeroData = {
-  headline: "Decision-grade intelligence for electronics procurement",
+  headline: "Decision-grade AI driven intelligence for electronics procurement",
   subHeadline: "From pricing and risk to execution and liquidation — the operating system for electronics procurement.",
   ctaPrimary: "Request a Demo",
   ctaSecondary: "Talk to Our Team",
