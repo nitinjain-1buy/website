@@ -1952,7 +1952,7 @@ const NewsManager = ({ isLoading: parentLoading, onRefresh }) => {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
               {riskCategories
                 .sort((a, b) => b.count - a.count)
                 .map((cat, idx) => (
@@ -1986,6 +1986,9 @@ const NewsManager = ({ isLoading: parentLoading, onRefresh }) => {
             )}
           </CardContent>
         </Card>
+        
+        {/* Risk Category Configuration */}
+        <RiskCategoryConfigManager />
       ) : activeNewsTab === 'queries' ? (
         <>
           {/* Search Queries Management */}
