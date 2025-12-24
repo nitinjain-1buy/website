@@ -133,10 +133,25 @@ const CareersPage = () => {
 
     setIsSubmitting(true);
     try {
-      await axios.post(`${API}/careers/apply`, {
+      // Prepare the data with resume file as base64
+      let submitData = {
         ...formData,
         role: selectedRole
-      });
+      };
+      
+      // If there's a resume file, convert to base64
+      if (resumeFile) {
+        const reader = new FileReader();
+        const base64Data = await new Promise((resolve, reject) => {
+          reader.onload = () => resolve(reader.result.split(',')[1]);
+          reader.onerror = reject;
+          reader.readAsDataURL(resumeFile);
+        });
+        submitData.resumeData = base64Data;
+        submitData.resumeFileName = resumeFile.name;
+      }
+      
+      await axios.post(`${API}/careers/apply`, submitData);
       setSubmitted(true);
       toast.success('Application submitted successfully!');
     } catch (error) {
