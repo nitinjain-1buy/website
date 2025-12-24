@@ -195,7 +195,9 @@ const HomePage = () => {
   const [headlineComplete, setHeadlineComplete] = useState(false);
   const [siteSettings, setSiteSettings] = useState({
     showClientNames: true,
-    clientSectionTitle: "Trusted by leading OEMs and EMSs of the world"
+    clientSectionTitle: "Trusted by leading OEMs and EMSs of the world",
+    clientSectionSubtitle: "Built for procurement leaders who demand precision",
+    targetAudience: ["CEOs & Owners", "Chief Procurement Officers", "Chief Financial Officers", "Sourcing Teams"]
   });
 
   useEffect(() => {
