@@ -204,13 +204,14 @@ const CustomerForm = () => {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="phone">Phone Number</Label>
+          <Label htmlFor="phone">Phone Number *</Label>
           <Input
             id="phone"
             name="phone"
             type="tel"
             value={formData.phone}
             onChange={handleInputChange}
+            required
             placeholder="+1 (555) 123-4567"
             className="h-12"
           />
