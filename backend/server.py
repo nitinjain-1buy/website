@@ -2552,6 +2552,44 @@ async def get_orphan_tags():
     
     return orphan_tags
 
+@api_router.post("/news/cleanup-orphan-tags")
+async def cleanup_all_orphan_tags():
+    """Remove all orphan tags from articles"""
+    # Get all managed query names
+    managed_queries = await db.news_queries.find({}, {"query": 1, "_id": 0}).to_list(100)
+    managed_set = set(q["query"] for q in managed_queries)
+    
+    # Get all unique tags from articles
+    pipeline = [
+        {"$unwind": "$queries"},
+        {"$group": {"_id": "$queries"}},
+    ]
+    article_tags = await db.news_articles.aggregate(pipeline).to_list(500)
+    
+    # Find and remove orphan tags
+    removed_count = 0
+    orphan_tags_removed = []
+    
+    for tag in article_tags:
+        tag_name = tag["_id"]
+        if tag_name and tag_name not in managed_set:
+            result = await db.news_articles.update_many(
+                {"queries": tag_name},
+                {"$pull": {"queries": tag_name}}
+            )
+            if result.modified_count > 0:
+                orphan_tags_removed.append({"tag": tag_name, "articlesUpdated": result.modified_count})
+                removed_count += result.modified_count
+    
+    logger.info(f"[Tags] Cleaned up {len(orphan_tags_removed)} orphan tags from {removed_count} article updates")
+    
+    return {
+        "success": True,
+        "message": f"Removed {len(orphan_tags_removed)} orphan tags",
+        "tagsRemoved": orphan_tags_removed,
+        "totalArticleUpdates": removed_count
+    }
+
 @api_router.post("/news/refresh")
 async def refresh_news():
     """Manually trigger news fetch (SerpAPI + GDELT only)"""
