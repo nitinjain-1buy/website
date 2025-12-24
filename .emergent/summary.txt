@@ -1,103 +1,122 @@
 <analysis>**original_problem_statement:**
-The user initially reported a bug where news article links on the  page were broken. This request evolved into a series of major feature enhancements:
-1.  **News Aggregation:** Integrate two new news sources, GDELT and MediaStack, in addition to the existing SerpApi. This involved handling different API formats and implementing separate fetching schedules (daily for SerpApi/GDELT, weekly for MediaStack due to rate limits).
-2.  **Advanced Deduplication:** Implement a system where a single news article can be associated with multiple topic queries (e.g., semiconductor shortage and nexperia). The article should appear when filtering by any of its associated topics but must only appear once when All News or multiple overlapping topics are selected.
-3.  **Web Content Scraping:** Build a web scraper using BeautifulSoup to fetch and store the full text of each news article. This scraper runs automatically after news is fetched and includes intelligent error handling to distinguish between permanent failures (like paywalls) and retryable errors (like rate limiting), and it avoids re-scraping completed articles.
-4.  **Admin Panel Enhancements:** Add separate refresh buttons for the different API schedules and a button to manually trigger content scraping. The UI was updated to show detailed statistics on the scraping progress.
-5.  **Article Risk Engine:** The primary feature request was to build a comprehensive, rule-based risk engine. For every article, this engine computes a , , ,  level, and . The logic is based on detecting keywords within the article text and applying a complex scoring formula.
-6.  **Risk UI Implementation:** Update the  page to display the new risk data. This includes adding a new row of Filter by Risk chips, a Sort by Highest Risk toggle, and displaying the risk band, score, and top categories on each article card.
+The user's initial request to fix broken news links evolved into a comprehensive feature build-out for a Market Intelligence platform. Key requirements implemented include:
+1.  **News Aggregation:** Integrating SerpApi, GDELT, and MediaStack for news fetching.
+2.  **Web Scraping & Metadata Extraction:** Building a scraper to fetch full article content and, for paywalled sites, extract key metadata (title, description, OG tags).
+3.  **Article Risk Engine:** Implementing a sophisticated, rule-based engine () to analyze articles and assign a , , and multiple .
+4.  **Risk Engine UI:** Enhancing the  page with UI for filtering by risk category, sorting by highest risk, and displaying detailed risk information on each article card.
+5.  **Mobile UI Fix:** Correcting the layout of the  page for mobile devices, where filter sections were previously obscuring content.
+6.  **Configurable Admin Panel:**
+    *   Adding a toggle on the homepage's Trusted By section to show/hide client logos.
+    *   Creating a UI to display risk category counts.
+    *   Implementing a full CRUD interface for managing the Risk Engine's categories and keyword triggers.
+7.  **Data Integrity:** Ensuring that when a topic query is deleted from the admin panel, the corresponding tag is removed from all associated news articles to prevent orphan tags.
+8.  **Homepage Enhancements:** Updating the company logo and key statistics displayed on the homepage.
+9.  **Careers Page:** A new request to create a Careers page with a job application form that submits to the backend.
 
 **User's preferred language**: English
 
 **what currently exists?**
-The application is a full-stack React/FastAPI platform with a Market Intelligence feature that aggregates news from three sources (SerpApi, GDELT, MediaStack). A backend cron job fetches news, and a subsequent job scrapes the full article content. A sophisticated, rule-based  has been implemented in , and an initial analysis has been run on all existing articles, populating the database with risk data. The frontend  has been heavily modified to support the new risk filtering/sorting UI, but the last edit introduced a syntax error, causing the page to be broken.
+The application is a full-stack React/FastAPI platform. The Market Intelligence feature is the core of the application, featuring a multi-source news pipeline, a web scraper with metadata extraction capabilities, and a rule-based risk engine. The frontend UI for displaying, filtering, and sorting by risk is complete and functional on both desktop and mobile. The admin panel has been significantly enhanced with configurable settings for the homepage's client logo section and a full management interface for the Risk Engine's rules (categories and triggers). Backend logic for data integrity (e.g., orphan tag cleanup) has been implemented. The scraper is actively processing a large backlog of articles. The initial backend setup and frontend file for a new Careers page have been created.
 
 **Last working item**:
-    - Last item agent was working: Implementing the frontend UI for the Article Risk Engine on . The agent had just performed a large  operation to add the risk filters, sorting toggle, and new display elements on article cards. This large edit introduced a syntax error. The user's last instruction was to fix this error before proceeding.
+    - Last item agent was working: Building a new **Careers Page**. The agent successfully created the Pydantic model () and the backend API endpoints (, ) to handle job applications. It also created the initial placeholder file for the frontend at . The next logical step was to integrate this page into the application's routing and navigation.
     - Status: IN PROGRESS
     - Agent Testing Done: N
-    - Which testing method agent to use? Frontend testing agent
+    - Which testing method agent to use? Frontend testing agent to test the new page and form submission, and  to test the backend endpoint.
     - User Testing Done: N
 
 **All Pending/In progress Issue list**:
-  - **Issue 1 (P0):** Syntax error in .
-
-**Issues Detail:**
-  - **Issue 1: Syntax error in **
-     - **Attempted fixes:** None. The agent was stopped immediately after the user reported the error was coming.
-     - **Next debug checklist:**
-        1. Run  on  to pinpoint the syntax error.
-        2. View the file at the reported location and correct the code. The error is likely a mismatched bracket, parenthesis, or an invalid JSX structure from the last large edit.
-        3. After applying the fix, restart the frontend service (frontend: stopped
-frontend: started).
-        4. Take a screenshot of the  page to ensure it loads without crashing.
-     - **Why fix this issue and what will be achieved with the fix?** The Market Intelligence page is currently non-functional. Fixing this error is the immediate blocker to making the new Risk Engine feature visible and testable.
-     - **Status**: IN PROGRESS
-     - **Is recurring issue?** N
-     - **Should Test frontend/backend/both after fix?** Frontend
-     - **Blocked on other issue:** None
+There are no pending bugs or issues. The current work is focused on feature development and data processing.
 
 **In progress Task List**:
-  - **Task 1: Complete and Verify the Risk Engine UI Implementation (P0)**
-     - **Where to resume:** After fixing the syntax error in , the agent must thoroughly test the new UI features.
-     - **What will be achieved with this?** The Market Intelligence page will have a fully functional risk analysis UI, allowing users to filter articles by multiple risk categories, sort by Highest Risk, and view detailed risk information on each article card.
+  - **Task 1: Complete the Careers Page Implementation (P0)**
+     - **Where to resume:** 
+        1. Add the new route for  in .
+        2. Add a Careers link to the main navigation in .
+        3. Build the UI in , including a form with the specified roles and fields (Name, Email, Resume, etc.).
+        4. Implement the form submission logic to  to the  endpoint.
+     - **What will be achieved with this?** A fully functional Careers page where users can apply for jobs, with submissions stored in the database.
      - **Status**: IN PROGRESS
-     - **Should Test frontend/backend/both after fix?** Both. The frontend requires extensive testing via the frontend testing agent. The backend  endpoint should also be verified to ensure it correctly returns all the necessary risk data fields.
-     - **Blocked on something:** Issue 1: Syntax error in .
+     - **Should Test frontend/backend/both after fix?** Both
+     - **Blocked on something:** None
+
+  - **Task 2: Complete Full Article Scraping (P1)**
+     - **Where to resume:** The scraper is running in the background. The user wants all ~2000 articles processed. The agent needs to continue monitoring progress via the  endpoint and triggering new batches () until the pending count is near zero.
+     - **What will be achieved with this?** The entire database of news articles will have full text or metadata, which is critical for the accuracy and completeness of the Risk Engine analysis.
+     - **Status**: IN PROGRESS
+     - **Should Test frontend/backend/both after fix?** N/A (Verification via API stats)
+     - **Blocked on something:** None
 
 **Upcoming and Future Tasks**
     **Upcoming Tasks:**
-    - **User Verification of Risk Engine (P1):** Once the UI is fixed and verified by the agent, the user needs to test and provide feedback on the complete end-to-end Risk Engine feature.
-    
+    - **Connect Risk Engine to DB Configuration (P1):** The admin panel now allows editing risk engine rules, but the engine itself () still uses hardcoded rules. The next step is to modify  to fetch its configuration from the  database collection at startup or per-request.
+    - **User Verification (P2):** After the Careers page is done, ask the user to verify all the recently completed features (Risk Engine UI, mobile fixes, Admin Panel configurations, tag management, etc.).
+
     **Future Tasks:**
-    - **ML/LLM Risk Engine (P2):** The user requested the  be built behind an interface to facilitate a future upgrade from the current rule-based system to an ML/LLM-based one.
-    - **BOM Risk Score Calculation (P3):** The user's long-term goal for the scraped data is to build risk scores for Bill of Materials (BOMs).
-    - **Supplier Product Catalog Upload (P3):** A previously mentioned feature request for suppliers to upload product catalogs.
+    - **ML/LLM Risk Engine (P3):** Upgrade the  from the current rule-based system to an ML/LLM-based one.
+    - **BOM Risk Score Calculation (P3):** A long-term goal to build risk scores for Bill of Materials.
+    - **Supplier Product Catalog Upload (P3):** A previously mentioned feature request for suppliers.
 
 **Completed work in this session**
-- **Fixed Broken News Links:** Resolved the initial bug by ensuring articles with invalid links are filtered out.
-- **Admin Panel UI/UX:** Reorganized the admin panel to have a dedicated, paginated tab for news fetch logs.
-- **Multi-Source News Aggregation:**
-  - Integrated **GDELT API** for daily news fetching.
-  - Integrated **MediaStack API** with a separate weekly schedule and a dedicated admin refresh button to handle its stricter rate limits.
-- **Advanced Deduplication & Tagging:** Refactored the data model to allow one article to have multiple topic tags ( array), ensuring it appears correctly in filtered views without duplication in All News. The frontend was updated to display all relevant tags on an article.
-- **Web Scraper Implementation:**
-  - Built a web scraper to fetch and store the full text content of articles.
-  - The scraper automatically runs after news fetches and intelligently handles errors, categorizing them as permanent (paywalls) or retryable (rate limits) and avoiding re-scraping completed articles.
-  - The admin panel was enhanced to show detailed scraper statistics.
-- **Risk Engine Backend Implementation:**
-  - Created a comprehensive, rule-based  module to analyze articles for various risk categories.
-  - Integrated the engine to run automatically after articles are scraped.
-  - Created API endpoints to trigger analysis and view risk statistics.
-  - Successfully processed all 1720 existing articles to populate the database with risk data.
+- **Risk Engine UI Fixed & Completed:** Fixed a critical syntax error on  and implemented the full UI for displaying risk badges, category chips, and metadata on article cards.
+- **Featured Article Logic Enhanced:** Implemented a sophisticated priority system for the homepage's featured article based on user-defined risk categories and recency.
+- **Mobile UI for Market Intelligence Fixed:** Made the filter chip sections horizontally scrollable, making the page usable on mobile devices.
+- **Trusted By Section Made Configurable:** Implemented a toggle in the admin panel to show or hide the scrolling client logos on the homepage.
+- **Scraper Enhanced for Paywalled Sites:** Modified the web scraper to extract metadata (description, OG tags) when full content access is denied, significantly reducing permanent failures.
+- **Robust Tag Management Implemented:** Fixed query deletion logic to remove associated tags from articles, preventing orphan tags, and added admin endpoints for cleanup.
+- **Risk Engine Rules Made Configurable:** Created a full CRUD interface in the admin panel for managing risk categories and their keyword triggers, storing them in the database.
+- **Homepage Stats Updated:** Modified the key statistics on the homepage as per the user's request.
+- **Company Logo Updated:** Replaced the logo in the header and reverted the footer to a stylized text logo.
+- **Careers Page Started:** Created the backend model, API endpoints, and initial frontend file.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **Backend:** FastAPI,  (multiple job schedules), ,  &  (for web scraping), modular rule-based engine design ().
-- **Frontend:** React, React Hooks (, , ), Tailwind CSS. Complex state management for interdependent multi-select filters (topic and risk).
+- **Backend:** FastAPI, , ,  & .
+- **Frontend:** React, React Hooks, Tailwind CSS.
+- **Architecture Pattern:**
+    - **Dynamic Frontend Configuration:** Using API-driven settings to control UI rendering (e.g., showing/hiding client logos).
+    - **Database-Driven Configuration:** Storing core business logic rules (Risk Engine triggers) in the database to be managed via a UI, decoupling the logic from the code.
+    - **Data Integrity Management:** Proactively implementing cleanup logic (e.g., on-delete hooks) and providing admin tools for data maintenance (orphan tag removal).
 
 **key DB schema**
-- **news_articles:**
-  - :  (migrated from : ).
-  - , , , ,  fields added for scraping.
-  - , , , , ,  fields added for the risk engine.
-- **news_fetch_logs:** Field  added to identify the source (SerpApi, GDELT, MediaStack).
+- : The main collection of news items.
+- : Manages the topic tags/filters.
+- : **New**. Singleton collection for global UI settings like .
+- : **New**. Stores the user-configurable rules for the risk engine.
+- : **New**. Stores submissions from the careers page form.
+- : **New**. Stores homepage statistics.
 
 **All files of reference**
-- : **CRITICAL FILE.** Contains the syntax error that needs to be fixed and the entire UI for the new Risk Engine feature.
-- : The core logic for all risk calculations.
-- : The main backend file that integrates all data pipeline stages (fetch, scrape, analyze).
-- : The admin dashboard UI.
-- : Contains the API keys.
+- : **Next file to edit.** Needs UI and form logic.
+- : Needs a route for .
+- : Needs a nav link to .
+- : Contains all backend logic, including the newly created endpoints for career applications.
+- : Contains the UI for all the new admin features.
+- : The core feature page, now stable.
+- : **Important for future task.** Needs to be updated to use the new database configuration.
+
+**Areas that need refactoring**:
+-  has grown very large. The sub-components for managing news, site settings, and risk configurations are defined within this single file and could be extracted into their own separate component files under  for better maintainability.
+
+**key api endpoints**
+- **Career Applications (New):**
+    - : Submits a new job application.
+    - : Retrieves all applications (for admin).
+- **Risk Configuration (New):**
+    - : Get all or create a new risk category rule.
+    - : Update or delete a specific risk category rule.
+- **Tag Management (Enhanced):**
+    - : Now also removes the corresponding tag from all articles.
+    - : Find and remove tags from articles that no longer have a corresponding query.
+- **Scraping (Enhanced):**
+    - : Resets permanently failed articles to be re-scraped for metadata.
 
 **Critical Info for New Agent**
-- The immediate priority is fixing the syntax error in . The user explicitly requested this fix before forking.
-- The Risk Engine feature is substantial. The backend logic is complete and has already processed the existing data. The frontend implementation is what needs to be fixed and verified.
-- The data processing pipeline is: **News Fetch -> Content Scrape -> Risk Analysis**. This sequence is important.
-- The user specified using **OR logic** for the multi-select risk category filters.
-- The user agreed to have risk computation run on scraped articles, but for unscraped articles, the analysis should run on the available  and . This is implemented in .
+- **Primary Goal:** Your immediate task is to complete the **Careers Page**. This involves adding the route in , the link in , and building out the form UI and submission logic in .
+- **Secondary Goal:** The user wants the article scraping to be completed. Periodically check the status with  and trigger new batches with  to process the remaining articles.
+- **Future Implication:** A major piece of groundwork has been laid: the Risk Engine's rules are now configurable via the admin panel and stored in the DB. However, the engine itself () **is not yet using this data**. It still uses its internal hardcoded dictionary. A key upcoming task will be to connect the engine to the database configuration.
 
 **Last 10 User Messages and any pending HUMAN messages**
 - 
@@ -109,29 +128,33 @@ frontend: started).
 - 
 - 
 - 
-- /usr/bin/date
+- 
+- 
+- 
 
 **Project Health Check:**
-- **Broken:** The  page is currently down due to a JavaScript syntax error. The core functionality of the new Risk Engine is therefore inaccessible to the user.
-- **Mocked:** The  page remains a placeholder with mock data.
+- **Broken:** None.
+- **Mocked:**  page still contains mock data.
+- **In-progress:**
+    - Careers Page implementation.
+    - Full scraping of all news articles.
 
 **3rd Party Integrations**
-- **SerpApi:** For daily news fetching. Key is in .
-- **GDELT:** For daily news fetching. No key required.
-- **MediaStack:** For weekly news fetching. Key is in .
-- **BeautifulSoup4 / lxml:** For web content scraping.
+- **SerpApi:** News aggregation.
+- **GDELT:** News aggregation.
+- **MediaStack:** News aggregation.
+- **BeautifulSoup4 / lxml:** Web content and metadata scraping.
 
 **Testing status**
-  - Testing agent used after significant changes: NO (The last major feature, Risk Engine, is not yet testable due to a syntax error).
-  - Troubleshoot agent used after agent stuck in loop: NO
-  - Test files created: []
-  - Known regressions: The  page is broken.
+- Testing agent used after significant changes: NO (A frontend testing agent call failed due to a command error, and subsequent feature completion was verified manually with screenshots).
+- Troubleshoot agent used after agent stuck in loop: NO
+- Test files created: []
+- Known regressions: None. The previous regression on  was fixed.
 
 **Credentials to test flow:**
--   **Admin Dashboard URL:** 
--   **Password:**  (sourced from ).
+- **Admin Dashboard URL:** 
+- **Password:** 
 
 **What agent forgot to execute**
-- The agent did not use the  for the GDELT and MediaStack integrations, implementing them directly.
-- The agent has not yet tested the complete end-to-end Risk Engine feature because the UI is broken.</analysis>
-</analysis>
+- The agent built the admin UI to manage Risk Engine rules but **did not update the actual  to use these rules from the database**. The engine is still using its hardcoded configuration, meaning the admin UI has no effect on the actual risk calculations yet.
+- After creating the backend and the  file for the **Careers Page**, the agent did not proceed to add the necessary routing in  or the navigation link in  to make the page accessible.</analysis>
