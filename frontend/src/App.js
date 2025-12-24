@@ -16,6 +16,7 @@ import AdminPage from "./pages/AdminPage";
 import LoginPage from "./pages/LoginPage";
 import PlatformPage from "./pages/PlatformPage";
 import MarketIntelligencePage from "./pages/MarketIntelligencePage";
+import CareersPage from "./pages/CareersPage";
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/contact" element={<ContactPage />} />
                 <Route path="/market-intelligence" element={<MarketIntelligencePage />} />
+                <Route path="/careers" element={<CareersPage />} />
               </Routes>
             </Layout>
           } />
