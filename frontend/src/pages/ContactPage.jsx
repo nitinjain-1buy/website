@@ -204,6 +204,21 @@ const CustomerForm = () => {
           />
         </div>
         <div className="space-y-2">
+          <Label htmlFor="phone">Phone Number</Label>
+          <Input
+            id="phone"
+            name="phone"
+            type="tel"
+            value={formData.phone}
+            onChange={handleInputChange}
+            placeholder="+1 (555) 123-4567"
+            className="h-12"
+          />
+        </div>
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-6">
+        <div className="space-y-2">
           <Label htmlFor="company">Company *</Label>
           <Input
             id="company"
@@ -215,9 +230,6 @@ const CustomerForm = () => {
             className="h-12"
           />
         </div>
-      </div>
-
-      <div className="grid sm:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label htmlFor="title">Job Title</Label>
           <Input
@@ -229,24 +241,25 @@ const CustomerForm = () => {
             className="h-12"
           />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="companySize">Company Size</Label>
-          <Select
-            value={formData.companySize}
-            onValueChange={(value) => handleSelectChange('companySize', value)}
-          >
-            <SelectTrigger className="h-12">
-              <SelectValue placeholder="Select size" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="1-50">1-50 employees</SelectItem>
-              <SelectItem value="51-200">51-200 employees</SelectItem>
-              <SelectItem value="201-1000">201-1,000 employees</SelectItem>
-              <SelectItem value="1001-5000">1,001-5,000 employees</SelectItem>
-              <SelectItem value="5000+">5,000+ employees</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="companySize">Company Size</Label>
+        <Select
+          value={formData.companySize}
+          onValueChange={(value) => handleSelectChange('companySize', value)}
+        >
+          <SelectTrigger className="h-12">
+            <SelectValue placeholder="Select size" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="1-50">1-50 employees</SelectItem>
+            <SelectItem value="51-200">51-200 employees</SelectItem>
+            <SelectItem value="201-1000">201-1,000 employees</SelectItem>
+            <SelectItem value="1001-5000">1,001-5,000 employees</SelectItem>
+            <SelectItem value="5000+">5,000+ employees</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-2">
