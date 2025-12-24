@@ -1925,15 +1925,16 @@ async def get_problems():
 async def create_problem(request: Request):
     """Create a new problem card"""
     body = await request.json()
+    problem_id = str(uuid.uuid4())
     problem = {
-        "id": str(uuid.uuid4()),
+        "id": problem_id,
         "title": body.get("title", ""),
         "description": body.get("description", ""),
         "icon": body.get("icon", "AlertTriangle"),
         "order": body.get("order", 0)
     }
     await db.problems.insert_one(problem)
-    return problem
+    return await db.problems.find_one({"id": problem_id}, {"_id": 0})
 
 @api_router.put("/problems/{problem_id}")
 async def update_problem(problem_id: str, request: Request):
