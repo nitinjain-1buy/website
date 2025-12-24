@@ -50,6 +50,7 @@ const RISK_CATEGORY_LABELS = {
 const MarketIntelligencePage = () => {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedTopics, setSelectedTopics] = useState([]);
   const [selectedRiskCategories, setSelectedRiskCategories] = useState([]);
   const [sortBy, setSortBy] = useState('newest'); // 'newest' or 'risk'
@@ -67,6 +68,9 @@ const MarketIntelligencePage = () => {
   const fetchRiskCategories = async () => {
     try {
       const response = await fetch(`${API_URL}/api/news/risk-categories`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
       setRiskCategoryCounts(data.categories || {});
     } catch (error) {
@@ -74,11 +78,22 @@ const MarketIntelligencePage = () => {
     }
   };
 
-  const fetchNews = async () => {
+  const fetchNews = async (retryCount = 0) => {
+    const maxRetries = 2;
     try {
       setLoading(true);
+      setError(null);
       const response = await fetch(`${API_URL}/api/news?limit=500`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
+      
+      if (!Array.isArray(data)) {
+        throw new Error('Invalid response format');
+      }
       
       // Filter out articles without valid links or content
       const validArticles = data.filter(
@@ -95,8 +110,15 @@ const MarketIntelligencePage = () => {
       });
       
       setArticles(sortedData);
+      setError(null);
     } catch (error) {
       console.error('Error fetching news:', error);
+      if (retryCount < maxRetries) {
+        // Retry after 1 second
+        setTimeout(() => fetchNews(retryCount + 1), 1000);
+        return;
+      }
+      setError(`Failed to load articles. Please check your internet connection and try again.`);
     } finally {
       setLoading(false);
     }
