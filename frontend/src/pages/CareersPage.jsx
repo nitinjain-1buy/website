@@ -396,12 +396,13 @@ const CareersPage = () => {
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="phone" className="flex items-center gap-1">
-                          <Phone className="w-3 h-3" /> Phone
+                          <Phone className="w-3 h-3" /> Phone *
                         </Label>
                         <Input
                           id="phone"
                           value={formData.phone}
                           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                          required
                           placeholder="+91 98765 43210"
                           className="mt-1"
                         />
