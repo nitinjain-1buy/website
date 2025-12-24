@@ -607,6 +607,83 @@ const CustomerLogosManager = ({ logos, isLoading, onRefresh }) => {
           </div>
         </div>
 
+        {/* Section Subtitle */}
+        <div className="space-y-2">
+          <label className="font-medium text-slate-700 text-sm">Section Subtitle</label>
+          <div className="flex gap-2">
+            <Input
+              value={siteSettings.clientSectionSubtitle || ''}
+              onChange={(e) => setSiteSettings({ ...siteSettings, clientSectionSubtitle: e.target.value })}
+              placeholder="Built for procurement leaders who demand precision"
+              className="flex-1"
+            />
+            <Button 
+              onClick={() => updateSiteSettings({ clientSectionSubtitle: siteSettings.clientSectionSubtitle })}
+              disabled={isUpdatingSettings}
+              size="sm"
+            >
+              Save
+            </Button>
+          </div>
+        </div>
+
+        {/* Target Audience Tags */}
+        <div className="space-y-2">
+          <label className="font-medium text-slate-700 text-sm">Target Audience Tags</label>
+          <p className="text-xs text-slate-500 mb-2">These appear as pill badges below the subtitle</p>
+          <div className="flex flex-wrap gap-2 mb-3">
+            {(siteSettings.targetAudience || []).map((tag, index) => (
+              <span 
+                key={index}
+                className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-100 text-slate-700 rounded-full text-sm border border-slate-200"
+              >
+                {tag}
+                <button
+                  onClick={() => {
+                    const newTags = siteSettings.targetAudience.filter((_, i) => i !== index);
+                    setSiteSettings({ ...siteSettings, targetAudience: newTags });
+                    updateSiteSettings({ targetAudience: newTags });
+                  }}
+                  className="ml-1 text-slate-400 hover:text-red-500"
+                >
+                  <XCircle className="h-4 w-4" />
+                </button>
+              </span>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <Input
+              value={newAudienceTag}
+              onChange={(e) => setNewAudienceTag(e.target.value)}
+              placeholder="Add new audience tag (e.g., Supply Chain Managers)"
+              className="flex-1"
+              onKeyPress={(e) => {
+                if (e.key === 'Enter' && newAudienceTag.trim()) {
+                  const newTags = [...(siteSettings.targetAudience || []), newAudienceTag.trim()];
+                  setSiteSettings({ ...siteSettings, targetAudience: newTags });
+                  updateSiteSettings({ targetAudience: newTags });
+                  setNewAudienceTag('');
+                }
+              }}
+            />
+            <Button 
+              onClick={() => {
+                if (newAudienceTag.trim()) {
+                  const newTags = [...(siteSettings.targetAudience || []), newAudienceTag.trim()];
+                  setSiteSettings({ ...siteSettings, targetAudience: newTags });
+                  updateSiteSettings({ targetAudience: newTags });
+                  setNewAudienceTag('');
+                }
+              }}
+              disabled={isUpdatingSettings || !newAudienceTag.trim()}
+              size="sm"
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Add
+            </Button>
+          </div>
+        </div>
+
         {/* Social Media Links */}
         <div className="mt-6 pt-6 border-t border-slate-200">
           <h4 className="font-semibold text-slate-900 mb-4">Social Media Links</h4>
