@@ -598,6 +598,54 @@ const CustomerLogosManager = ({ logos, isLoading, onRefresh }) => {
             </Button>
           </div>
         </div>
+
+        {/* Social Media Links */}
+        <div className="mt-6 pt-6 border-t border-slate-200">
+          <h4 className="font-semibold text-slate-900 mb-4">Social Media Links</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="font-medium text-slate-700 text-sm flex items-center gap-2">
+                <Linkedin className="h-4 w-4 text-blue-600" /> LinkedIn URL
+              </label>
+              <div className="flex gap-2">
+                <Input
+                  value={siteSettings.linkedinUrl || ''}
+                  onChange={(e) => setSiteSettings({ ...siteSettings, linkedinUrl: e.target.value })}
+                  placeholder="https://linkedin.com/company/1buy-ai"
+                  className="flex-1"
+                />
+                <Button 
+                  onClick={() => updateSiteSettings({ linkedinUrl: siteSettings.linkedinUrl })}
+                  disabled={isUpdatingSettings}
+                  size="sm"
+                >
+                  Save
+                </Button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="font-medium text-slate-700 text-sm flex items-center gap-2">
+                <Twitter className="h-4 w-4 text-sky-500" /> Twitter/X URL
+              </label>
+              <div className="flex gap-2">
+                <Input
+                  value={siteSettings.twitterUrl || ''}
+                  onChange={(e) => setSiteSettings({ ...siteSettings, twitterUrl: e.target.value })}
+                  placeholder="https://twitter.com/1buy_ai"
+                  className="flex-1"
+                />
+                <Button 
+                  onClick={() => updateSiteSettings({ twitterUrl: siteSettings.twitterUrl })}
+                  disabled={isUpdatingSettings}
+                  size="sm"
+                >
+                  Save
+                </Button>
+              </div>
+            </div>
+          </div>
+          <p className="text-xs text-slate-500 mt-2">These links will appear in the website footer</p>
+        </div>
       </div>
 
       <div className="flex justify-between items-center mb-6">
