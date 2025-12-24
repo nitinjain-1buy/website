@@ -3053,6 +3053,9 @@ const AdminDashboard = ({ onLogout }) => {
               {activeTab === 'site-settings' && (
                 <HeroSectionManager heroData={heroSection} isLoading={isLoading} onRefresh={fetchData} />
               )}
+              {activeTab === 'careers' && (
+                <CareersManager benefits={careerBenefits} roles={careerRoles} applications={careerApplications} isLoading={isLoading} onRefresh={fetchData} />
+              )}
               {activeTab === 'news' && (
                 <NewsManager isLoading={isLoading} onRefresh={fetchData} />
               )}
