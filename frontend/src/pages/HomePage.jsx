@@ -246,7 +246,11 @@ const HomePage = () => {
 
         // Update site settings if available
         if (settingsRes.data) {
-          setSiteSettings(settingsRes.data);
+          setSiteSettings({
+            ...siteSettings,
+            ...settingsRes.data,
+            targetAudience: settingsRes.data.targetAudience || ["CEOs & Owners", "Chief Procurement Officers", "Chief Financial Officers", "Sourcing Teams"]
+          });
         }
       } catch (error) {
         console.error('Error fetching site content:', error);
