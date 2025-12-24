@@ -563,7 +563,10 @@ const MarketIntelligencePage = () => {
               <span className={`text-xs px-1 py-0.5 rounded-full ${
                 selectedTopics.length === 0 ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-500'
               }`}>
-                {stats.total || articles.length}
+                {activeTab === 'recent' 
+                  ? (stats.recent || recentArticles.length)
+                  : (stats.archived || archivedArticles.length)
+                }
               </span>
             </button>
 
