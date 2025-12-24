@@ -2848,13 +2848,16 @@ const AdminDashboard = ({ onLogout }) => {
   const [mapLocations, setMapLocations] = useState([]);
   const [regionCards, setRegionCards] = useState([]);
   const [flowLines, setFlowLines] = useState([]);
+  const [careerBenefits, setCareerBenefits] = useState([]);
+  const [careerRoles, setCareerRoles] = useState([]);
+  const [careerApplications, setCareerApplications] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
 
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [customersRes, suppliersRes, testimonialsRes, statsRes, heroRes, logosRes, productsRes, mapLocationsRes, regionCardsRes, flowLinesRes] = await Promise.all([
+      const [customersRes, suppliersRes, testimonialsRes, statsRes, heroRes, logosRes, productsRes, mapLocationsRes, regionCardsRes, flowLinesRes, benefitsRes, rolesRes, applicationsRes] = await Promise.all([
         axios.get(`${API}/demo-requests`),
         axios.get(`${API}/supplier-requests`),
         axios.get(`${API}/testimonials`),
@@ -2864,7 +2867,10 @@ const AdminDashboard = ({ onLogout }) => {
         axios.get(`${API}/products`),
         axios.get(`${API}/map-locations`),
         axios.get(`${API}/region-cards`),
-        axios.get(`${API}/flow-lines`)
+        axios.get(`${API}/flow-lines`),
+        axios.get(`${API}/careers/benefits`),
+        axios.get(`${API}/careers/roles-config`),
+        axios.get(`${API}/careers/applications`)
       ]);
       setCustomerRequests(customersRes.data);
       setSupplierRequests(suppliersRes.data);
@@ -2876,6 +2882,9 @@ const AdminDashboard = ({ onLogout }) => {
       setMapLocations(mapLocationsRes.data);
       setRegionCards(regionCardsRes.data);
       setFlowLines(flowLinesRes.data);
+      setCareerBenefits(benefitsRes.data);
+      setCareerRoles(rolesRes.data);
+      setCareerApplications(applicationsRes.data);
     } catch (err) {
       toast.error('Failed to fetch data');
     } finally {
