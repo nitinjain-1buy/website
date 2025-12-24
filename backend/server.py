@@ -1591,10 +1591,11 @@ async def seed_site_stats():
         return {"message": f"Stats already exist ({count} found)", "seeded": False}
     
     default_stats = [
-        {"key": "cost_savings", "value": "15-20%", "label": "Cost Savings Identified", "description": "Average savings identified across customer BOMs", "order": 0},
+        {"key": "cost_savings", "value": "15-20%", "label": "Cost Savings Realised", "description": "Average savings realised across customer BOMs", "order": 0},
         {"key": "mpn_coverage", "value": "25M+", "label": "MPN Coverage", "description": "Comprehensive part number database", "order": 1},
         {"key": "data_sources", "value": "400+", "label": "Data Sources", "description": "Proprietary data pipes for intelligence", "order": 2},
         {"key": "enterprise_customers", "value": "30+", "label": "Enterprise Customers", "description": "Active OEM & EMS engagements", "order": 3},
+        {"key": "data_points", "value": "500M+", "label": "Data Points", "description": "Real-time market intelligence signals processed daily", "order": 4},
     ]
     
     for stat_data in default_stats:
