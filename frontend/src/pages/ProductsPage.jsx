@@ -200,7 +200,7 @@ const ProductsPage = () => {
 
                   {/* Key Benefits Grid */}
                   <div className="grid sm:grid-cols-2 gap-4 mb-8">
-                    {details.keyBenefits.map((benefit, idx) => (
+                    {(details?.keyBenefits || []).map((benefit, idx) => (
                       <div key={idx} className="flex items-start space-x-3">
                         <div className={`w-10 h-10 rounded-lg ${colors[index].bg} flex items-center justify-center flex-shrink-0`}>
                           <benefit.icon className={`h-5 w-5 ${colors[index].accent}`} />
@@ -217,7 +217,7 @@ const ProductsPage = () => {
                   <div className="mb-8">
                     <h4 className="font-semibold text-slate-900 mb-3">Use Cases</h4>
                     <ul className="space-y-2">
-                      {details.useCases.map((useCase, idx) => (
+                      {(details?.useCases || product.features || []).map((useCase, idx) => (
                         <li key={idx} className="flex items-start">
                           <CheckCircle className={`h-5 w-5 ${colors[index].accent} mr-2 flex-shrink-0 mt-0.5`} />
                           <span className="text-slate-700">{useCase}</span>
@@ -238,7 +238,7 @@ const ProductsPage = () => {
                 <div className={isReverse ? 'lg:order-1' : ''}>
                   <div className={`rounded-xl overflow-hidden shadow-2xl border ${colors[index].border}`}>
                     <img
-                      src={details.screenshot}
+                      src={details?.screenshot || product.screenshot || 'https://via.placeholder.com/800x600'}
                       alt={`${product.name} Interface`}
                       className="w-full"
                     />
