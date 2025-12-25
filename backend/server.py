@@ -225,9 +225,6 @@ def check_article_relevance(title: str, snippet: str = "", source_name: str = ""
         "reason": reason,
         "matched_keywords": matched_keywords[:10]
     }
-        "reason": reason,
-        "matched_keywords": matched_keywords[:10]
-    }
 
 # News fetching function
 async def fetch_news_from_serpapi(query: str) -> List[dict]:
