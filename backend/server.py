@@ -818,6 +818,7 @@ async def fetch_and_store_all_news():
             serpapi_articles = await fetch_news_from_serpapi(query_text)
             serpapi_new = 0
             serpapi_existing_updated = 0
+            serpapi_filtered = 0
             
             for article in serpapi_articles:
                 link = article.get("link", "")
@@ -843,11 +844,23 @@ async def fetch_and_store_all_news():
                     )
                     serpapi_existing_updated += 1
                 else:
+                    # Check relevance before storing
+                    title = article.get("title", "")
+                    snippet = article.get("snippet", "")
+                    source_name = article.get("source", {}).get("name", "")
+                    
+                    relevance = check_article_relevance(title, snippet, source_name)
+                    
+                    if not relevance["is_relevant"]:
+                        serpapi_filtered += 1
+                        logger.debug(f"[SerpAPI] Filtered irrelevant: {title[:50]}... Reason: {relevance['reason']}")
+                        continue
+                    
                     # New article - create with queries array
                     news_doc = {
                         "id": str(uuid.uuid4()),
                         "position": article.get("position", 0),
-                        "title": article.get("title", ""),
+                        "title": title,
                         "source": article.get("source", {}),
                         "link": link,
                         "thumbnail": article.get("thumbnail"),
@@ -857,7 +870,9 @@ async def fetch_and_store_all_news():
                         "queries": [query_text],  # Array of queries this article belongs to
                         "apiSource": "SerpAPI",
                         "fetchedAt": datetime.now(timezone.utc).isoformat(),
-                        "isHidden": False
+                        "isHidden": False,
+                        "relevanceScore": relevance["relevance_score"],
+                        "matchedKeywords": relevance.get("matched_keywords", [])
                     }
                     
                     await db.news_articles.insert_one(news_doc)
@@ -874,11 +889,12 @@ async def fetch_and_store_all_news():
                 "articlesFound": len(serpapi_articles),
                 "newArticles": serpapi_new,
                 "existingUpdated": serpapi_existing_updated,
+                "filtered": serpapi_filtered,
                 "status": "success" if serpapi_articles else "no_results",
                 "fetchedAt": datetime.now(timezone.utc).isoformat()
             }
             await db.news_fetch_logs.insert_one(serpapi_log)
-            logger.info(f"[SerpAPI] Query '{query_text}': {len(serpapi_articles)} found, {serpapi_new} new, {serpapi_existing_updated} existing updated")
+            logger.info(f"[SerpAPI] Query '{query_text}': {len(serpapi_articles)} found, {serpapi_new} new, {serpapi_existing_updated} existing, {serpapi_filtered} filtered")
             
             # ========== GDELT ==========
             gdelt_articles = await fetch_news_from_gdelt(query_text)
