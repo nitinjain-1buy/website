@@ -3835,6 +3835,129 @@ async def get_news_fetch_logs_count():
     count = await db.news_fetch_logs.count_documents({})
     return {"count": count}
 
+
+# ============== RELEVANCE FILTERING ENDPOINTS ==============
+
+@api_router.get("/news/relevance-stats", response_model=dict)
+async def get_relevance_stats():
+    """Get statistics about article relevance scores"""
+    total = await db.news_articles.count_documents({})
+    with_score = await db.news_articles.count_documents({"relevanceScore": {"$exists": True}})
+    without_score = total - with_score
+    
+    # Count by relevance ranges
+    high_relevance = await db.news_articles.count_documents({"relevanceScore": {"$gte": 50}})
+    medium_relevance = await db.news_articles.count_documents({"relevanceScore": {"$gte": 25, "$lt": 50}})
+    low_relevance = await db.news_articles.count_documents({"relevanceScore": {"$gte": 1, "$lt": 25}})
+    
+    return {
+        "total": total,
+        "withRelevanceScore": with_score,
+        "withoutRelevanceScore": without_score,
+        "byRelevance": {
+            "high": high_relevance,
+            "medium": medium_relevance,
+            "low": low_relevance
+        }
+    }
+
+@api_router.post("/news/check-relevance")
+async def check_article_relevance_endpoint(title: str, snippet: str = "", source: str = ""):
+    """Test the relevance filter on a specific article title"""
+    result = check_article_relevance(title, snippet, source)
+    return result
+
+@api_router.post("/news/cleanup-irrelevant")
+async def cleanup_irrelevant_articles(dry_run: bool = True):
+    """
+    Find and optionally remove irrelevant articles from the database.
+    Set dry_run=False to actually delete articles.
+    """
+    # Find articles that fail relevance check
+    all_articles = await db.news_articles.find(
+        {},
+        {"_id": 0, "id": 1, "title": 1, "link": 1, "source": 1}
+    ).to_list(10000)
+    
+    irrelevant_articles = []
+    for article in all_articles:
+        title = article.get("title", "")
+        source_name = article.get("source", {}).get("name", "") if isinstance(article.get("source"), dict) else ""
+        
+        relevance = check_article_relevance(title, "", source_name)
+        
+        if not relevance["is_relevant"]:
+            irrelevant_articles.append({
+                "id": article.get("id"),
+                "title": title[:80] + "..." if len(title) > 80 else title,
+                "link": article.get("link", "")[:60] + "..." if len(article.get("link", "")) > 60 else article.get("link", ""),
+                "reason": relevance["reason"]
+            })
+    
+    if not dry_run and irrelevant_articles:
+        # Delete irrelevant articles
+        ids_to_delete = [a["id"] for a in irrelevant_articles]
+        result = await db.news_articles.delete_many({"id": {"$in": ids_to_delete}})
+        
+        # Log the cleanup
+        cleanup_log = {
+            "id": str(uuid.uuid4()),
+            "action": "cleanup_irrelevant",
+            "deletedCount": result.deleted_count,
+            "articles": irrelevant_articles[:20],  # Store first 20 for reference
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        await db.news_fetch_logs.insert_one(cleanup_log)
+        
+        return {
+            "success": True,
+            "dryRun": False,
+            "deletedCount": result.deleted_count,
+            "deletedArticles": irrelevant_articles
+        }
+    
+    return {
+        "success": True,
+        "dryRun": True,
+        "irrelevantCount": len(irrelevant_articles),
+        "irrelevantArticles": irrelevant_articles
+    }
+
+@api_router.post("/news/apply-relevance-scores")
+async def apply_relevance_scores_to_existing():
+    """Apply relevance scores to existing articles that don't have them"""
+    # Find articles without relevance score
+    articles = await db.news_articles.find(
+        {"relevanceScore": {"$exists": False}},
+        {"_id": 0, "id": 1, "title": 1, "source": 1}
+    ).to_list(10000)
+    
+    if not articles:
+        return {"success": True, "message": "All articles already have relevance scores", "updated": 0}
+    
+    updated_count = 0
+    for article in articles:
+        title = article.get("title", "")
+        source_name = article.get("source", {}).get("name", "") if isinstance(article.get("source"), dict) else ""
+        
+        relevance = check_article_relevance(title, "", source_name)
+        
+        await db.news_articles.update_one(
+            {"id": article["id"]},
+            {"$set": {
+                "relevanceScore": relevance["relevance_score"],
+                "matchedKeywords": relevance.get("matched_keywords", [])
+            }}
+        )
+        updated_count += 1
+    
+    return {
+        "success": True,
+        "message": f"Applied relevance scores to {updated_count} articles",
+        "updated": updated_count
+    }
+
+
 class AdminLoginRequest(BaseModel):
     password: str
 
