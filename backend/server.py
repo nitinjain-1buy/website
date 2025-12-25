@@ -84,7 +84,7 @@ SERPAPI_KEY = os.environ.get("SERPAPI_KEY", "")
 MEDIASTACK_KEY = os.environ.get("MEDIASTACK_KEY", "")
 
 # ==================== RELEVANCE FILTER ====================
-# Keywords that indicate relevance to electronics/semiconductor industry
+# Keywords that indicate relevance to electronics/semiconductor industry (for scoring)
 RELEVANCE_KEYWORDS = {
     # Core industry terms
     'semiconductor', 'chip', 'chips', 'microchip', 'microprocessor', 'processor',
@@ -94,11 +94,11 @@ RELEVANCE_KEYWORDS = {
     'pcb', 'printed circuit', 'circuit board', 'motherboard', 'memory',
     'dram', 'nand', 'flash', 'ssd', 'storage', 'hdd',
     # Manufacturing
-    'tsmc', 'samsung', 'intel', 'nvidia', 'amd', 'qualcomm', 'broadcom',
+    'tsmc', 'samsung semiconductor', 'intel', 'nvidia', 'amd', 'qualcomm', 'broadcom',
     'micron', 'sk hynix', 'infineon', 'nxp', 'texas instruments', 'analog devices',
     'stmicroelectronics', 'renesas', 'on semiconductor', 'microchip technology',
     'nexperia', 'vishay', 'murata', 'tdk', 'yageo', 'kemet', 'avx',
-    'foxconn', 'asml', 'applied materials', 'lam research', 'kla',
+    'foxconn', 'asml', 'applied materials', 'lam research', 'kla', 'digikey', 'mouser',
     # Supply chain terms
     'supply chain', 'shortage', 'lead time', 'allocation', 'procurement',
     'sourcing', 'inventory', 'logistics', 'distribution', 'manufacturing',
@@ -109,6 +109,7 @@ RELEVANCE_KEYWORDS = {
     'tariff', 'trade war', 'export control', 'chips act', 'semiconductor act',
     'taiwan strait', 'chip war', 'tech war', 'sanctions', 'entity list',
     'huawei', 'smic', 'china semiconductor', 'reshoring', 'onshoring',
+    'blacklist', 'trade restriction', 'export ban',
     # Applications
     'automotive chip', 'automotive semiconductor', 'ev battery', 'power electronics',
     'iot', 'internet of things', '5g', '6g', 'ai chip', 'gpu', 'cpu', 'soc',
@@ -119,45 +120,48 @@ RELEVANCE_KEYWORDS = {
     'fire', 'factory', 'plant', 'facility', 'closure', 'shutdown',
 }
 
-# Keywords that indicate IRRELEVANT content (blocklist)
-IRRELEVANCE_KEYWORDS = {
-    'furniture', 'bedroom', 'mattress', 'sofa', 'couch', 'decor', 'interior design',
-    'fashion', 'clothing', 'apparel', 'jewelry', 'cosmetics', 'beauty', 'skincare',
-    'recipe', 'cooking', 'food', 'restaurant', 'dining', 'cuisine',
-    'real estate', 'mortgage', 'apartment', 'housing market', 'rent',
-    'fitness', 'workout', 'gym', 'yoga', 'diet', 'weight loss',
-    'celebrity', 'gossip', 'entertainment', 'movie review', 'album review',
-    'sports score', 'game recap', 'fantasy football', 'betting odds',
-    'horoscope', 'astrology', 'zodiac',
-    'travel deals', 'vacation', 'hotel', 'resort', 'cruise',
-    'pet', 'dog', 'cat', 'veterinary',
-    'wedding', 'engagement', 'marriage', 'divorce',
-    'lottery', 'casino', 'gambling',
+# Keywords that indicate CLEARLY IRRELEVANT content (blocklist)
+# Only block if article title/content strongly matches these AND has no electronics keywords
+SPAM_BLOCKLIST = {
+    # Furniture/Home - these are clearly unrelated
+    'furniture', 'bedroom furniture', 'mattress', 'sofa', 'couch', 'home decor', 'interior design',
+    'kitchen cabinet', 'living room decor', 'bathroom renovation',
+    # Fashion/Beauty - clearly unrelated
+    'fashion trend', 'clothing line', 'jewelry collection', 'cosmetics', 'beauty tips', 'skincare routine',
+    'makeup tutorial', 'nail art', 'hairstyle',
+    # Food/Recipes - clearly unrelated
+    'recipe', 'cooking tips', 'food blog', 'restaurant review', 'dining guide', 'cuisine',
+    'meal prep', 'healthy eating',
+    # Entertainment/Celebrity - clearly unrelated
+    'celebrity gossip', 'movie review', 'album review', 'concert review', 'tv show',
+    'red carpet', 'award show', 'film festival',
+    # Sports betting/gambling - clearly unrelated
+    'sports betting', 'fantasy football', 'betting odds', 'casino', 'gambling', 'lottery winner',
+    # Horoscope/Astrology - clearly unrelated
+    'horoscope', 'astrology', 'zodiac sign', 'tarot',
+    # Travel/Hotels - clearly unrelated (unless about supply chain)
+    'vacation deals', 'hotel review', 'resort review', 'cruise ship', 'travel tips',
+    # Pets - clearly unrelated
+    'pet care', 'dog training', 'cat food', 'veterinary',
+    # Weddings - clearly unrelated
+    'wedding planning', 'bridal', 'engagement ring',
 }
 
 def check_article_relevance(title: str, snippet: str = "", source_name: str = "") -> dict:
     """
     Check if an article is relevant to electronics/semiconductor industry.
+    
+    STRATEGY: 
+    - Only BLOCK articles that clearly match spam/blocklist AND have NO electronics keywords
+    - Articles without clear spam signals pass through (since they came from electronics-related queries)
+    
     Returns dict with: is_relevant (bool), relevance_score (0-100), reason (str)
     """
     # Combine all text for analysis
     text = f"{title} {snippet} {source_name}".lower()
+    title_lower = title.lower()
     
-    # First check blocklist - immediate rejection if strong match
-    irrelevance_count = 0
-    for keyword in IRRELEVANCE_KEYWORDS:
-        if keyword in text:
-            irrelevance_count += 1
-    
-    # If multiple irrelevant keywords found, likely spam
-    if irrelevance_count >= 2:
-        return {
-            "is_relevant": False,
-            "relevance_score": 0,
-            "reason": f"Multiple irrelevant keywords found ({irrelevance_count})"
-        }
-    
-    # Count relevance keywords
+    # Count relevance keywords first
     relevance_count = 0
     matched_keywords = []
     for keyword in RELEVANCE_KEYWORDS:
@@ -166,28 +170,61 @@ def check_article_relevance(title: str, snippet: str = "", source_name: str = ""
             matched_keywords.append(keyword)
     
     # Calculate relevance score
-    # Score based on keyword matches (each keyword adds ~10 points, max 100)
     relevance_score = min(relevance_count * 15, 100)
-    
-    # Boost score for title matches (more important)
-    title_lower = title.lower()
     title_matches = sum(1 for kw in RELEVANCE_KEYWORDS if kw in title_lower)
     relevance_score = min(relevance_score + (title_matches * 20), 100)
     
-    # Penalize if irrelevant keywords found
-    relevance_score = max(0, relevance_score - (irrelevance_count * 30))
+    # Check blocklist - only block if:
+    # 1. Multiple spam keywords found in TITLE specifically
+    # 2. AND no electronics keywords found
+    spam_count_title = 0
+    spam_count_total = 0
+    matched_spam = []
     
-    # Decision threshold
-    is_relevant = relevance_score >= 15  # At least one strong match
+    for keyword in SPAM_BLOCKLIST:
+        if keyword in title_lower:
+            spam_count_title += 1
+            matched_spam.append(keyword)
+        elif keyword in text:
+            spam_count_total += 1
     
-    if is_relevant:
+    # Block logic:
+    # - If 2+ spam keywords in TITLE and NO relevance keywords -> BLOCK
+    # - If 1 spam keyword in title and 0 relevance keywords -> BLOCK
+    # - Otherwise -> ALLOW (benefit of the doubt since it came from electronics query)
+    
+    is_spam = False
+    block_reason = ""
+    
+    if spam_count_title >= 2 and relevance_count == 0:
+        is_spam = True
+        block_reason = f"Spam detected in title: {', '.join(matched_spam[:3])}"
+    elif spam_count_title >= 1 and relevance_count == 0:
+        is_spam = True
+        block_reason = f"Spam keyword in title, no electronics content: {matched_spam[0]}"
+    
+    if is_spam:
+        return {
+            "is_relevant": False,
+            "relevance_score": 0,
+            "reason": block_reason,
+            "matched_keywords": [],
+            "spam_keywords": matched_spam
+        }
+    
+    # Article passes - calculate final score
+    if relevance_count > 0:
         reason = f"Matched: {', '.join(matched_keywords[:5])}"
     else:
-        reason = "No relevant keywords found" if relevance_count == 0 else f"Low relevance ({relevance_score})"
+        reason = "Passed (no spam detected, from electronics query)"
+        relevance_score = 10  # Base score for passing articles without keywords
     
     return {
-        "is_relevant": is_relevant,
+        "is_relevant": True,
         "relevance_score": relevance_score,
+        "reason": reason,
+        "matched_keywords": matched_keywords[:10]
+    }
         "reason": reason,
         "matched_keywords": matched_keywords[:10]
     }
