@@ -1019,12 +1019,14 @@ async def fetch_news_for_single_query(query_text: str):
                 global_seen_urls.add(normalize_url(article["link"]))
         
         total_new_articles = 0
+        total_filtered = 0
         query_seen_urls = set()
         
         # ========== SERPAPI ==========
         serpapi_articles = await fetch_news_from_serpapi(query_text)
         serpapi_new = 0
         serpapi_existing_updated = 0
+        serpapi_filtered = 0
         
         for article in serpapi_articles:
             link = article.get("link", "")
@@ -1046,11 +1048,23 @@ async def fetch_news_for_single_query(query_text: str):
                 )
                 serpapi_existing_updated += 1
             else:
+                # Check relevance before storing
+                title = article.get("title", "")
+                snippet = article.get("snippet", "")
+                source_name = article.get("source", {}).get("name", "")
+                
+                relevance = check_article_relevance(title, snippet, source_name)
+                
+                if not relevance["is_relevant"]:
+                    serpapi_filtered += 1
+                    total_filtered += 1
+                    continue
+                
                 # New article
                 article_doc = {
                     "id": str(uuid.uuid4()),
                     "position": article.get("position", 0),
-                    "title": article.get("title", ""),
+                    "title": title,
                     "source": article.get("source", {}),
                     "link": link,
                     "thumbnail": article.get("thumbnail"),
@@ -1060,19 +1074,22 @@ async def fetch_news_for_single_query(query_text: str):
                     "queries": [query_text],
                     "apiSource": "SerpAPI",
                     "fetchedAt": datetime.now(timezone.utc).isoformat(),
-                    "isHidden": False
+                    "isHidden": False,
+                    "relevanceScore": relevance["relevance_score"],
+                    "matchedKeywords": relevance.get("matched_keywords", [])
                 }
                 await db.news_articles.insert_one(article_doc)
                 global_seen_urls.add(normalized_link)
                 serpapi_new += 1
                 total_new_articles += 1
         
-        logger.info(f"[SerpAPI] Query '{query_text}': {len(serpapi_articles)} found, {serpapi_new} new, {serpapi_existing_updated} existing updated")
+        logger.info(f"[SerpAPI] Query '{query_text}': {len(serpapi_articles)} found, {serpapi_new} new, {serpapi_existing_updated} existing, {serpapi_filtered} filtered")
         
         # ========== GDELT ==========
         gdelt_articles = await fetch_news_from_gdelt(query_text)
         gdelt_new = 0
         gdelt_existing_updated = 0
+        gdelt_filtered = 0
         
         for article in gdelt_articles:
             link = article.get("url", "")
@@ -1093,6 +1110,17 @@ async def fetch_news_for_single_query(query_text: str):
                 )
                 gdelt_existing_updated += 1
             else:
+                # Check relevance before storing
+                title = article.get("title", "")
+                source_name = article.get("domain", "")
+                
+                relevance = check_article_relevance(title, "", source_name)
+                
+                if not relevance["is_relevant"]:
+                    gdelt_filtered += 1
+                    total_filtered += 1
+                    continue
+                
                 # Parse GDELT date format
                 iso_date = None
                 gdelt_date = article.get("seendate", "")
@@ -1106,8 +1134,8 @@ async def fetch_news_for_single_query(query_text: str):
                 article_doc = {
                     "id": str(uuid.uuid4()),
                     "position": 0,
-                    "title": article.get("title", ""),
-                    "source": {"name": article.get("domain", ""), "icon": None},
+                    "title": title,
+                    "source": {"name": source_name or "Unknown", "icon": None},
                     "link": link,
                     "thumbnail": article.get("socialimage"),
                     "thumbnail_small": article.get("socialimage"),
@@ -1116,14 +1144,16 @@ async def fetch_news_for_single_query(query_text: str):
                     "queries": [query_text],
                     "apiSource": "GDELT",
                     "fetchedAt": datetime.now(timezone.utc).isoformat(),
-                    "isHidden": False
+                    "isHidden": False,
+                    "relevanceScore": relevance["relevance_score"],
+                    "matchedKeywords": relevance.get("matched_keywords", [])
                 }
                 await db.news_articles.insert_one(article_doc)
                 global_seen_urls.add(normalized_link)
                 gdelt_new += 1
                 total_new_articles += 1
         
-        logger.info(f"[GDELT] Query '{query_text}': {len(gdelt_articles)} found, {gdelt_new} new, {gdelt_existing_updated} existing updated")
+        logger.info(f"[GDELT] Query '{query_text}': {len(gdelt_articles)} found, {gdelt_new} new, {gdelt_existing_updated} existing, {gdelt_filtered} filtered")
         
         # Log fetch to news_fetch_logs
         log_entry = {
@@ -1132,13 +1162,14 @@ async def fetch_news_for_single_query(query_text: str):
             "queriesProcessed": 1,
             "articlesFound": len(serpapi_articles) + len(gdelt_articles),
             "newArticlesStored": total_new_articles,
+            "filtered": total_filtered,
             "api": "SerpAPI+GDELT (New Query)",
             "status": "success"
         }
         await db.news_fetch_logs.insert_one(log_entry)
         
         logger.info("=" * 60)
-        logger.info(f"[SingleQuery] Complete! New articles stored: {total_new_articles}")
+        logger.info(f"[SingleQuery] Complete! New articles stored: {total_new_articles}, Filtered: {total_filtered}")
         logger.info("=" * 60)
         
         # Trigger scraping for new articles
