@@ -1203,6 +1203,7 @@ async def fetch_mediastack_news():
                 global_seen_urls.add(normalize_url(article["link"]))
         
         total_new_articles = 0
+        total_filtered = 0
         
         for q in queries:
             query_text = q["query"]
@@ -1211,6 +1212,7 @@ async def fetch_mediastack_news():
             mediastack_articles = await fetch_news_from_mediastack(query_text)
             mediastack_new = 0
             mediastack_existing_updated = 0
+            mediastack_filtered = 0
             
             for article in mediastack_articles:
                 link = article.get("url", "")
@@ -1230,6 +1232,18 @@ async def fetch_mediastack_news():
                     )
                     mediastack_existing_updated += 1
                 else:
+                    # Check relevance before storing
+                    title = article.get("title", "")
+                    description = article.get("description", "")
+                    source_name = article.get("source", "")
+                    
+                    relevance = check_article_relevance(title, description, source_name)
+                    
+                    if not relevance["is_relevant"]:
+                        mediastack_filtered += 1
+                        total_filtered += 1
+                        continue
+                    
                     # Parse MediaStack date format
                     published_at = article.get("published_at", "")
                     iso_date = published_at if published_at else None
@@ -1237,9 +1251,9 @@ async def fetch_mediastack_news():
                     news_doc = {
                         "id": str(uuid.uuid4()),
                         "position": 0,
-                        "title": article.get("title", ""),
+                        "title": title,
                         "source": {
-                            "name": article.get("source", "Unknown"),
+                            "name": source_name or "Unknown",
                             "icon": None
                         },
                         "link": link,
@@ -1250,7 +1264,9 @@ async def fetch_mediastack_news():
                         "queries": [query_text],
                         "apiSource": "MediaStack",
                         "fetchedAt": datetime.now(timezone.utc).isoformat(),
-                        "isHidden": False
+                        "isHidden": False,
+                        "relevanceScore": relevance["relevance_score"],
+                        "matchedKeywords": relevance.get("matched_keywords", [])
                     }
                     
                     await db.news_articles.insert_one(news_doc)
@@ -1267,15 +1283,16 @@ async def fetch_mediastack_news():
                 "articlesFound": len(mediastack_articles),
                 "newArticles": mediastack_new,
                 "existingUpdated": mediastack_existing_updated,
+                "filtered": mediastack_filtered,
                 "status": "success" if mediastack_articles else "no_results",
                 "fetchedAt": datetime.now(timezone.utc).isoformat()
             }
             await db.news_fetch_logs.insert_one(mediastack_log)
-            logger.info(f"[MediaStack] Query '{query_text}': {len(mediastack_articles)} found, {mediastack_new} new, {mediastack_existing_updated} existing updated")
+            logger.info(f"[MediaStack] Query '{query_text}': {len(mediastack_articles)} found, {mediastack_new} new, {mediastack_existing_updated} existing, {mediastack_filtered} filtered")
         
         logger.info("=" * 60)
         logger.info("[MediaStack] Weekly news fetch complete!")
-        logger.info(f"[MediaStack] Total new articles stored: {total_new_articles}")
+        logger.info(f"[MediaStack] Total new articles: {total_new_articles}, Filtered: {total_filtered}")
         logger.info("=" * 60)
         
         # Trigger background scraping for new articles
