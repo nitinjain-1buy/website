@@ -1310,16 +1310,32 @@ scheduler = AsyncIOScheduler()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup - Schedule jobs
-    # SerpAPI + GDELT: Daily at 8 AM and 4 PM UTC
+    # SerpAPI + GDELT: 3 times a day - 8 AM, 2 PM, 10 PM UTC
     scheduler.add_job(fetch_and_store_all_news, 'cron', hour=8, minute=0, id='news_fetch_8am')
-    scheduler.add_job(fetch_and_store_all_news, 'cron', hour=16, minute=0, id='news_fetch_4pm')
+    scheduler.add_job(fetch_and_store_all_news, 'cron', hour=14, minute=0, id='news_fetch_2pm')
+    scheduler.add_job(fetch_and_store_all_news, 'cron', hour=22, minute=0, id='news_fetch_10pm')
+    
+    # Scraping cron job: 3 times a day - 9 AM, 3 PM, 11 PM UTC (1 hour after news fetch)
+    scheduler.add_job(
+        lambda: asyncio.create_task(scrape_unscraped_articles(limit=100, retry_failed=True)),
+        'cron', hour=9, minute=0, id='scrape_9am'
+    )
+    scheduler.add_job(
+        lambda: asyncio.create_task(scrape_unscraped_articles(limit=100, retry_failed=True)),
+        'cron', hour=15, minute=0, id='scrape_3pm'
+    )
+    scheduler.add_job(
+        lambda: asyncio.create_task(scrape_unscraped_articles(limit=100, retry_failed=True)),
+        'cron', hour=23, minute=0, id='scrape_11pm'
+    )
     
     # MediaStack: Weekly on Monday at 2:30 AM UTC (8:00 AM IST)
     scheduler.add_job(fetch_mediastack_news, 'cron', day_of_week='mon', hour=2, minute=30, id='mediastack_weekly')
     
     scheduler.start()
     logger.info("News scheduler started:")
-    logger.info("  - SerpAPI + GDELT: Daily at 8:00 AM and 4:00 PM UTC")
+    logger.info("  - News Fetch: 3x daily at 8:00 AM, 2:00 PM, 10:00 PM UTC")
+    logger.info("  - Article Scraping: 3x daily at 9:00 AM, 3:00 PM, 11:00 PM UTC")
     logger.info("  - MediaStack: Weekly on Monday at 8:00 AM IST (2:30 AM UTC)")
     
     # Run initial fetch on startup (only SerpAPI + GDELT, not MediaStack due to rate limits)
