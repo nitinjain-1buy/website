@@ -83,6 +83,115 @@ SERPAPI_KEY = os.environ.get("SERPAPI_KEY", "")
 # MediaStack API Key
 MEDIASTACK_KEY = os.environ.get("MEDIASTACK_KEY", "")
 
+# ==================== RELEVANCE FILTER ====================
+# Keywords that indicate relevance to electronics/semiconductor industry
+RELEVANCE_KEYWORDS = {
+    # Core industry terms
+    'semiconductor', 'chip', 'chips', 'microchip', 'microprocessor', 'processor',
+    'integrated circuit', 'ic', 'wafer', 'fab', 'foundry', 'transistor',
+    'electronics', 'electronic', 'component', 'components', 'capacitor', 'resistor',
+    'inductor', 'diode', 'mosfet', 'igbt', 'led', 'sensor', 'sensors',
+    'pcb', 'printed circuit', 'circuit board', 'motherboard', 'memory',
+    'dram', 'nand', 'flash', 'ssd', 'storage', 'hdd',
+    # Manufacturing
+    'tsmc', 'samsung', 'intel', 'nvidia', 'amd', 'qualcomm', 'broadcom',
+    'micron', 'sk hynix', 'infineon', 'nxp', 'texas instruments', 'analog devices',
+    'stmicroelectronics', 'renesas', 'on semiconductor', 'microchip technology',
+    'nexperia', 'vishay', 'murata', 'tdk', 'yageo', 'kemet', 'avx',
+    'foxconn', 'asml', 'applied materials', 'lam research', 'kla',
+    # Supply chain terms
+    'supply chain', 'shortage', 'lead time', 'allocation', 'procurement',
+    'sourcing', 'inventory', 'logistics', 'distribution', 'manufacturing',
+    'production', 'capacity', 'yield', 'fab capacity', 'wafer start',
+    'bom', 'bill of materials', 'eol', 'end of life', 'obsolescence',
+    'counterfeit', 'authentication', 'traceability',
+    # Geopolitical/Trade
+    'tariff', 'trade war', 'export control', 'chips act', 'semiconductor act',
+    'taiwan strait', 'chip war', 'tech war', 'sanctions', 'entity list',
+    'huawei', 'smic', 'china semiconductor', 'reshoring', 'onshoring',
+    # Applications
+    'automotive chip', 'automotive semiconductor', 'ev battery', 'power electronics',
+    'iot', 'internet of things', '5g', '6g', 'ai chip', 'gpu', 'cpu', 'soc',
+    'data center', 'server', 'networking', 'telecom', 'communications',
+    'industrial automation', 'medical device', 'aerospace', 'defense electronics',
+    # Risk terms
+    'disruption', 'geopolitical', 'natural disaster', 'earthquake', 'flood',
+    'fire', 'factory', 'plant', 'facility', 'closure', 'shutdown',
+}
+
+# Keywords that indicate IRRELEVANT content (blocklist)
+IRRELEVANCE_KEYWORDS = {
+    'furniture', 'bedroom', 'mattress', 'sofa', 'couch', 'decor', 'interior design',
+    'fashion', 'clothing', 'apparel', 'jewelry', 'cosmetics', 'beauty', 'skincare',
+    'recipe', 'cooking', 'food', 'restaurant', 'dining', 'cuisine',
+    'real estate', 'mortgage', 'apartment', 'housing market', 'rent',
+    'fitness', 'workout', 'gym', 'yoga', 'diet', 'weight loss',
+    'celebrity', 'gossip', 'entertainment', 'movie review', 'album review',
+    'sports score', 'game recap', 'fantasy football', 'betting odds',
+    'horoscope', 'astrology', 'zodiac',
+    'travel deals', 'vacation', 'hotel', 'resort', 'cruise',
+    'pet', 'dog', 'cat', 'veterinary',
+    'wedding', 'engagement', 'marriage', 'divorce',
+    'lottery', 'casino', 'gambling',
+}
+
+def check_article_relevance(title: str, snippet: str = "", source_name: str = "") -> dict:
+    """
+    Check if an article is relevant to electronics/semiconductor industry.
+    Returns dict with: is_relevant (bool), relevance_score (0-100), reason (str)
+    """
+    # Combine all text for analysis
+    text = f"{title} {snippet} {source_name}".lower()
+    
+    # First check blocklist - immediate rejection if strong match
+    irrelevance_count = 0
+    for keyword in IRRELEVANCE_KEYWORDS:
+        if keyword in text:
+            irrelevance_count += 1
+    
+    # If multiple irrelevant keywords found, likely spam
+    if irrelevance_count >= 2:
+        return {
+            "is_relevant": False,
+            "relevance_score": 0,
+            "reason": f"Multiple irrelevant keywords found ({irrelevance_count})"
+        }
+    
+    # Count relevance keywords
+    relevance_count = 0
+    matched_keywords = []
+    for keyword in RELEVANCE_KEYWORDS:
+        if keyword in text:
+            relevance_count += 1
+            matched_keywords.append(keyword)
+    
+    # Calculate relevance score
+    # Score based on keyword matches (each keyword adds ~10 points, max 100)
+    relevance_score = min(relevance_count * 15, 100)
+    
+    # Boost score for title matches (more important)
+    title_lower = title.lower()
+    title_matches = sum(1 for kw in RELEVANCE_KEYWORDS if kw in title_lower)
+    relevance_score = min(relevance_score + (title_matches * 20), 100)
+    
+    # Penalize if irrelevant keywords found
+    relevance_score = max(0, relevance_score - (irrelevance_count * 30))
+    
+    # Decision threshold
+    is_relevant = relevance_score >= 15  # At least one strong match
+    
+    if is_relevant:
+        reason = f"Matched: {', '.join(matched_keywords[:5])}"
+    else:
+        reason = "No relevant keywords found" if relevance_count == 0 else f"Low relevance ({relevance_score})"
+    
+    return {
+        "is_relevant": is_relevant,
+        "relevance_score": relevance_score,
+        "reason": reason,
+        "matched_keywords": matched_keywords[:10]
+    }
+
 # News fetching function
 async def fetch_news_from_serpapi(query: str) -> List[dict]:
     """Fetch news from SerpAPI for a given query"""
