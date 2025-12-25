@@ -366,8 +366,8 @@ const HomePage = () => {
               </div>
             </div>
             
-            {/* Only show client names if enabled */}
-            {siteSettings.showClientNames && (
+            {/* Only show client names if explicitly enabled (not null, not false) */}
+            {siteSettings.showClientNames === true && (
               <div className="relative overflow-hidden py-4">
                 {/* Gradient Masks */}
                 <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-white to-transparent z-10"></div>
