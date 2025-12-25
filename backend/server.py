@@ -900,6 +900,7 @@ async def fetch_and_store_all_news():
             gdelt_articles = await fetch_news_from_gdelt(query_text)
             gdelt_new = 0
             gdelt_existing_updated = 0
+            gdelt_filtered = 0
             
             for article in gdelt_articles:
                 link = article.get("url", "")
@@ -925,6 +926,17 @@ async def fetch_and_store_all_news():
                     )
                     gdelt_existing_updated += 1
                 else:
+                    # Check relevance before storing
+                    title = article.get("title", "")
+                    source_name = article.get("domain", article.get("sourcecountry", ""))
+                    
+                    relevance = check_article_relevance(title, "", source_name)
+                    
+                    if not relevance["is_relevant"]:
+                        gdelt_filtered += 1
+                        logger.debug(f"[GDELT] Filtered irrelevant: {title[:50]}... Reason: {relevance['reason']}")
+                        continue
+                    
                     # Parse GDELT date format (YYYYMMDDTHHMMSSZ)
                     gdelt_date = article.get("seendate", "")
                     iso_date = None
@@ -939,9 +951,9 @@ async def fetch_and_store_all_news():
                     news_doc = {
                         "id": str(uuid.uuid4()),
                         "position": 0,
-                        "title": article.get("title", ""),
+                        "title": title,
                         "source": {
-                            "name": article.get("domain", article.get("sourcecountry", "Unknown")),
+                            "name": source_name or "Unknown",
                             "icon": None
                         },
                         "link": link,
@@ -952,7 +964,9 @@ async def fetch_and_store_all_news():
                         "queries": [query_text],  # Array of queries this article belongs to
                         "apiSource": "GDELT",
                         "fetchedAt": datetime.now(timezone.utc).isoformat(),
-                        "isHidden": False
+                        "isHidden": False,
+                        "relevanceScore": relevance["relevance_score"],
+                        "matchedKeywords": relevance.get("matched_keywords", [])
                     }
                     
                     await db.news_articles.insert_one(news_doc)
@@ -969,11 +983,12 @@ async def fetch_and_store_all_news():
                 "articlesFound": len(gdelt_articles),
                 "newArticles": gdelt_new,
                 "existingUpdated": gdelt_existing_updated,
+                "filtered": gdelt_filtered,
                 "status": "success" if gdelt_articles else "no_results",
                 "fetchedAt": datetime.now(timezone.utc).isoformat()
             }
             await db.news_fetch_logs.insert_one(gdelt_log)
-            logger.info(f"[GDELT] Query '{query_text}': {len(gdelt_articles)} found, {gdelt_new} new, {gdelt_existing_updated} existing updated")
+            logger.info(f"[GDELT] Query '{query_text}': {len(gdelt_articles)} found, {gdelt_new} new, {gdelt_existing_updated} existing, {gdelt_filtered} filtered")
         
         logger.info("=" * 60)
         logger.info("Scheduled news fetch complete!")
