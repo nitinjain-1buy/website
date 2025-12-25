@@ -194,7 +194,7 @@ const HomePage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [headlineComplete, setHeadlineComplete] = useState(false);
   const [siteSettings, setSiteSettings] = useState({
-    showClientNames: true,
+    showClientNames: null, // Start as null to prevent flash - only show when API confirms
     clientSectionTitle: "Trusted by leading OEMs and EMSs of the world",
     clientSectionSubtitle: "Built for procurement leaders who demand precision",
     targetAudience: ["CEOs & Owners", "Chief Procurement Officers", "Chief Financial Officers", "Sourcing Teams"]
